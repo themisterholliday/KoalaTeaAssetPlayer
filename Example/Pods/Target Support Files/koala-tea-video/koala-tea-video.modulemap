@@ -1,0 +1,6 @@
+framework module koala_tea_video {
+  umbrella header "koala-tea-video-umbrella.h"
+
+  export *
+  module * { export * }
+}

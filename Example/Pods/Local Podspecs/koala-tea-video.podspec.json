@@ -1,0 +1,34 @@
+{
+  "name": "koala-tea-video",
+  "version": "0.1.0",
+  "summary": "A short description of koala-tea-video.",
+  "description": "nothing",
+  "homepage": "https://github.com/themisterholliday/koala-tea-video",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "themisterholliday": "themisterholliday@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/themisterholliday/koala-tea-video.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "10.3"
+  },
+  "swift_version": "4.2",
+  "source_files": "koala-tea-video/Classes/**/*",
+  "dependencies": {
+    "SwifterSwift": [
+
+    ],
+    "Quick": [
+
+    ],
+    "Nimble": [
+
+    ]
+  }
+}
