@@ -9,10 +9,10 @@
 /* Begin PBXBuildFile section */
 		16B6F3702212104400F2677C /* SampleVideo_1280x720_5mb.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 16B6F36F2212104400F2677C /* SampleVideo_1280x720_5mb.mp4 */; };
 		16B6F3722212105400F2677C /* VideoExporterSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16B6F3712212105400F2677C /* VideoExporterSpec.swift */; };
+		16B6F3762212186600F2677C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16B6F3752212186600F2677C /* Images.xcassets */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
-		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		EC5C5F48A41876A25A835402 /* Pods_koala_tea_video_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57AD04EB0ECAD6459243397D /* Pods_koala_tea_video_Example.framework */; };
 		F476205E43AE442D1CAE2BC6 /* Pods_koala_tea_video_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42D87BB65C2295E9A5E93D44 /* Pods_koala_tea_video_Tests.framework */; };
@@ -31,6 +31,7 @@
 /* Begin PBXFileReference section */
 		16B6F36F2212104400F2677C /* SampleVideo_1280x720_5mb.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SampleVideo_1280x720_5mb.mp4; sourceTree = "<group>"; };
 		16B6F3712212105400F2677C /* VideoExporterSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoExporterSpec.swift; sourceTree = "<group>"; };
+		16B6F3752212186600F2677C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		17A2010EE1EF514633CE69D4 /* Pods-koala-tea-video_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-koala-tea-video_Example.debug.xcconfig"; path = "Target Support Files/Pods-koala-tea-video_Example/Pods-koala-tea-video_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		39B23D639D269DE1EF3E33C3 /* Pods-koala-tea-video_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-koala-tea-video_Tests.release.xcconfig"; path = "Target Support Files/Pods-koala-tea-video_Tests/Pods-koala-tea-video_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		42D87BB65C2295E9A5E93D44 /* Pods_koala_tea_video_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_koala_tea_video_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -40,7 +41,6 @@
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		607FACD71AFB9204008FA782 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		607FACDA1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		607FACDC1AFB9204008FA782 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		607FACE51AFB9204008FA782 /* koala-tea-video_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "koala-tea-video_Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -95,10 +95,10 @@
 		607FACD21AFB9204008FA782 /* Example for koala-tea-video */ = {
 			isa = PBXGroup;
 			children = (
+				16B6F3752212186600F2677C /* Images.xcassets */,
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				607FACD91AFB9204008FA782 /* Main.storyboard */,
-				607FACDC1AFB9204008FA782 /* Images.xcassets */,
 				607FACDE1AFB9204008FA782 /* LaunchScreen.xib */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
 			);
@@ -250,7 +250,7 @@
 			files = (
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
 				607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */,
-				607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */,
+				16B6F3762212186600F2677C /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
