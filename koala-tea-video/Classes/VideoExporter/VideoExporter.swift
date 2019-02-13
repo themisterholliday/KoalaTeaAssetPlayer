@@ -400,21 +400,46 @@ extension VideoExporter {
 
         parentlayer.addSublayer(view.layer)
 
-        // @TODO: add animation and animation sync here
-        //        // Animation Sync Layer
-        //        let avSynchronizedLayer = AVSynchronizedLayer()
-        //        // Add parent layer to contents
-        //        avSynchronizedLayer.contents = parentlayer
-        //        avSynchronizedLayer.frame = CGRect(origin: .zero,
-        //                                           size: avMutableVideoComposition.renderSize)
-        //        avSynchronizedLayer.masksToBounds = true
-        //        // Add avSynchronizedLayer to Parent Layer
-        //        parentlayer.addSublayer(avSynchronizedLayer)
-
         avMutableVideoComposition
             .animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: videoLayer,
                                                                  in: parentlayer)
         return avMutableVideoComposition
+    }
+}
+
+extension VideoExporter {
+    func exportClips(videoAsset: VideoAsset,
+                     clipLength: Int,
+                     queue: DispatchQueue,
+                     fullProgress: @escaping (Float) -> (),
+                     completed: @escaping (_ fileUrls: [URL], _ errors: [Error]) -> ()) {
+        let assets = videoAsset.generateClippedAssets(for: clipLength)
+        let assetCount = assets.count.float
+
+        var fileUrls = [URL]()
+        var errors = [Error]()
+
+        let dispatchGroup = DispatchGroup()
+
+        assets.forEach { (asset) in
+            dispatchGroup.enter()
+
+            VideoExporter.exportVideoWithoutCrop(videoAsset: asset,
+                                                 progress:
+                { (progress) in
+                    fullProgress(progress / assetCount)
+            }, success: { (url) in
+                dispatchGroup.leave()
+                fileUrls.append(url)
+            }, failure: { (error) in
+                dispatchGroup.leave()
+                errors.append(error)
+            })
+        }
+
+        dispatchGroup.notify(queue: queue) {
+            completed(fileUrls, errors)
+        }
     }
 }
 
