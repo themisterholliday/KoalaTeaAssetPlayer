@@ -120,13 +120,13 @@ extension VideoExporter {
         let operation = VideoExportOperation(export: videoExport)
 
         operation.completionBlock = {
-            switch operation.export.state {
+            switch operation.exportSessionObject.state {
             case .idle:
                 break
             case .successful:
-                success(operation.export.fileUrl)
+                success(operation.exportSessionObject.fileUrl)
             case .failed:
-                failure(operation.export.error ?? VideoManagerError.UnknownError)
+                failure(operation.exportSessionObject.error ?? VideoManagerError.UnknownError)
             }
         }
 
@@ -304,10 +304,8 @@ extension VideoExporter {
         self.exportVideoToDiskFrom(avMutableComposition: mixComposition, avMutatableVideoComposition: avMutableVideoComposition, success: success, failure: failure)
     }
 
-    @discardableResult public static func exportVideoWithoutCrop(videoAsset: VideoAsset,
-                                              watermarkView: UIView? = nil,
-                                              success: @escaping (_ fileUrl: URL) -> Void,
-                                              failure: @escaping (Error) -> Void) -> VideoExportOperation? {
+    @discardableResult public static func createVideoExportOperationWithoutCrop(videoAsset: VideoAsset,
+                                              watermarkView: UIView? = nil) throws -> VideoExportOperation {
         // 1 - Create AVMutableComposition object. This object will hold your AVMutableCompositionTrack instances.
         let mixComposition = AVMutableComposition()
 
@@ -315,23 +313,16 @@ extension VideoExporter {
         guard let firstTrack = mixComposition.addMutableTrack(withMediaType: .video,
                                                               preferredTrackID: Int32(kCMPersistentTrackID_Invalid)) else
         {
-            failure(VideoManagerError.FailedError(reason: "Failed To Create Video Track"))
-            return nil
+            throw VideoManagerError.FailedError(reason: "Failed To Create Video Track")
         }
         guard let assetFirstVideoTrack = videoAsset.urlAsset.getFirstVideoTrack() else {
-            failure(VideoManagerError.NoFirstVideoTrack)
-            return nil
+            throw VideoManagerError.NoFirstVideoTrack
         }
 
         // Attach timerange for first video track
-        do {
-            try firstTrack.insertTimeRange(videoAsset.timeRange,
-                                           of: assetFirstVideoTrack,
-                                           at: CMTime.zero)
-        } catch {
-            failure(VideoManagerError.FailedError(reason: "Failed To Insert Time Range For Video Track"))
-            return nil
-        }
+        try firstTrack.insertTimeRange(videoAsset.timeRange,
+                                       of: assetFirstVideoTrack,
+                                       at: CMTime.zero)
 
         // 2.1
         let mainInstruction = AVMutableVideoCompositionInstruction()
@@ -348,8 +339,7 @@ extension VideoExporter {
         let avMutableVideoComposition = AVMutableVideoComposition()
         avMutableVideoComposition.instructions = [mainInstruction]
         guard let framerate = videoAsset.framerate else {
-            failure(VideoManagerError.FailedError(reason: "No Framerate for Asset"))
-            return nil
+            throw VideoManagerError.FailedError(reason: "No Framerate for Asset")
         }
         avMutableVideoComposition.frameDuration = CMTimeMake(value: 1, timescale: Int32(framerate))
         avMutableVideoComposition.renderSize = assetFirstVideoTrack.naturalSize
@@ -361,24 +351,46 @@ extension VideoExporter {
 
         // 3 - Audio track
         guard let audioAsset = videoAsset.urlAsset.getFirstAudioTrack() else {
-            failure(VideoManagerError.FailedError(reason: "No First Audio Track"))
-            return nil
+            throw VideoManagerError.FailedError(reason: "No First Audio Track")
         }
 
         let audioTrack = mixComposition.addMutableTrack(withMediaType: .audio, preferredTrackID: 0)
-        do {
-            try audioTrack?.insertTimeRange(videoAsset.timeRange,
-                                            of: audioAsset,
-                                            at: CMTime.zero)
-        } catch {
-            failure(VideoManagerError.FailedError(reason: "Failed To Insert Time Range For Audio Track"))
-        }
+        try audioTrack?.insertTimeRange(videoAsset.timeRange,
+                                        of: audioAsset,
+                                        at: CMTime.zero)
 
         // 4 Export Video
-        return self.exportVideoToDiskFrom(avMutableComposition: mixComposition,
-                                          avMutatableVideoComposition: finalAVMutable,
-                                          success: success,
-                                          failure: failure)
+
+        // @TODO: move to create directory method
+        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            throw VideoManagerError.FailedError(reason: "Get File Path Error")
+        }
+
+        guard let appName = Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String else {
+            throw VideoManagerError.FailedError(reason: "Cannot find App Name")
+        }
+
+        let dateString = Date.currentDateTimeString
+        let uuid = UUID().uuidString
+        let fileURL = documentDirectory.appendingPathComponent("\(appName)-\(dateString)-\(uuid).mp4")
+
+        // Remove any file at URL because if file exists assetExport will fail
+        FileHelpers.removeFileAtURL(fileURL: fileURL)
+
+        // @TODO: move to create asset session method
+        // Create AVAssetExportSession
+        guard let assetExportSession = AVAssetExportSession(asset: mixComposition,
+                                                            presetName: AVAssetExportPresetHighestQuality) else {
+            throw VideoManagerError.FailedError(reason: "Can't create asset exporter")
+        }
+        assetExportSession.videoComposition = finalAVMutable
+        assetExportSession.outputFileType = AVFileType.mp4
+        assetExportSession.shouldOptimizeForNetworkUse = true
+        assetExportSession.outputURL = fileURL
+
+        let videoExport = VideoExportSession(avExportSession: assetExportSession, fileUrl: fileURL)
+
+        return VideoExportOperation(export: videoExport)
     }
 
     // @TODO: move somewhere else
@@ -415,33 +427,22 @@ extension VideoExporter {
                      clipLength: Int,
                      queue: DispatchQueue,
                      watermarkView: UIView? = nil,
-                     completed: @escaping (_ fileUrls: [URL], _ errors: [Error]) -> ()) -> [VideoExportOperation] {
+                     completed: @escaping (_ fileUrls: [URL], _ errors: [Error]) -> ()) -> MultiVideoExportOperation {
         let assets = videoAsset.generateClippedAssets(for: clipLength)
-
-        var fileUrls = [URL]()
-        var errors = [Error]()
-
-        let completionOperation = BlockOperation {
-            queue.async {
-                completed(fileUrls, errors)
-            }
-        }
 
         let operationQueue = VideoExporter.videoExportOperationQueue
         let operations = assets.compactMap { (asset) -> VideoExportOperation? in
-            return VideoExporter
-                .exportVideoWithoutCrop(videoAsset: asset,
-                                        watermarkView: watermarkView,
-                                        success:
-                    { (url) in
-                        queue.async {
-                            fileUrls.append(url)
-                        }
-                }, failure: { (error) in
-                    queue.async {
-                        errors.append(error)
-                    }
-                })
+            return try? VideoExporter
+                .createVideoExportOperationWithoutCrop(videoAsset: asset,
+                                                       watermarkView: watermarkView)
+        }
+
+
+        let completionOperation = MultiVideoExportOperation(operations: operations)
+        completionOperation.completionBlock = {
+            queue.async {
+                completed(completionOperation.fileUrls, completionOperation.errors)
+            }
         }
 
         operations.forEach { (operation) in
@@ -451,7 +452,7 @@ extension VideoExporter {
 
         OperationQueue.main.addOperation(completionOperation)
 
-        return operations
+        return completionOperation
     }
 }
 
@@ -522,17 +523,20 @@ struct VideoExportSession {
 }
 
 public class VideoExportOperation: AsyncOperation {
-    var export: VideoExportSession
+    var exportSessionObject: VideoExportSession
     public var progressBlock: (_ operation: Operation) -> Void = { _ in }
     public var progress: Float {
-        return export.progress
+        return exportSessionObject.progress
+    }
+    public var fileUrl: URL {
+        return exportSessionObject.fileUrl
     }
     public var error: Error? {
-        return export.error
+        return exportSessionObject.error
     }
 
     init(export: VideoExportSession) {
-        self.export = export
+        self.exportSessionObject = export
     }
 
     override public func main() {
@@ -542,7 +546,7 @@ public class VideoExportOperation: AsyncOperation {
             return
         }
 
-        let assetExportSession = export.avExportSession
+        let assetExportSession = exportSessionObject.avExportSession
 
         let timer = Repeater.every(.seconds(0.5)) { [weak self] _ in
             self?.handleTimerProgress(assetExportSession: assetExportSession)
@@ -553,27 +557,27 @@ public class VideoExportOperation: AsyncOperation {
 
             switch assetExportSession.status {
             case .completed:
-                self.export = self.export
+                self.exportSessionObject = self.exportSessionObject
                     .withChangingProgress(to: 1.0)
                     .withChangingState(to: .successful)
                 self.progressBlock(self)
                 self.state = .finished
             case .cancelled:
                 let error = assetExportSession.error ?? VideoExportOperationError.CancelledError
-                self.export = self.export
+                self.exportSessionObject = self.exportSessionObject
                     .withChangingState(to: .failed)
                     .withChangingError(to: error)
                 self.state = .finished
             case .failed:
                 let error = assetExportSession.error ?? VideoExportOperationError.FailedError(reason: "Asset Exporter Failed")
-                self.export = self.export
+                self.exportSessionObject = self.exportSessionObject
                     .withChangingState(to: .failed)
                     .withChangingError(to: error)
                 self.state = .finished
             case .unknown, .exporting, .waiting:
                 // Should never arrive here
                 let error = assetExportSession.error ?? VideoExportOperationError.UnknownError
-                self.export = self.export
+                self.exportSessionObject = self.exportSessionObject
                     .withChangingState(to: .failed)
                     .withChangingError(to: error)
                 self.state = .finished
@@ -583,7 +587,7 @@ public class VideoExportOperation: AsyncOperation {
 
     override public func cancel() {
         super.cancel()
-        self.export.avExportSession.cancelExport()
+        self.exportSessionObject.avExportSession.cancelExport()
     }
 
     private func handleTimerProgress(assetExportSession: AVAssetExportSession) {
@@ -591,7 +595,7 @@ public class VideoExportOperation: AsyncOperation {
             return
         }
 
-        self.export = self.export.withChangingProgress(to: assetExportSession.progress)
+        self.exportSessionObject = self.exportSessionObject.withChangingProgress(to: assetExportSession.progress)
         self.progressBlock(self)
     }
 }
@@ -608,5 +612,19 @@ extension CALayer {
     var copyOfLayer: CALayer? {
         let archive = NSKeyedArchiver.archivedData(withRootObject: self)
         return NSKeyedUnarchiver.unarchiveObject(with: archive) as? CALayer
+    }
+}
+
+public class MultiVideoExportOperation: Operation {
+    public var operations: [VideoExportOperation]
+    var fileUrls: [URL] {
+        return operations.compactMap({ $0.fileUrl })
+    }
+    var errors: [Error] {
+        return operations.compactMap({ $0.error })
+    }
+
+    init(operations: [VideoExportOperation]) {
+        self.operations = operations
     }
 }
