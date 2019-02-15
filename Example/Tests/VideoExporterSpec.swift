@@ -138,14 +138,7 @@ class VideoExporterSpec: QuickSpec {
                         }
                     })
 
-                    expect(urls).toEventually(haveCount(3), timeout: 120)
-
-//                    // Check just saved local video
-//                    let savedVideo = VideoAsset(url: fileUrl!)
-//                    let firstVideoTrack = savedVideo.urlAsset.getFirstVideoTrack()
-//                    expect(firstVideoTrack?.naturalSize.width).to(equal(1280))
-//                    expect(firstVideoTrack?.naturalSize.height).to(equal(720))
-//                    expect(firstVideoTrack?.asset?.duration.seconds).to(equal(5))
+                    expect(urls).toEventually(haveCount(3), timeout: 50)
                 }
             }
         }

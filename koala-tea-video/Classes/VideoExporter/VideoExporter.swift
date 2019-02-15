@@ -420,6 +420,12 @@ extension VideoExporter {
         var fileUrls = [URL]()
         var errors = [Error]()
 
+        let completionOperation = BlockOperation {
+            queue.async {
+                completed(fileUrls, errors)
+            }
+        }
+
         let operationQueue = VideoExporter.videoExportOperationQueue
         let operations = assets.compactMap { (asset) -> VideoExportOperation? in
             return VideoExporter
@@ -437,8 +443,13 @@ extension VideoExporter {
                 })
         }
 
-        operationQueue.addOperations(operations,
-                                     waitUntilFinished: false)
+        operations.forEach { (operation) in
+            completionOperation.addDependency(operation)
+            operationQueue.addOperation(operation)
+        }
+
+        OperationQueue.main.addOperation(completionOperation)
+
         return operations
     }
 }
