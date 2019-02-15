@@ -355,8 +355,8 @@ extension VideoExporter {
         avMutableVideoComposition.renderSize = assetFirstVideoTrack.naturalSize
 
         var finalAVMutable = avMutableVideoComposition
-        if let watermarkView = watermarkView {
-            finalAVMutable = self.addView(watermarkView, to: avMutableVideoComposition)
+        if let copyOfLayer = watermarkView?.layer.copyOfLayer {
+            finalAVMutable = self.addLayer(copyOfLayer, to: avMutableVideoComposition)
         }
 
         // 3 - Audio track
@@ -382,7 +382,7 @@ extension VideoExporter {
     }
 
     // @TODO: move somewhere else
-    private static func addView(_ view: UIView,
+    private static func addLayer(_ layer: CALayer,
                                 to avMutableVideoComposition: AVMutableVideoComposition) -> AVMutableVideoComposition {
         let frameForLayers = CGRect(origin: .zero, size: avMutableVideoComposition.renderSize)
         let videoLayer = CALayer()
@@ -392,8 +392,9 @@ extension VideoExporter {
         parentlayer.frame = frameForLayers
         parentlayer.isGeometryFlipped = true
         parentlayer.addSublayer(videoLayer)
-        
-        parentlayer.addSublayer(view.layer)
+
+        // Actually add layer to parent layer
+        parentlayer.addSublayer(layer)
         
         avMutableVideoComposition
             .animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: videoLayer,
@@ -526,6 +527,9 @@ public class VideoExportOperation: AsyncOperation {
     public var progress: Float {
         return export.progress
     }
+    public var error: Error? {
+        return export.error
+    }
 
     init(export: VideoExportSession) {
         self.export = export
@@ -597,5 +601,12 @@ extension VideoExportOperation {
         case FailedError(reason: String)
         case CancelledError
         case UnknownError
+    }
+}
+
+extension CALayer {
+    var copyOfLayer: CALayer? {
+        let archive = NSKeyedArchiver.archivedData(withRootObject: self)
+        return NSKeyedUnarchiver.unarchiveObject(with: archive) as? CALayer
     }
 }
