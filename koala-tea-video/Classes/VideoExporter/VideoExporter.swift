@@ -83,19 +83,18 @@ extension VideoExporter {
      - success: Completion for when the video is saved successfully.
      - failure: Completion for when the video failed to save.
      */
-    private static func exportVideoToDiskFrom(avMutableComposition: AVMutableComposition,
-                                              avMutatableVideoComposition: AVMutableVideoComposition,
-                                              progress: @escaping (Float) -> (),
-                                              success: @escaping (_ fileUrl: URL) -> (),
-                                              failure: @escaping (Error) -> ()) {
+    @discardableResult private static func exportVideoToDiskFrom(avMutableComposition: AVMutableComposition,
+                                                                 avMutatableVideoComposition: AVMutableVideoComposition,
+                                                                 success: @escaping (_ fileUrl: URL) -> Void,
+                                                                 failure: @escaping (Error) -> ()) -> VideoExportOperation? {
         guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             failure(VideoManagerError.FailedError(reason: "Get File Path Error"))
-            return
+            return nil
         }
 
         guard let appName = Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String else {
             failure(VideoManagerError.FailedError(reason: "Cannot find App Name"))
-            return
+            return nil
         }
 
         let dateString = Date.currentDateTimeString
@@ -107,33 +106,31 @@ extension VideoExporter {
         // Create AVAssetExportSession
         guard let assetExportSession = AVAssetExportSession(asset: avMutableComposition, presetName: AVAssetExportPresetHighestQuality) else {
             failure(VideoManagerError.FailedError(reason: "Can't create asset exporter"))
-            return
+            return nil
         }
         assetExportSession.videoComposition = avMutatableVideoComposition
         assetExportSession.outputFileType = AVFileType.mp4
         assetExportSession.shouldOptimizeForNetworkUse = true
         assetExportSession.outputURL = fileURL
 
-        // Schedule timer for sending progress
-        let timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true, block: { (timer) in
-            progress(assetExportSession.progress)
-        })
+        let videoExport = VideoExportSession(avExportSession: assetExportSession, finalUrl: fileURL)
 
-        assetExportSession.exportAsynchronously(completionHandler: {
-            timer.invalidate()
+        let operation = VideoExportOperation(export: videoExport)
 
-            switch assetExportSession.status {
-            case .completed:
-                success(fileURL)
-            case .cancelled:
-                failure(assetExportSession.error ?? VideoManagerError.CancelledError)
+        operation.completionBlock = {
+//            guard !operation.isCancelled else { return }
+            switch operation.export.state {
+            case .idle:
+                break
+            case .successful:
+                success(operation.export.finalUrl)
             case .failed:
-                failure(assetExportSession.error ?? VideoManagerError.FailedError(reason: "Asset Exporter Failed"))
-            case .unknown, .exporting, .waiting:
-                // Should never arrive here
-                failure(assetExportSession.error ?? VideoManagerError.UnknownError)
+                print(operation.export.error ?? VideoManagerError.UnknownError, "export failure")
+                failure(operation.export.error ?? VideoManagerError.UnknownError)
             }
-        })
+        }
+
+        return operation
     }
 
     private static func videoCompositionInstructionFor(compositionTrack: AVCompositionTrack,
@@ -304,14 +301,13 @@ extension VideoExporter {
         }
 
         // 4 Export Video
-        self.exportVideoToDiskFrom(avMutableComposition: mixComposition, avMutatableVideoComposition: avMutableVideoComposition, progress: progress, success: success, failure: failure)
+        self.exportVideoToDiskFrom(avMutableComposition: mixComposition, avMutatableVideoComposition: avMutableVideoComposition, success: success, failure: failure)
     }
 
-    public static func exportVideoWithoutCrop(videoAsset: VideoAsset,
+    @discardableResult public static func exportVideoWithoutCrop(videoAsset: VideoAsset,
                                               watermarkView: UIView? = nil,
-                                              progress: @escaping (Float) -> (),
-                                              success: @escaping (_ fileUrl: URL) -> (),
-                                              failure: @escaping (Error) -> ()) {
+                                              success: @escaping (_ fileUrl: URL) -> Void,
+                                              failure: @escaping (Error) -> Void) -> VideoExportOperation? {
         // 1 - Create AVMutableComposition object. This object will hold your AVMutableCompositionTrack instances.
         let mixComposition = AVMutableComposition()
 
@@ -320,11 +316,11 @@ extension VideoExporter {
                                                               preferredTrackID: Int32(kCMPersistentTrackID_Invalid)) else
         {
             failure(VideoManagerError.FailedError(reason: "Failed To Create Video Track"))
-            return
+            return nil
         }
         guard let assetFirstVideoTrack = videoAsset.urlAsset.getFirstVideoTrack() else {
             failure(VideoManagerError.NoFirstVideoTrack)
-            return
+            return nil
         }
 
         // Attach timerange for first video track
@@ -334,13 +330,13 @@ extension VideoExporter {
                                            at: CMTime.zero)
         } catch {
             failure(VideoManagerError.FailedError(reason: "Failed To Insert Time Range For Video Track"))
-            return
+            return nil
         }
 
         // 2.1
         let mainInstruction = AVMutableVideoCompositionInstruction()
-        let durationOfExportedVideo = CMTimeRange(start: CMTime.zero, duration: videoAsset.durationInCMTime)
-        mainInstruction.timeRange = durationOfExportedVideo
+        mainInstruction.timeRange = CMTimeRange(start: CMTime.zero,
+                                                duration: videoAsset.durationInCMTime)
 
         // 2.2
         let firstInstruction = self.createSimpleVideoCompositionInstruction(compositionTrack: firstTrack,
@@ -353,7 +349,7 @@ extension VideoExporter {
         avMutableVideoComposition.instructions = [mainInstruction]
         guard let framerate = videoAsset.framerate else {
             failure(VideoManagerError.FailedError(reason: "No Framerate for Asset"))
-            return
+            return nil
         }
         avMutableVideoComposition.frameDuration = CMTimeMake(value: 1, timescale: Int32(framerate))
         avMutableVideoComposition.renderSize = assetFirstVideoTrack.naturalSize
@@ -366,7 +362,7 @@ extension VideoExporter {
         // 3 - Audio track
         guard let audioAsset = videoAsset.urlAsset.getFirstAudioTrack() else {
             failure(VideoManagerError.FailedError(reason: "No First Audio Track"))
-            return
+            return nil
         }
 
         let audioTrack = mixComposition.addMutableTrack(withMediaType: .audio, preferredTrackID: 0)
@@ -379,27 +375,26 @@ extension VideoExporter {
         }
 
         // 4 Export Video
-        self.exportVideoToDiskFrom(avMutableComposition: mixComposition,
-                                   avMutatableVideoComposition: finalAVMutable,
-                                   progress: progress,
-                                   success: success,
-                                   failure: failure)
+        return self.exportVideoToDiskFrom(avMutableComposition: mixComposition,
+                                          avMutatableVideoComposition: finalAVMutable,
+                                          success: success,
+                                          failure: failure)
     }
 
     // @TODO: move somewhere else
-    static func addView(_ view: UIView,
-                        to avMutableVideoComposition: AVMutableVideoComposition) -> AVMutableVideoComposition {
+    private static func addView(_ view: UIView,
+                                to avMutableVideoComposition: AVMutableVideoComposition) -> AVMutableVideoComposition {
         let frameForLayers = CGRect(origin: .zero, size: avMutableVideoComposition.renderSize)
         let videoLayer = CALayer()
         videoLayer.frame = frameForLayers
-
+        
         let parentlayer = CALayer()
         parentlayer.frame = frameForLayers
         parentlayer.isGeometryFlipped = true
         parentlayer.addSublayer(videoLayer)
-
+        
         parentlayer.addSublayer(view.layer)
-
+        
         avMutableVideoComposition
             .animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: videoLayer,
                                                                  in: parentlayer)
@@ -408,38 +403,65 @@ extension VideoExporter {
 }
 
 extension VideoExporter {
-    func exportClips(videoAsset: VideoAsset,
+    static var videoExportOperationQueue: OperationQueue {
+        let queue = OperationQueue()
+        queue.name = "videoExportOperationQueue"
+        queue.maxConcurrentOperationCount = 1
+        return queue
+    }
+
+    public static func exportClips(videoAsset: VideoAsset,
                      clipLength: Int,
                      queue: DispatchQueue,
-                     fullProgress: @escaping (Float) -> (),
-                     completed: @escaping (_ fileUrls: [URL], _ errors: [Error]) -> ()) {
+                     watermarkView: UIView? = nil,
+                     completed: @escaping (_ fileUrls: [URL], _ errors: [Error]) -> ()) -> [VideoExportOperation] {
         let assets = videoAsset.generateClippedAssets(for: clipLength)
-        let assetCount = assets.count.float
 
         var fileUrls = [URL]()
         var errors = [Error]()
 
-        let dispatchGroup = DispatchGroup()
-
-        assets.forEach { (asset) in
-            dispatchGroup.enter()
-
-            VideoExporter.exportVideoWithoutCrop(videoAsset: asset,
-                                                 progress:
-                { (progress) in
-                    fullProgress(progress / assetCount)
-            }, success: { (url) in
-                dispatchGroup.leave()
-                fileUrls.append(url)
-            }, failure: { (error) in
-                dispatchGroup.leave()
-                errors.append(error)
-            })
+        let operationQueue = VideoExporter.videoExportOperationQueue
+        let finalAssets = [assets[1]]
+        let operations = assets.compactMap { (asset) -> VideoExportOperation? in
+            return VideoExporter
+                .exportVideoWithoutCrop(videoAsset: asset,
+                                        watermarkView: watermarkView,
+                                        success:
+                    { (url) in
+                        queue.async {
+                            fileUrls.append(url)
+                        }
+                }, failure: { (error) in
+                    queue.async {
+                        errors.append(error)
+                    }
+                })
         }
 
-        dispatchGroup.notify(queue: queue) {
-            completed(fileUrls, errors)
-        }
+        operationQueue.addOperations(operations,
+                                     waitUntilFinished: false)
+        return operations
+//        assets.forEach { (asset) in
+//            dispatchGroup.enter()
+//
+//            VideoExporter
+//                .exportVideoWithoutCrop(videoAsset: asset,
+//                                        watermarkView: watermarkView,
+//                                        progress:
+//                    { (progress) in
+//                        fullProgress(progress / assetCount)
+//                }, success: { (url) in
+//                    dispatchGroup.leave()
+//                    fileUrls.append(url)
+//                }, failure: { (error) in
+//                    dispatchGroup.leave()
+//                    errors.append(error)
+//                })
+//        }
+
+//        dispatchGroup.notify(queue: queue) {
+//            completed(fileUrls, errors)
+//        }
     }
 }
 
@@ -449,5 +471,252 @@ extension Date {
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.timeZone = utcTimeZone
         return dateFormatter.string(from: Date())
+    }
+}
+
+enum VideoExportState {
+    case idle, successful, failed
+}
+
+struct VideoExportSession {
+    let avExportSession: AVAssetExportSession
+    let progress: Float
+    let finalUrl: URL
+    let error: Error?
+
+    let state: VideoExportState
+
+    init(avExportSession: AVAssetExportSession,
+         finalUrl: URL,
+         progress: Float = 0.0,
+         state: VideoExportState = .idle,
+         error: Error? = nil) {
+        self.avExportSession = avExportSession
+        self.finalUrl = finalUrl
+        self.progress = progress
+        self.state = state
+        self.error = error
+    }
+
+    func withChangingProgress(to progress: Float) -> VideoExportSession {
+        return VideoExportSession(avExportSession: avExportSession,
+                                  finalUrl: finalUrl,
+                                  progress: progress,
+                                  state: state,
+                                  error: error)
+    }
+
+    func withChangingFinalUrl(to finalUrl: URL) -> VideoExportSession {
+        return VideoExportSession(avExportSession: avExportSession,
+                                  finalUrl: finalUrl,
+                                  progress: progress,
+                                  state: state,
+                                  error: error)
+    }
+
+    func withChangingState(to state: VideoExportState) -> VideoExportSession {
+        return VideoExportSession(avExportSession: avExportSession,
+                                  finalUrl: finalUrl,
+                                  progress: progress,
+                                  state: state,
+                                  error: error)
+    }
+
+    func withChangingError(to error: Error) -> VideoExportSession {
+        return VideoExportSession(avExportSession: avExportSession,
+                                  finalUrl: finalUrl,
+                                  progress: progress,
+                                  state: state,
+                                  error: error)
+    }
+}
+
+public class VideoExportOperation: AsyncOperation {
+    public var progress: Float {
+        return export.progress
+    }
+    var export: VideoExportSession
+    public var progressBlock: (_ operation: Operation) -> Void = { _ in }
+
+    init(export: VideoExportSession) {
+        self.export = export
+    }
+
+    override public func main() {
+        print("here")
+        self.state = .executing
+
+//        if isCancelled {
+//            return
+//        }
+
+        let assetExportSession = export.avExportSession
+
+        // Schedule timer for sending progress
+        let timer = Timer.scheduledTimer(withTimeInterval: 0.5,
+                                         repeats: true,
+                                         block:
+            { [weak self] (timer) in
+                guard let strongSelf = self else {
+                    return
+                }
+//                if strongSelf.isCancelled {
+//                    return
+//                }
+                strongSelf.export = strongSelf.export.withChangingProgress(to: assetExportSession.progress)
+                strongSelf.progressBlock(strongSelf)
+        })
+
+        assetExportSession.exportAsynchronously(completionHandler: {
+            timer.invalidate()
+            // @TODO: try only one session or cleanup session
+            switch assetExportSession.status {
+            case .completed:
+                print("completed")
+                self.export = self.export
+                    .withChangingProgress(to: 1.0)
+                    .withChangingState(to: .successful)
+                self.state = .finished
+            case .cancelled:
+                let error = assetExportSession.error ?? VideoExportOperationError.CancelledError
+                self.export = self.export
+                    .withChangingState(to: .failed)
+                    .withChangingError(to: error)
+                self.state = .finished
+            case .failed:
+                print("failed")
+                let error = assetExportSession.error ?? VideoExportOperationError.FailedError(reason: "Asset Exporter Failed")
+                self.export = self.export
+                    .withChangingState(to: .failed)
+                    .withChangingError(to: error)
+                self.state = .finished
+            case .unknown, .exporting, .waiting:
+                // Should never arrive here
+                let error = assetExportSession.error ?? VideoExportOperationError.UnknownError
+                self.export = self.export
+                    .withChangingState(to: .failed)
+                    .withChangingError(to: error)
+                self.state = .finished
+            }
+        })
+    }
+
+    override public func cancel() {
+        self.export.avExportSession.cancelExport()
+    }
+}
+
+extension VideoExportOperation {
+    private enum VideoExportOperationError: Error {
+        case FailedError(reason: String)
+        case CancelledError
+        case UnknownError
+    }
+}
+
+
+
+//
+//  AsyncOperation.swift
+//  AsyncOperation
+//
+//  Created by Vincent Esche on 4/7/15.
+//  Copyright (c) 2015 Vincent Esche. All rights reserved.
+//
+
+// https://github.com/regexident/AsyncOperation
+
+import Foundation
+
+open class AsyncOperation: Operation {
+    public enum State: String {
+        case waiting = "isWaiting"
+        case ready = "isReady"
+        case executing = "isExecuting"
+        case finished = "isFinished"
+        case cancelled = "isCancelled"
+    }
+
+    open var state: State = State.waiting {
+        willSet {
+            willChangeValue(forKey: State.ready.rawValue)
+            willChangeValue(forKey: State.executing.rawValue)
+            willChangeValue(forKey: State.finished.rawValue)
+            willChangeValue(forKey: State.cancelled.rawValue)
+        }
+        didSet {
+            switch self.state {
+            case .waiting:
+                assert(oldValue == .waiting, "Invalid change from \(oldValue) to \(self.state)")
+            case .ready:
+                assert(oldValue == .waiting, "Invalid change from \(oldValue) to \(self.state)")
+            case .executing:
+                assert(
+                    oldValue == .ready || oldValue == .waiting,
+                    "Invalid change from \(oldValue) to \(self.state)"
+                )
+            case .finished:
+                assert(oldValue != .cancelled, "Invalid change from \(oldValue) to \(self.state)")
+            case .cancelled:
+                break
+            }
+
+            didChangeValue(forKey: State.cancelled.rawValue)
+            didChangeValue(forKey: State.finished.rawValue)
+            didChangeValue(forKey: State.executing.rawValue)
+            didChangeValue(forKey: State.ready.rawValue)
+        }
+    }
+
+    open override var isReady: Bool {
+        if self.state == .waiting {
+            return super.isReady
+        } else {
+            return self.state == .ready
+        }
+    }
+
+    open override var isExecuting: Bool {
+        if self.state == .waiting {
+            return super.isExecuting
+        } else {
+            return self.state == .executing
+        }
+    }
+
+    open override var isFinished: Bool {
+        if self.state == .waiting {
+            return super.isFinished
+        } else {
+            return self.state == .finished
+        }
+    }
+
+    open override var isCancelled: Bool {
+        if self.state == .waiting {
+            return super.isCancelled
+        } else {
+            return self.state == .cancelled
+        }
+    }
+
+    open override var isAsynchronous: Bool {
+        return true
+    }
+}
+
+open class AsyncBlockOperation: AsyncOperation {
+    public typealias Closure = (AsyncBlockOperation) -> ()
+
+    let closure: Closure
+
+    public init(closure: @escaping Closure) {
+        self.closure = closure
+    }
+
+    open override func main() {
+        guard !self.isCancelled else { return }
+
+        self.closure(self)
     }
 }

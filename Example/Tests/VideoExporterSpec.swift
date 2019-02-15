@@ -48,11 +48,7 @@ class VideoExporterSpec: QuickSpec {
 
                     VideoExporter
                         .exportVideoWithoutCrop(videoAsset: finalAsset,
-                                     progress:
-                            { (progress) in
-                                print("export video: \(progress)")
-                                progressToCheck = progress
-                        }, success: { returnedFileUrl in
+                                                success: { returnedFileUrl in
                             print(returnedFileUrl, "exported file url")
                             fileUrl = returnedFileUrl
 
@@ -75,7 +71,7 @@ class VideoExporterSpec: QuickSpec {
             }
 
             context("export video with watermark") {
-                fit("should complete export with progress") {
+                it("should complete export with progress") {
                     let start = Date()
 
                     let finalAsset = thirtySecondAsset.changeStartTime(to: 0.0).changeEndTime(to: 5.0)
@@ -90,11 +86,7 @@ class VideoExporterSpec: QuickSpec {
                     VideoExporter
                         .exportVideoWithoutCrop(videoAsset: finalAsset,
                                                 watermarkView: watermarkView,
-                                                progress:
-                            { (progress) in
-                                print("export video: \(progress)")
-                                progressToCheck = progress
-                        }, success: { returnedFileUrl in
+                                                success: { returnedFileUrl in
                             print(returnedFileUrl, "exported file url")
                             fileUrl = returnedFileUrl
 
@@ -113,6 +105,47 @@ class VideoExporterSpec: QuickSpec {
                     expect(firstVideoTrack?.naturalSize.width).to(equal(1280))
                     expect(firstVideoTrack?.naturalSize.height).to(equal(720))
                     expect(firstVideoTrack?.asset?.duration.seconds).to(equal(5))
+                }
+            }
+
+            context("export clipped video") {
+                fit("should complete export with progress") {
+                    let start = Date()
+
+                    let watermarkView = UIImageView(frame: CGRect(x: 0, y: 0, width: 200, height: 100))
+                    watermarkView.contentMode = .scaleAspectFit
+                    watermarkView.image = UIImage(named: "long_story_watermark")
+                    watermarkView.layer.rasterizationScale = 2.0
+                    watermarkView.layer.contentsScale = 2.0
+                    watermarkView.layer.shouldRasterize = true
+
+                    var urls: [URL]?
+
+                    let operations = VideoExporter
+                        .exportClips(videoAsset: thirtySecondAsset,
+                                     clipLength: 10,
+                                     queue: .main,
+                                     watermarkView: watermarkView,
+                                     completed: { (exportedUrls, errors) in
+                            urls = exportedUrls
+                            expect(errors).to(beEmpty())
+                            print(Date().timeIntervalSince(start), "<- End Time For Export")
+                        })
+
+                    operations.forEach({ operation in
+                        operation.progressBlock = { _ in
+                            print(operation.progress)
+                        }
+                    })
+
+                    expect(urls).toEventually(haveCount(3), timeout: 120)
+
+//                    // Check just saved local video
+//                    let savedVideo = VideoAsset(url: fileUrl!)
+//                    let firstVideoTrack = savedVideo.urlAsset.getFirstVideoTrack()
+//                    expect(firstVideoTrack?.naturalSize.width).to(equal(1280))
+//                    expect(firstVideoTrack?.naturalSize.height).to(equal(720))
+//                    expect(firstVideoTrack?.asset?.duration.seconds).to(equal(5))
                 }
             }
         }
