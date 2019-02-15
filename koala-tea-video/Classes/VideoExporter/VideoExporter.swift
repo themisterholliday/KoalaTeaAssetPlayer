@@ -8,6 +8,7 @@
 
 import AVFoundation
 import UIKit
+import Repeat
 
 /// Exporter for VideoAssets
 public class VideoExporter {
@@ -98,7 +99,8 @@ extension VideoExporter {
         }
 
         let dateString = Date.currentDateTimeString
-        let fileURL = documentDirectory.appendingPathComponent("\(appName)-\(dateString).mp4")
+        let uuid = UUID().uuidString
+        let fileURL = documentDirectory.appendingPathComponent("\(appName)-\(dateString)-\(uuid).mp4")
 
         // Remove any file at URL because if file exists assetExport will fail
         FileHelpers.removeFileAtURL(fileURL: fileURL)
@@ -113,19 +115,17 @@ extension VideoExporter {
         assetExportSession.shouldOptimizeForNetworkUse = true
         assetExportSession.outputURL = fileURL
 
-        let videoExport = VideoExportSession(avExportSession: assetExportSession, finalUrl: fileURL)
+        let videoExport = VideoExportSession(avExportSession: assetExportSession, fileUrl: fileURL)
 
         let operation = VideoExportOperation(export: videoExport)
 
         operation.completionBlock = {
-//            guard !operation.isCancelled else { return }
             switch operation.export.state {
             case .idle:
                 break
             case .successful:
-                success(operation.export.finalUrl)
+                success(operation.export.fileUrl)
             case .failed:
-                print(operation.export.error ?? VideoManagerError.UnknownError, "export failure")
                 failure(operation.export.error ?? VideoManagerError.UnknownError)
             }
         }
@@ -421,7 +421,6 @@ extension VideoExporter {
         var errors = [Error]()
 
         let operationQueue = VideoExporter.videoExportOperationQueue
-        let finalAssets = [assets[1]]
         let operations = assets.compactMap { (asset) -> VideoExportOperation? in
             return VideoExporter
                 .exportVideoWithoutCrop(videoAsset: asset,
@@ -441,27 +440,6 @@ extension VideoExporter {
         operationQueue.addOperations(operations,
                                      waitUntilFinished: false)
         return operations
-//        assets.forEach { (asset) in
-//            dispatchGroup.enter()
-//
-//            VideoExporter
-//                .exportVideoWithoutCrop(videoAsset: asset,
-//                                        watermarkView: watermarkView,
-//                                        progress:
-//                    { (progress) in
-//                        fullProgress(progress / assetCount)
-//                }, success: { (url) in
-//                    dispatchGroup.leave()
-//                    fileUrls.append(url)
-//                }, failure: { (error) in
-//                    dispatchGroup.leave()
-//                    errors.append(error)
-//                })
-//        }
-
-//        dispatchGroup.notify(queue: queue) {
-//            completed(fileUrls, errors)
-//        }
     }
 }
 
@@ -481,18 +459,18 @@ enum VideoExportState {
 struct VideoExportSession {
     let avExportSession: AVAssetExportSession
     let progress: Float
-    let finalUrl: URL
+    let fileUrl: URL
     let error: Error?
 
     let state: VideoExportState
 
     init(avExportSession: AVAssetExportSession,
-         finalUrl: URL,
+         fileUrl: URL,
          progress: Float = 0.0,
          state: VideoExportState = .idle,
          error: Error? = nil) {
         self.avExportSession = avExportSession
-        self.finalUrl = finalUrl
+        self.fileUrl = fileUrl
         self.progress = progress
         self.state = state
         self.error = error
@@ -500,7 +478,7 @@ struct VideoExportSession {
 
     func withChangingProgress(to progress: Float) -> VideoExportSession {
         return VideoExportSession(avExportSession: avExportSession,
-                                  finalUrl: finalUrl,
+                                  fileUrl: fileUrl,
                                   progress: progress,
                                   state: state,
                                   error: error)
@@ -508,7 +486,7 @@ struct VideoExportSession {
 
     func withChangingFinalUrl(to finalUrl: URL) -> VideoExportSession {
         return VideoExportSession(avExportSession: avExportSession,
-                                  finalUrl: finalUrl,
+                                  fileUrl: finalUrl,
                                   progress: progress,
                                   state: state,
                                   error: error)
@@ -516,7 +494,7 @@ struct VideoExportSession {
 
     func withChangingState(to state: VideoExportState) -> VideoExportSession {
         return VideoExportSession(avExportSession: avExportSession,
-                                  finalUrl: finalUrl,
+                                  fileUrl: fileUrl,
                                   progress: progress,
                                   state: state,
                                   error: error)
@@ -524,7 +502,7 @@ struct VideoExportSession {
 
     func withChangingError(to error: Error) -> VideoExportSession {
         return VideoExportSession(avExportSession: avExportSession,
-                                  finalUrl: finalUrl,
+                                  fileUrl: fileUrl,
                                   progress: progress,
                                   state: state,
                                   error: error)
@@ -532,50 +510,38 @@ struct VideoExportSession {
 }
 
 public class VideoExportOperation: AsyncOperation {
+    var export: VideoExportSession
+    public var progressBlock: (_ operation: Operation) -> Void = { _ in }
     public var progress: Float {
         return export.progress
     }
-    var export: VideoExportSession
-    public var progressBlock: (_ operation: Operation) -> Void = { _ in }
 
     init(export: VideoExportSession) {
         self.export = export
     }
 
     override public func main() {
-        print("here")
         self.state = .executing
 
-//        if isCancelled {
-//            return
-//        }
+        if self.state == .cancelled {
+            return
+        }
 
         let assetExportSession = export.avExportSession
 
-        // Schedule timer for sending progress
-        let timer = Timer.scheduledTimer(withTimeInterval: 0.5,
-                                         repeats: true,
-                                         block:
-            { [weak self] (timer) in
-                guard let strongSelf = self else {
-                    return
-                }
-//                if strongSelf.isCancelled {
-//                    return
-//                }
-                strongSelf.export = strongSelf.export.withChangingProgress(to: assetExportSession.progress)
-                strongSelf.progressBlock(strongSelf)
-        })
+        let timer = Repeater.every(.seconds(0.5)) { [weak self] _ in
+            self?.handleTimerProgress(assetExportSession: assetExportSession)
+        }
 
         assetExportSession.exportAsynchronously(completionHandler: {
-            timer.invalidate()
-            // @TODO: try only one session or cleanup session
+            timer.pause()
+
             switch assetExportSession.status {
             case .completed:
-                print("completed")
                 self.export = self.export
                     .withChangingProgress(to: 1.0)
                     .withChangingState(to: .successful)
+                self.progressBlock(self)
                 self.state = .finished
             case .cancelled:
                 let error = assetExportSession.error ?? VideoExportOperationError.CancelledError
@@ -584,7 +550,6 @@ public class VideoExportOperation: AsyncOperation {
                     .withChangingError(to: error)
                 self.state = .finished
             case .failed:
-                print("failed")
                 let error = assetExportSession.error ?? VideoExportOperationError.FailedError(reason: "Asset Exporter Failed")
                 self.export = self.export
                     .withChangingState(to: .failed)
@@ -602,7 +567,17 @@ public class VideoExportOperation: AsyncOperation {
     }
 
     override public func cancel() {
+        super.cancel()
         self.export.avExportSession.cancelExport()
+    }
+
+    private func handleTimerProgress(assetExportSession: AVAssetExportSession) {
+        guard self.state != .cancelled else {
+            return
+        }
+
+        self.export = self.export.withChangingProgress(to: assetExportSession.progress)
+        self.progressBlock(self)
     }
 }
 
@@ -611,112 +586,5 @@ extension VideoExportOperation {
         case FailedError(reason: String)
         case CancelledError
         case UnknownError
-    }
-}
-
-
-
-//
-//  AsyncOperation.swift
-//  AsyncOperation
-//
-//  Created by Vincent Esche on 4/7/15.
-//  Copyright (c) 2015 Vincent Esche. All rights reserved.
-//
-
-// https://github.com/regexident/AsyncOperation
-
-import Foundation
-
-open class AsyncOperation: Operation {
-    public enum State: String {
-        case waiting = "isWaiting"
-        case ready = "isReady"
-        case executing = "isExecuting"
-        case finished = "isFinished"
-        case cancelled = "isCancelled"
-    }
-
-    open var state: State = State.waiting {
-        willSet {
-            willChangeValue(forKey: State.ready.rawValue)
-            willChangeValue(forKey: State.executing.rawValue)
-            willChangeValue(forKey: State.finished.rawValue)
-            willChangeValue(forKey: State.cancelled.rawValue)
-        }
-        didSet {
-            switch self.state {
-            case .waiting:
-                assert(oldValue == .waiting, "Invalid change from \(oldValue) to \(self.state)")
-            case .ready:
-                assert(oldValue == .waiting, "Invalid change from \(oldValue) to \(self.state)")
-            case .executing:
-                assert(
-                    oldValue == .ready || oldValue == .waiting,
-                    "Invalid change from \(oldValue) to \(self.state)"
-                )
-            case .finished:
-                assert(oldValue != .cancelled, "Invalid change from \(oldValue) to \(self.state)")
-            case .cancelled:
-                break
-            }
-
-            didChangeValue(forKey: State.cancelled.rawValue)
-            didChangeValue(forKey: State.finished.rawValue)
-            didChangeValue(forKey: State.executing.rawValue)
-            didChangeValue(forKey: State.ready.rawValue)
-        }
-    }
-
-    open override var isReady: Bool {
-        if self.state == .waiting {
-            return super.isReady
-        } else {
-            return self.state == .ready
-        }
-    }
-
-    open override var isExecuting: Bool {
-        if self.state == .waiting {
-            return super.isExecuting
-        } else {
-            return self.state == .executing
-        }
-    }
-
-    open override var isFinished: Bool {
-        if self.state == .waiting {
-            return super.isFinished
-        } else {
-            return self.state == .finished
-        }
-    }
-
-    open override var isCancelled: Bool {
-        if self.state == .waiting {
-            return super.isCancelled
-        } else {
-            return self.state == .cancelled
-        }
-    }
-
-    open override var isAsynchronous: Bool {
-        return true
-    }
-}
-
-open class AsyncBlockOperation: AsyncOperation {
-    public typealias Closure = (AsyncBlockOperation) -> ()
-
-    let closure: Closure
-
-    public init(closure: @escaping Closure) {
-        self.closure = closure
-    }
-
-    open override func main() {
-        guard !self.isCancelled else { return }
-
-        self.closure(self)
     }
 }

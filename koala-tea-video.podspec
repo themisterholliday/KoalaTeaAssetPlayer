@@ -38,7 +38,8 @@ Pod::Spec.new do |s|
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
-  s.dependency 'SwifterSwift'
-  s.dependency 'Quick'
-  s.dependency 'Nimble'
+  s.dependency 'SwifterSwift', '~> 4.6.0'
+  s.dependency 'Repeat', '~> 0.5.7'
+  s.dependency 'Quick', '~> 1.3.4'
+  s.dependency 'Nimble', '~> 7.3.4'
 end
