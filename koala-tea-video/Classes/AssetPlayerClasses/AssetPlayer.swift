@@ -163,7 +163,7 @@ open class AssetPlayer: NSObject {
         self.currentAVAudioTimePitchAlgorithm = .timeDomain
     }
 
-    public var avPlayerItem: AVPlayerItem? = nil {
+    private var avPlayerItem: AVPlayerItem? = nil {
         willSet {
             if avPlayerItem != nil {
                 // Remove observers before changing player item
@@ -182,7 +182,7 @@ open class AssetPlayer: NSObject {
         }
     }
 
-    public var asset: AssetProtocol? {
+    private var asset: AssetProtocol? {
         didSet {
             guard let newAsset = self.asset else { return }
 
@@ -315,7 +315,7 @@ open class AssetPlayer: NSObject {
     }
 
     // MARK: Playback Control Methods.
-    open func handle(action: AssetPlayerActions) {
+    open func perform(action: AssetPlayerActions) {
         switch action {
         case .setup(let asset, let startMuted):
             self.setup(with: asset)
