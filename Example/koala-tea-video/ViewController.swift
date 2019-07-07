@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AVFoundation
 import koala_tea_video
 
 class ViewController: UIViewController {
@@ -15,7 +16,10 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        assetPlayer.perform(action: .play)
+        let urlAsset = AVURLAsset(url: URL(string:"http://ccrma.stanford.edu/~jos/mp3/gtr-nylon22.mp3")!)
+        let asset = Asset(urlAsset: urlAsset)
+        assetPlayer.perform(action: .setup(with: asset, startMuted: false))
+//        assetPlayer.perform(action: .play)
     }
 
     override func didReceiveMemoryWarning() {

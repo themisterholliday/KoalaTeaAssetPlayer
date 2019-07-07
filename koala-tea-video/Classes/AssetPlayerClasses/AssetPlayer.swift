@@ -29,11 +29,6 @@ public protocol AssetPlayerDelegate: class {
     func playerBufferTimeDidChange(_ player: AssetPlayer)
 }
 
-extension AssetPlayerDelegate {
-    func playerIsLikelyToKeepUp(_ player: AssetPlayer) {}
-    func playerBufferTimeDidChange(_ player: AssetPlayer) {}
-}
-
 public enum AssetPlayerPlaybackState: Equatable {
     case setup(asset: AssetProtocol)
     case playing, paused, interrupted, buffering, finished, none
@@ -662,7 +657,7 @@ extension AssetPlayer {
                 // @TODO: There is a bit better buffering calculation we could do here
                 let percent = 100.0
                 let percentageOfDuration = self.duration * (percent / 100.0)
-//                // @TODO: Figure out dynamci dampening
+//                // @TODO: Figure out dynamic dampening
 //                let acceptableBufferedTime = pow(percentageOfDuration, (1.0/2.0))
                 let acceptableBufferedTime = percentageOfDuration
                 let isBufferedEnough = (bufferedTime - self.currentTime) > acceptableBufferedTime || bufferedTime >= self.duration
