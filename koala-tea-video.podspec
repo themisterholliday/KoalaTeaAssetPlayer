@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '10.3'
-  s.swift_version = '4.2'
+  s.swift_version = '5.0'
 
   s.source_files = 'koala-tea-video/Classes/**/*'
 
@@ -38,8 +38,7 @@ Pod::Spec.new do |s|
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
-  s.dependency 'SwifterSwift', '~> 4.6.0'
-  s.dependency 'Repeat', '~> 0.5.7'
-  s.dependency 'Quick', '~> 1.3.4'
-  s.dependency 'Nimble', '~> 7.3.4'
+  s.dependency 'SwifterSwift', '~> 5.0.0'
+  s.dependency 'Quick', '~> 2.1.0'
+  s.dependency 'Nimble', '~> 8.0.2'
 end

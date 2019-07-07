@@ -18,20 +18,18 @@
   "platforms": {
     "ios": "10.3"
   },
-  "swift_version": "4.2",
+  "swift_versions": "5.0",
   "source_files": "koala-tea-video/Classes/**/*",
   "dependencies": {
     "SwifterSwift": [
-
-    ],
-    "Repeat": [
-
+      "~> 5.0.0"
     ],
     "Quick": [
-
+      "~> 2.1.0"
     ],
     "Nimble": [
-
+      "~> 8.0.2"
     ]
-  }
+  },
+  "swift_version": "5.0"
 }

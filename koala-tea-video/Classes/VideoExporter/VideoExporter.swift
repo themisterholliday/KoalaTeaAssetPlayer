@@ -8,7 +8,6 @@
 
 import AVFoundation
 import UIKit
-import Repeat
 
 /// Exporter for VideoAssets
 public class VideoExporter {
@@ -413,6 +412,51 @@ extension VideoExporter {
                                                                  in: parentlayer)
         return avMutableVideoComposition
     }
+
+    public static func exportAllAudios(_ allAudios: [MediaAsset]) throws -> VideoExportOperation {
+        let mixComposition = AVMutableComposition()
+
+        allAudios.forEach { (mediaAsset) in
+            guard let audioAsset = mediaAsset.urlAsset.getFirstAudioTrack() else {
+                return
+            }
+            let audioTrack = mixComposition.addMutableTrack(withMediaType: .audio, preferredTrackID: 0)
+            try? audioTrack?.insertTimeRange(audioAsset.timeRange,
+                                            of: audioAsset,
+                                            at: mediaAsset.startTime)
+        }
+
+        // @TODO: move to create directory method
+        guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            throw VideoManagerError.FailedError(reason: "Get File Path Error")
+        }
+
+        guard let appName = Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String else {
+            throw VideoManagerError.FailedError(reason: "Cannot find App Name")
+        }
+
+        let dateString = Date.currentDateTimeString
+        let uuid = UUID().uuidString
+        let fileURL = documentDirectory.appendingPathComponent("\(appName)-\(dateString)-\(uuid).mp4")
+
+        // Remove any file at URL because if file exists assetExport will fail
+        FileHelpers.removeFileAtURL(fileURL: fileURL)
+
+        // @TODO: move to create asset session method
+        // Create AVAssetExportSession
+        guard let assetExportSession = AVAssetExportSession(asset: mixComposition,
+                                                            presetName: AVAssetExportPresetHighestQuality) else
+        {
+            throw VideoManagerError.FailedError(reason: "Can't create asset exporter")
+        }
+        assetExportSession.outputFileType = AVFileType.wav
+        assetExportSession.shouldOptimizeForNetworkUse = true
+        assetExportSession.outputURL = fileURL
+
+        let videoExport = VideoExportSession(avExportSession: assetExportSession, fileUrl: fileURL)
+
+        return VideoExportOperation(export: videoExport)
+    }
 }
 
 extension VideoExporter {
@@ -547,13 +591,12 @@ public class VideoExportOperation: AsyncOperation {
         }
 
         let assetExportSession = exportSessionObject.avExportSession
-
-        let timer = Repeater.every(.seconds(0.5)) { [weak self] _ in
+        let timer = Timer(timeInterval: 0.5, repeats: true) { [weak self] _ in
             self?.handleTimerProgress(assetExportSession: assetExportSession)
         }
 
         assetExportSession.exportAsynchronously(completionHandler: {
-            timer.pause()
+            timer.invalidate()
 
             switch assetExportSession.status {
             case .completed:
@@ -581,6 +624,8 @@ public class VideoExportOperation: AsyncOperation {
                     .withChangingState(to: .failed)
                     .withChangingError(to: error)
                 self.state = .finished
+            @unknown default:
+                assertionFailure()
             }
         })
     }

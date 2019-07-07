@@ -28,7 +28,7 @@ class VideoExporterSpec: QuickSpec {
 
         describe("video exporter") {
             var fileUrl: URL?
-            var progressToCheck: Float = 0
+//            var progressToCheck: Float = 0
 
             afterEach {
                 if let url = fileUrl {
@@ -37,7 +37,7 @@ class VideoExporterSpec: QuickSpec {
                 }
 
                 fileUrl = nil
-                progressToCheck = 0
+//                progressToCheck = 0
             }
 
 //            context("export video") {

@@ -10,7 +10,7 @@ import UIKit
 
 public extension CGSize {
     // @TODO: Aspect ration and minimum size/bounding size does not make sense
-    public static func aspectFit(aspectRatio : CGSize, boundingSize: CGSize) -> CGSize {
+    static func aspectFit(aspectRatio : CGSize, boundingSize: CGSize) -> CGSize {
         var boundingSize = boundingSize
         let mW = boundingSize.width / aspectRatio.width;
         let mH = boundingSize.height / aspectRatio.height;
@@ -25,7 +25,7 @@ public extension CGSize {
         return boundingSize;
     }
 
-    public static func aspectFill(aspectRatio :CGSize, minimumSize: CGSize) -> CGSize {
+    static func aspectFill(aspectRatio :CGSize, minimumSize: CGSize) -> CGSize {
         var minimumSize = minimumSize
         let mW = minimumSize.width / aspectRatio.width;
         let mH = minimumSize.height / aspectRatio.height;
@@ -40,7 +40,7 @@ public extension CGSize {
         return minimumSize;
     }
 
-    public func getAspectRatio() -> CGFloat {
+    func getAspectRatio() -> CGFloat {
         return round(100.0 * (self.height / self.width)) / 100.0
     }
 }

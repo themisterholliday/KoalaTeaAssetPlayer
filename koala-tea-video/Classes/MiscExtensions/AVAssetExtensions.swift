@@ -92,7 +92,7 @@ extension AVAsset {
     }
 
     private static func getFrame(fromTime: Float64, with generator: AVAssetImageGenerator) -> UIImage? {
-        let time: CMTime = CMTimeMakeWithSeconds(fromTime, preferredTimescale: VideoAsset.PublicConstants.DefaultTimeScale)
+        let time: CMTime = CMTimeMakeWithSeconds(fromTime, preferredTimescale: Asset.PublicConstants.DefaultTimeScale)
         do {
             let image = try generator.copyCGImage(at:time, actualTime:nil)
             return UIImage(cgImage:image)

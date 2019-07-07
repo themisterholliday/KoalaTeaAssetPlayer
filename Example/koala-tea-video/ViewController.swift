@@ -7,8 +7,10 @@
 //
 
 import UIKit
+import koala_tea_video
 
 class ViewController: UIViewController {
+    lazy var assetPlayer = AssetPlayer(isPlayingLocalAsset: false, shouldLoop: false)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,3 +24,36 @@ class ViewController: UIViewController {
 
 }
 
+extension ViewController: AssetPlayerDelegate {
+    func currentAssetDidChange(_ player: AssetPlayer) {
+
+    }
+
+    func playerIsSetup(_ player: AssetPlayer) {
+
+    }
+
+    func playerPlaybackStateDidChange(_ player: AssetPlayer) {
+
+    }
+
+    func playerCurrentTimeDidChange(_ player: AssetPlayer) {
+
+    }
+
+    func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer) {
+
+    }
+
+    func playerPlaybackDidEnd(_ player: AssetPlayer) {
+
+    }
+
+    func playerIsLikelyToKeepUp(_ player: AssetPlayer) {
+
+    }
+
+    func playerBufferTimeDidChange(_ player: AssetPlayer) {
+        
+    }
+}

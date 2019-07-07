@@ -66,7 +66,7 @@ public class TimelineView: UIView {
         let framerate = video.framerate ?? 0
         // Add this duration buffer for videos that are extremely close to the 5 second mark but just a little over
         let durationBuffer = 0.01
-        let videoDurationGreaterThanCropTime = video.duration > VideoAsset.PublicConstants.MaxCropDurationInSeconds
+        let videoDurationGreaterThanCropTime = video.duration > Asset.PublicConstants.MaxCropDurationInSeconds
         let duration = videoDurationGreaterThanCropTime ? video.duration - durationBuffer : video.duration
         videoFramesScrollingView = VideoFramesScrollingView(frame: frame,
                                                             videoAsset: video.urlAsset,

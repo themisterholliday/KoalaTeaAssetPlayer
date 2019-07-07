@@ -202,6 +202,9 @@ public class PHPhotoLibraryInterface {
             return .denied
         case .authorized, .restricted:
             return .authorized
+        @unknown default:
+            assertionFailure()
+            return .denied
         }
     }
 
@@ -215,6 +218,8 @@ public class PHPhotoLibraryInterface {
                     completion(.denied)
                 case .authorized, .restricted:
                     completion(.authorized)
+                @unknown default:
+                    assertionFailure()
                 }
             }
         }
@@ -414,7 +419,7 @@ public class PHPhotoLibraryInterface {
 
         // Default has a specific sort
         let sorted = assetCollecitonWithThumbnails
-            .sorted{ allTitles.index(of: ($0.phAssetCollection.localizedTitle ?? "").lowercased()) ?? 0 < allTitles.index(of: ($1.phAssetCollection.localizedTitle ?? "").lowercased()) ?? 0 }
+            .sorted{ allTitles.firstIndex(of: ($0.phAssetCollection.localizedTitle ?? "").lowercased()) ?? 0 < allTitles.firstIndex(of: ($1.phAssetCollection.localizedTitle ?? "").lowercased()) ?? 0 }
 
         return sorted
     }
@@ -562,6 +567,9 @@ class AVCaptureDeviceInterface {
             return .denied
         case .authorized, .restricted:
             return .authorized
+        @unknown default:
+            assertionFailure()
+            return.denied
         }
     }
 

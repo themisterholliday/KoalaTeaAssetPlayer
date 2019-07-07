@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import SwifterSwift
 
 public class VideoFramesView: UIView {
     required public init(videoAsset: AVURLAsset,
@@ -24,7 +25,7 @@ public class VideoFramesView: UIView {
         self.addSubviews(imageViews)
 
         videoAsset.getAllFrames(framesPerSecond: desiredFramesPerSecond) { (index, image) in
-            guard let imageView = imageViews.item(at: index) else {
+            guard let imageView = imageViews[safe: index] else {
                 return
             }
             UIView.transition(with: imageView, duration: Constants.ImageViewTransitionAnimationDuration, options: .transitionCrossDissolve, animations: {
