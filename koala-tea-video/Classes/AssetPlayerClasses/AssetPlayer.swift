@@ -627,24 +627,25 @@ extension AssetPlayer {
     private func addPlayerItemObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(self.handleAVPlayerItemDidPlayToEndTimeNotification(notification:)), name: .AVPlayerItemDidPlayToEndTime, object: avPlayerItem)
 
-        playbackBufferEmptyObserver = avPlayerItem?.observe(\.isPlaybackBufferEmpty, options: [.new, .old], changeHandler: { (playerItem, change) in
+        playbackBufferEmptyObserver = avPlayerItem?.observe(\.isPlaybackBufferEmpty, options: [.new, .old, .initial], changeHandler: { (playerItem, change) in
             self.handleBufferEmptyChange()
         })
 
-        playbackLikelyToKeepUpObserver = avPlayerItem?.observe(\.isPlaybackLikelyToKeepUp, options: [.new, .old], changeHandler: { (playerItem, change) in
+        playbackLikelyToKeepUpObserver = avPlayerItem?.observe(\.isPlaybackLikelyToKeepUp, options: [.new, .old, .initial], changeHandler: { (playerItem, change) in
             self.handleLikelyToKeepUpChange()
         })
 
-        loadedTimeRangesObserver = avPlayerItem?.observe(\.loadedTimeRanges, options: [.new, .old], changeHandler: { (playerItem, change) in
+        loadedTimeRangesObserver = avPlayerItem?.observe(\.loadedTimeRanges, options: [.new, .old, .initial], changeHandler: { (playerItem, change) in
             self.handleLoadedTimeRangesChange()
         })
 
-        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old], changeHandler: { (playerItem, change) in
+        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old, .initial], changeHandler: { (playerItem, change) in
             self.handleStatusChange(change: change)
         })
 
-        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old], changeHandler: { (playerItem, change) in
-            print("duration changed")
+        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old, .initial], changeHandler: { (playerItem, change) in
+            // Should be ready to play here
+            // @TODO: handle
         })
     }
 

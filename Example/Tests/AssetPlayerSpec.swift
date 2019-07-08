@@ -28,7 +28,6 @@ class AssetPlayerSpec: QuickSpec {
 
                 beforeEach {
                     assetPlayer = AssetPlayer(isPlayingLocalAsset: true, shouldLoop: false)
-                    print(fiveSecondAsset.urlAsset.duration, "fiveSecondAsset.urlAsset.duration")
                 }
 
                 afterEach {
@@ -68,24 +67,12 @@ class AssetPlayerSpec: QuickSpec {
                     }
 
                     it("should change start time and end time for looping") {
-                        print(assetPlayer.state)
-                        print("after")
-                        print(assetPlayer.endTimeForLoop)
                         assetPlayer.perform(action: .changeStartTimeForLoop(to: 5.0))
                         expect(assetPlayer.startTimeForLoop).to(equal(5.0))
 
-                        // @TODO: Fix hack to wait for assetplayer to setup
-                        sleep(1)
-                        // Wait, can't set end time when video is not setup
-                        waitUntil(timeout: 2, action: { (done) in
-                            sleep(1)
-                            expect(assetPlayer.state).to(equal(AssetPlayerPlaybackState.none))
-                            done()
-                        })
-print(assetPlayer.startTimeForLoop)
+                        expect(assetPlayer.player.currentItem?.status).toEventually(equal(.readyToPlay), timeout: 20)
+
                         assetPlayer.perform(action: .changeEndTimeForLoop(to: 10.0))
-                        print(assetPlayer.duration, "dur")
-                        print(assetPlayer.endTimeForLoop, "testsetste" )
                         expect(assetPlayer.endTimeForLoop).to(equal(10.0))
                     }
                 }
