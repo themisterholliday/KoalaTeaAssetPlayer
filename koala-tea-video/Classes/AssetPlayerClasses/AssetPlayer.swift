@@ -138,6 +138,9 @@ open class AssetPlayer: NSObject {
 
     // MARK: AV Properties
 
+    /// The instance of `MPNowPlayingInfoCenter` that is used for updating metadata for the currently playing `Asset`.
+    private let nowPlayingInfoCenter = MPNowPlayingInfoCenter.default()
+
     /// AVPlayer to pass in to any PlayerView's
     @objc public let player = AVPlayer()
 
@@ -177,7 +180,7 @@ open class AssetPlayer: NSObject {
         }
     }
 
-    private var asset: AssetProtocol? {
+    public var asset: AssetProtocol? {
         didSet {
             guard let newAsset = self.asset else { return }
 
@@ -201,7 +204,8 @@ open class AssetPlayer: NSObject {
     private var playbackBufferEmptyObserver: NSKeyValueObservation?
     private var playbackLikelyToKeepUpObserver: NSKeyValueObservation?
     private var loadedTimeRangesObserver: NSKeyValueObservation?
-
+    private var playbackStatusObserver: NSKeyValueObservation?
+    private var playbackDurationObserver: NSKeyValueObservation?
 
     public var previousState: AssetPlayerPlaybackState
 
@@ -222,6 +226,9 @@ open class AssetPlayer: NSObject {
         self.previousState = .none
         self.isPlayingLocalAsset = isPlayingLocalAsset
         self.shouldLoop = shouldLoop
+
+        // Allow background audio or playing audio with silent switch on
+        try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default)
     }
 
     deinit {
@@ -337,7 +344,6 @@ open class AssetPlayer: NSObject {
             guard self.duration != 0 else {
                 return
             }
-
             guard time < self.duration else {
                 self._endTimeForLoop = self.duration
                 return
@@ -345,6 +351,23 @@ open class AssetPlayer: NSObject {
             self._endTimeForLoop = time
         case .changeIsMuted(let isMuted):
             self.player.isMuted = isMuted
+        case .stop:
+            // @TODO: complete remove of everything
+            break
+        case .beginFastForward:
+            self.perform(action: .changePlayerPlaybackRate(to: 2.0))
+        case .beginRewind:
+            self.perform(action: .changePlayerPlaybackRate(to: -2.0))
+        case .endRewind, .endFastForward:
+            self.perform(action: .changePlayerPlaybackRate(to: 1.0))
+        case .togglePlayPause:
+            if state == .playing {
+                self.perform(action: .pause)
+            } else {
+                self.perform(action: .play)
+            }
+        case .skip(let interval):
+            self.perform(action: .seekToTimeInSeconds(time: currentTime + interval))
         }
     }
 
@@ -410,10 +433,10 @@ extension AssetPlayer {
     }
 
     // MARK: - KVO Observation
-    override open func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
+    open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         // Make sure the this KVO callback was intended for this view controller.
         guard context == &AssetPlayerKVOContext else {
-//            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
+            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
             return
         }
 
@@ -441,9 +464,13 @@ extension AssetPlayer {
             self.maxSecondValue = Float(newDurationSeconds)
             self.timeElapsedText = createTimeString(time: currentTime)
             self.durationText = createTimeString(time: newDurationSeconds)
+
+            self.updateGeneralMetadata()
+            self.updatePlaybackRateMetadata()
         }
         else if keyPath == #keyPath(AssetPlayer.player.rate) {
             // Handle any player rate changes
+            self.updatePlaybackRateMetadata()
         }
         else if keyPath == #keyPath(AssetPlayer.player.currentItem.status) {
             // Display an error if status becomes `.Failed`.
@@ -511,7 +538,8 @@ extension AssetPlayer {
          and not those destined for a subclass that also happens to be observing
          these properties.
          */
-        self.addPlayerObservers()
+//        self.addPlayerObservers()
+        self.updateGeneralMetadata()
 
         self.state = .setup(asset: asset)
 
@@ -528,6 +556,7 @@ extension AssetPlayer {
             strongSelf.timeElapsedText = strongSelf.createTimeString(time: timeElapsed)
 
             strongSelf.delegate?.playerCurrentTimeDidChange(strongSelf)
+            strongSelf.updatePlaybackRateMetadata()
         }
 
         // Millisecond time observer
@@ -548,7 +577,10 @@ extension AssetPlayer {
             if let endTime = strongSelf.endTimeForLoop, timeElapsed >= endTime, strongSelf.shouldLoop {
                 strongSelf.state = .finished
             }
+            strongSelf.updatePlaybackRateMetadata()
         }
+
+
     }
 
     private func seekTo(_ newPosition: CMTime) {
@@ -560,6 +592,8 @@ extension AssetPlayer {
         guard asset != nil else { return }
         let newPosition = CMTimeMakeWithSeconds(time, preferredTimescale: 1000)
         self.player.seek(to: newPosition, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero, completionHandler: completion)
+
+        self.updatePlaybackRateMetadata()
     }
 
     private func changePlayerPlaybackRate(to newRate: Float) {
@@ -604,6 +638,14 @@ extension AssetPlayer {
         loadedTimeRangesObserver = avPlayerItem?.observe(\.loadedTimeRanges, options: [.new, .old], changeHandler: { (playerItem, change) in
             self.handleLoadedTimeRangesChange()
         })
+
+        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old], changeHandler: { (playerItem, change) in
+            self.handleStatusChange(change: change)
+        })
+
+        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old], changeHandler: { (playerItem, change) in
+            print("duration changed")
+        })
     }
 
     private func removePlayerItemObservers() {
@@ -612,6 +654,8 @@ extension AssetPlayer {
         playbackBufferEmptyObserver?.invalidate()
         playbackLikelyToKeepUpObserver?.invalidate()
         loadedTimeRangesObserver?.invalidate()
+        playbackStatusObserver?.invalidate()
+        playbackDurationObserver?.invalidate()
     }
 
     private func handleBufferEmptyChange() {
@@ -676,17 +720,87 @@ extension AssetPlayer {
             }
         }
     }
+
+    private func handleStatusChange(change: NSKeyValueObservedChange<AVPlayerItem.Status>) {
+        var newStatus: AVPlayerItem.Status
+
+        if let status = change.newValue {
+            newStatus = status
+        } else {
+            newStatus = .unknown
+        }
+
+        if newStatus == .failed, newStatus == .unknown {
+            self.state = .failed(error: player.currentItem?.error)
+        }
+        updateGeneralMetadata()
+    }
 }
 
 public enum AssetPlayerActions {
     case setup(with: AssetProtocol, startMuted: Bool)
     case play
     case pause
+    case togglePlayPause
+    case stop
+    case beginFastForward
+    case endFastForward
+    case beginRewind
+    case endRewind
     case seekToTimeInSeconds(time: Double)
+    case skip(by: TimeInterval)
     case changePlayerPlaybackRate(to: Float)
     case changeIsPlayingLocalAsset(to: Bool)
     case changeShouldLoop(to: Bool)
     case changeStartTimeForLoop(to: Double)
     case changeEndTimeForLoop(to: Double)
     case changeIsMuted(to: Bool)
+}
+
+// MARK: MPNowPlayingInforCenter Management Methods
+public extension AssetPlayer {
+    func updateGeneralMetadata() {
+        guard self.player.currentItem != nil, let urlAsset = self.player.currentItem?.asset else {
+            nowPlayingInfoCenter.nowPlayingInfo = nil
+            return
+        }
+
+        var nowPlayingInfo = nowPlayingInfoCenter.nowPlayingInfo ?? [String: Any]()
+
+        let title = AVMetadataItem.metadataItems(from: urlAsset.commonMetadata, withKey: AVMetadataKey.commonKeyTitle, keySpace: AVMetadataKeySpace.common).first?.value as? String ?? asset?.assetName
+        let album = AVMetadataItem.metadataItems(from: urlAsset.commonMetadata, withKey: AVMetadataKey.commonKeyAlbumName, keySpace: AVMetadataKeySpace.common).first?.value as? String ?? ""
+        var artworkData = AVMetadataItem.metadataItems(from: urlAsset.commonMetadata, withKey: AVMetadataKey.commonKeyArtwork, keySpace: AVMetadataKeySpace.common).first?.value as? Data ?? Data()
+        if let url = asset?.artworkURL {
+            if let data = try? Data(contentsOf: url) {
+                artworkData = data
+            }
+        }
+
+        let image = UIImage(data: artworkData) ?? UIImage()
+        let artwork = MPMediaItemArtwork(boundsSize: image.size, requestHandler: {  (_) -> UIImage in
+            return image
+        })
+
+        nowPlayingInfo[MPMediaItemPropertyTitle] = title
+        nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = album
+        nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
+
+        nowPlayingInfoCenter.nowPlayingInfo = nowPlayingInfo
+    }
+
+    func updatePlaybackRateMetadata() {
+        guard self.player.currentItem != nil else {
+            nowPlayingInfoCenter.nowPlayingInfo = nil
+
+            return
+        }
+
+        var nowPlayingInfo = nowPlayingInfoCenter.nowPlayingInfo ?? [String: Any]()
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(self.player.currentItem?.currentTime() ?? .zero)
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = self.player.rate
+        nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = self.player.rate
+
+        nowPlayingInfoCenter.nowPlayingInfo = nowPlayingInfo
+    }
 }

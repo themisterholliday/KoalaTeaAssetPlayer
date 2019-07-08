@@ -23,12 +23,6 @@
   "dependencies": {
     "SwifterSwift": [
       "~> 5.0.0"
-    ],
-    "Quick": [
-      "~> 2.1.0"
-    ],
-    "Nimble": [
-      "~> 8.0.2"
     ]
   },
   "swift_version": "5.0"

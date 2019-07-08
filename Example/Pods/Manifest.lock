@@ -1,7 +1,5 @@
 PODS:
   - koala-tea-video (0.1.0):
-    - Nimble (~> 8.0.2)
-    - Quick (~> 2.1.0)
     - SwifterSwift (~> 5.0.0)
   - Nimble (8.0.2)
   - Quick (2.1.0)
@@ -27,6 +25,8 @@ PODS:
 
 DEPENDENCIES:
   - koala-tea-video (from `../`)
+  - Nimble (~> 8.0.2)
+  - Quick (~> 2.1.0)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -39,11 +39,11 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  koala-tea-video: 757eba7f84f0e68f62b554bf1acd3518a1bbab59
+  koala-tea-video: 85972ee3d8acbcc299a2697b0ea5777ea8289a23
   Nimble: 622629381bda1dd5678162f21f1368cec7cbba60
   Quick: 4be43f6634acfa727dd106bdf3929ce125ffa79d
   SwifterSwift: 96f90594b370802f01647c2b1229c74a84ffafee
 
-PODFILE CHECKSUM: 399ac9f2e52b2936ddfdf6ecfc05c4779bd47240
+PODFILE CHECKSUM: d793bf4316fefadd53c76151a16be84401777b75
 
 COCOAPODS: 1.7.3

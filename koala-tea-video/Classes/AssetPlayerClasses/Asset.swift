@@ -13,6 +13,8 @@ public protocol AssetProtocol {
     /// The `AVURLAsset` corresponding to an asset in either the application bundle or on the Internet.
     var urlAsset: AVURLAsset { get }
     var naturalAssetSize: CGSize? { get }
+    var assetName: String { get }
+    var artworkURL: URL? { get }
 }
 
 extension AssetProtocol {
@@ -25,13 +27,19 @@ extension AssetProtocol {
 
 public struct Asset: AssetProtocol {
     public var urlAsset: AVURLAsset
+    public var assetName: String
+    public var artworkURL: URL?
 
-    public init(url: URL) {
+    public init(url: URL, assetName: String? = nil, artworkURL: URL? = nil) {
         self.urlAsset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
+        self.assetName = assetName ?? ""
+        self.artworkURL = artworkURL
     }
 
-    public init(urlAsset: AVURLAsset) {
+    public init(urlAsset: AVURLAsset, assetName: String? = nil, artworkURL: URL? = nil) {
         self.urlAsset = urlAsset
+        self.assetName = assetName ?? ""
+        self.artworkURL = artworkURL
     }
 }
 
