@@ -13,19 +13,14 @@ import koala_tea_video
 class ViewController: UIViewController {
     lazy var assetPlayer = AssetPlayer()
     lazy var remoteCommandManager = RemoteCommandManager(assetPlaybackManager: assetPlayer)
-    lazy var playerView: PlayerView = {
-        let playerView = PlayerView()
-        playerView.translatesAutoresizingMaskIntoConstraints = false
-        playerView.player = assetPlayer.player
-        return playerView
-    }()
+    lazy var playerView: PlayerView = self.assetPlayer.playerView
     lazy var asset: Asset = {
         return Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_1mb", withExtension: "mp4")!)
     }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        playerView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(playerView)
         NSLayoutConstraint.activate([
             playerView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -36,12 +31,7 @@ class ViewController: UIViewController {
 
         self.setup()
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
+    
     func setup() {
 //        guard let url = URL(string:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3") else {
 //            assertionFailure()

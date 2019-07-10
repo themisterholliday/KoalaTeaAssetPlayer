@@ -223,6 +223,12 @@ open class AssetPlayer: NSObject {
         }
     }
 
+    public lazy var playerView: PlayerView = {
+        let playerView = PlayerView()
+        playerView.player = self.player
+        return playerView
+    }()
+
     // MARK: - Life Cycle
     public override init() {
         self.state = .none
@@ -230,8 +236,14 @@ open class AssetPlayer: NSObject {
         self.isPlayingLocalAsset = false
         self.shouldLoop = false
 
+        super.init()
+
         // Allow background audio or playing audio with silent switch on
         try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default)
+
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(appMovedToForeground), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
 
     deinit {
@@ -683,5 +695,19 @@ public extension AssetPlayer {
         nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = self.player.rate
 
         nowPlayingInfoCenter.nowPlayingInfo = nowPlayingInfo
+    }
+}
+
+private extension AssetPlayer {
+    @objc func appMovedToBackground() {
+        playerView.playerLayer.player = nil
+        playerView.alpha = 0
+    }
+
+    @objc func appMovedToForeground() {
+        playerView.playerLayer.player = self.player
+        UIView.animate(withDuration: 0.5) {
+            self.playerView.alpha = 1
+        }
     }
 }
