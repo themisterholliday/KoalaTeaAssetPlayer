@@ -42,7 +42,7 @@ public enum AssetPlayerPlaybackState: Equatable {
             return true
         case (.interrupted, .interrupted):
             return true
-        case (.failed(_), .failed(_)):
+        case (.failed, .failed):
             return true
         case (.buffering, .buffering):
             return true
@@ -55,12 +55,6 @@ public enum AssetPlayerPlaybackState: Equatable {
         }
     }
 }
-
-/*
- KVO context used to differentiate KVO callbacks for this class versus other
- classes in its class hierarchy.
- */
-private var AssetPlayerKVOContext = 0
 
 extension AssetPlayer {
     private struct Constants {
@@ -91,7 +85,7 @@ open class AssetPlayer: NSObject {
     public var startTimeForLoop: Double {
         return self._startTimeForLoop
     }
-    private var _endTimeForLoop: Double? = nil
+    private var _endTimeForLoop: Double?
     public var endTimeForLoop: Double? {
         return self._endTimeForLoop
     }
@@ -99,7 +93,7 @@ open class AssetPlayer: NSObject {
         return self.player.isMuted
     }
 
-    // Mark: Time Properties
+    // MARK: - Time Properties
     public var currentTime: Double = 0
 
     public var bufferedTime: Double = 0 {
@@ -285,7 +279,6 @@ open class AssetPlayer: NSObject {
                  */
                 guard newAsset.urlAsset == self.asset?.urlAsset else { return }
 
-                // @TODO: Handle errors
                 /*
                  Test whether the values of each of the keys we need have been
                  successfully loaded.
@@ -294,9 +287,6 @@ open class AssetPlayer: NSObject {
                     var error: NSError?
 
                     if newAsset.urlAsset.statusOfValue(forKey: key, error: &error) == .failed {
-                        let stringFormat = NSLocalizedString("error.asset_key_%@_failed.description", comment: "Can't use this AVAsset because one of it's keys failed to load")
-                        let _ = String.localizedStringWithFormat(stringFormat, key)
-
                         self.state = .failed(error: error as Error?)
 
                         return
@@ -533,28 +523,28 @@ extension AssetPlayer {
     private func addPlayerItemObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(self.handleAVPlayerItemDidPlayToEndTimeNotification(notification:)), name: .AVPlayerItemDidPlayToEndTime, object: avPlayerItem)
 
-        playbackBufferEmptyObserver = avPlayerItem?.observe(\.isPlaybackBufferEmpty, options: [.new, .old, .initial], changeHandler: { (playerItem, change) in
+        playbackBufferEmptyObserver = avPlayerItem?.observe(\.isPlaybackBufferEmpty, options: [.new, .old, .initial], changeHandler: { _, _ in
             self.handleBufferEmptyChange()
         })
 
-        playbackLikelyToKeepUpObserver = avPlayerItem?.observe(\.isPlaybackLikelyToKeepUp, options: [.new, .old, .initial], changeHandler: { (playerItem, change) in
+        playbackLikelyToKeepUpObserver = avPlayerItem?.observe(\.isPlaybackLikelyToKeepUp, options: [.new, .old, .initial], changeHandler: { _, _ in
             self.handleLikelyToKeepUpChange()
         })
 
-        loadedTimeRangesObserver = avPlayerItem?.observe(\.loadedTimeRanges, options: [.new, .old, .initial], changeHandler: { (playerItem, change) in
+        loadedTimeRangesObserver = avPlayerItem?.observe(\.loadedTimeRanges, options: [.new, .old, .initial], changeHandler: { _, _ in
             self.handleLoadedTimeRangesChange()
         })
 
-        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old, .initial], changeHandler: { (playerItem, change) in
+        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old, .initial], changeHandler: { _, change in
             self.handleStatusChange(change: change)
         })
 
-        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old, .initial], changeHandler: { (playerItem, change) in
+        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old, .initial], changeHandler: { _, _ in
             // Should be ready to play here
             // @TODO: handle
         })
 
-        playbackRateObserver = player.observe(\.rate, options: [.new, .old, .initial], changeHandler: { (playerItem, change) in
+        playbackRateObserver = player.observe(\.rate, options: [.new, .old, .initial], changeHandler: { _, _ in
             self.updatePlaybackMetadata()
         })
     }

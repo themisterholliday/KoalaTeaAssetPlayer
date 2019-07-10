@@ -26,12 +26,12 @@ class ViewController: UIViewController {
             playerView.topAnchor.constraint(equalTo: view.topAnchor),
             playerView.heightAnchor.constraint(equalTo: playerView.widthAnchor),
             playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ])
 
         self.setup()
     }
-    
+
     func setup() {
 //        guard let url = URL(string:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3") else {
 //            assertionFailure()

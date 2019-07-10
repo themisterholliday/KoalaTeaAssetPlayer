@@ -30,13 +30,17 @@ extension AVAsset {
 }
 
 // MARK: Frame getters
+
 extension AVAsset {
-    public func getFramesBySecond(every seconds: Double, withStreaming: @escaping (Int, UIImage) -> ()) {
+    public func getFramesBySecond(every seconds: Double, withStreaming: @escaping (Int, UIImage) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
             var images: [UIImage] = []
 
             // Frame Reader
-            let reader = try! AVAssetReader(asset: self)
+            guard let reader = try? AVAssetReader(asset: self) else {
+                assertionFailure()
+                return
+            }
 
             guard let firstTrack = self.getFirstVideoTrack() else {
                 return
@@ -47,7 +51,7 @@ extension AVAsset {
 
             // read video frames as BGRA
             let trackReaderOutput = AVAssetReaderTrackOutput(track: firstTrack,
-                                                             outputSettings:[String(kCVPixelBufferPixelFormatTypeKey): NSNumber(value: kCVPixelFormatType_32BGRA)])
+                                                             outputSettings: [String(kCVPixelBufferPixelFormatTypeKey): NSNumber(value: kCVPixelFormatType_32BGRA)])
             reader.add(trackReaderOutput)
             reader.startReading()
 
@@ -75,7 +79,7 @@ extension AVAsset {
     func getAllFrames(framesPerSecond seconds: Double, withStreaming: @escaping (Int, UIImage) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
             let duration = self.duration.seconds.rounded() * seconds
-            let generator = AVAssetImageGenerator(asset:self)
+            let generator = AVAssetImageGenerator(asset: self)
             generator.maximumSize = CGSize(width: 200, height: 200)
             generator.appliesPreferredTrackTransform = true
             var frames = [UIImage]()
@@ -94,8 +98,8 @@ extension AVAsset {
     private static func getFrame(fromTime: Float64, with generator: AVAssetImageGenerator) -> UIImage? {
         let time: CMTime = CMTimeMakeWithSeconds(fromTime, preferredTimescale: Asset.PublicConstants.DefaultTimeScale)
         do {
-            let image = try generator.copyCGImage(at:time, actualTime:nil)
-            return UIImage(cgImage:image)
+            let image = try generator.copyCGImage(at: time, actualTime: nil)
+            return UIImage(cgImage: image)
         } catch {
             return nil
         }
@@ -113,7 +117,7 @@ extension UIImage {
         let assetInfo = VideoExporterOrientationHelper.orientationFromTransform(transform: assetTransform)
 
         let image = self
-        if assetInfo.orientation == .up && !assetInfo.isPortrait {
+        if assetInfo.orientation == .up, !assetInfo.isPortrait {
             return image
         }
 

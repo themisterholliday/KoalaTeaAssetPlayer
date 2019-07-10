@@ -62,15 +62,12 @@ public class RemoteCommandManager: NSObject {
             remoteCommandCenter.pauseCommand.addTarget(self, action: #selector(RemoteCommandManager.handlePauseCommandEvent(_:)))
             remoteCommandCenter.stopCommand.addTarget(self, action: #selector(RemoteCommandManager.handleStopCommandEvent(_:)))
             remoteCommandCenter.togglePlayPauseCommand.addTarget(self, action: #selector(RemoteCommandManager.handleTogglePlayPauseCommandEvent(_:)))
-            
-        }
-        else {
+        } else {
             remoteCommandCenter.playCommand.removeTarget(self, action: #selector(RemoteCommandManager.handlePlayCommandEvent(_:)))
             remoteCommandCenter.pauseCommand.removeTarget(self, action: #selector(RemoteCommandManager.handlePauseCommandEvent(_:)))
             remoteCommandCenter.stopCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleStopCommandEvent(_:)))
             remoteCommandCenter.togglePlayPauseCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleTogglePlayPauseCommandEvent(_:)))
         }
-        
         remoteCommandCenter.playCommand.isEnabled = enable
         remoteCommandCenter.pauseCommand.isEnabled = enable
         remoteCommandCenter.stopCommand.isEnabled = enable
@@ -80,8 +77,7 @@ public class RemoteCommandManager: NSObject {
     public func toggleNextTrackCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.nextTrackCommand.addTarget(self, action: #selector(RemoteCommandManager.handleNextTrackCommandEvent(_:)))
-        }
-        else {
+        } else {
             remoteCommandCenter.nextTrackCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleNextTrackCommandEvent(_:)))
         }
         
@@ -91,8 +87,7 @@ public class RemoteCommandManager: NSObject {
     public func togglePreviousTrackCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.previousTrackCommand.addTarget(self, action: #selector(RemoteCommandManager.handlePreviousTrackCommandEvent(event:)))
-        }
-        else {
+        } else {
             remoteCommandCenter.previousTrackCommand.removeTarget(self, action: #selector(RemoteCommandManager.handlePreviousTrackCommandEvent(event:)))
         }
         
@@ -103,8 +98,7 @@ public class RemoteCommandManager: NSObject {
         if enable {
             remoteCommandCenter.skipForwardCommand.preferredIntervals = [NSNumber(value: interval)]
             remoteCommandCenter.skipForwardCommand.addTarget(self, action: #selector(RemoteCommandManager.handleSkipForwardCommandEvent(event:)))
-        }
-        else {
+        } else {
             remoteCommandCenter.skipForwardCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleSkipForwardCommandEvent(event:)))
         }
         
@@ -115,8 +109,7 @@ public class RemoteCommandManager: NSObject {
         if enable {
             remoteCommandCenter.skipBackwardCommand.preferredIntervals = [NSNumber(value: interval)]
             remoteCommandCenter.skipBackwardCommand.addTarget(self, action: #selector(RemoteCommandManager.handleSkipBackwardCommandEvent(event:)))
-        }
-        else {
+        } else {
             remoteCommandCenter.skipBackwardCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleSkipBackwardCommandEvent(event:)))
         }
         
@@ -126,8 +119,7 @@ public class RemoteCommandManager: NSObject {
     public func toggleSeekForwardCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.seekForwardCommand.addTarget(self, action: #selector(RemoteCommandManager.handleSeekForwardCommandEvent(event:)))
-        }
-        else {
+        } else {
             remoteCommandCenter.seekForwardCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleSeekForwardCommandEvent(event:)))
         }
         
@@ -137,8 +129,7 @@ public class RemoteCommandManager: NSObject {
     public func toggleSeekBackwardCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.seekBackwardCommand.addTarget(self, action: #selector(RemoteCommandManager.handleSeekBackwardCommandEvent(event:)))
-        }
-        else {
+        } else {
             remoteCommandCenter.seekBackwardCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleSeekBackwardCommandEvent(event:)))
         }
         
@@ -148,11 +139,9 @@ public class RemoteCommandManager: NSObject {
     public func toggleChangePlaybackPositionCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.changePlaybackPositionCommand.addTarget(self, action: #selector(RemoteCommandManager.handleChangePlaybackPositionCommandEvent(event:)))
-        }
-        else {
+        } else {
             remoteCommandCenter.changePlaybackPositionCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleChangePlaybackPositionCommandEvent(event:)))
         }
-        
         
         remoteCommandCenter.changePlaybackPositionCommand.isEnabled = enable
     }
@@ -160,8 +149,7 @@ public class RemoteCommandManager: NSObject {
     public func toggleLikeCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.likeCommand.addTarget(self, action: #selector(RemoteCommandManager.handleLikeCommandEvent(event:)))
-        }
-        else {
+        } else {
             remoteCommandCenter.likeCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleLikeCommandEvent(event:)))
         }
         
@@ -171,8 +159,7 @@ public class RemoteCommandManager: NSObject {
     public func toggleDislikeCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.dislikeCommand.addTarget(self, action: #selector(RemoteCommandManager.handleDislikeCommandEvent(event:)))
-        }
-        else {
+        } else {
             remoteCommandCenter.dislikeCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleDislikeCommandEvent(event:)))
         }
         
@@ -182,8 +169,7 @@ public class RemoteCommandManager: NSObject {
     public func toggleBookmarkCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.bookmarkCommand.addTarget(self, action: #selector(RemoteCommandManager.handleBookmarkCommandEvent(event:)))
-        }
-        else {
+        } else {
             remoteCommandCenter.bookmarkCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleBookmarkCommandEvent(event:)))
         }
         
@@ -288,8 +274,7 @@ public class RemoteCommandManager: NSObject {
         if assetPlayer.asset != nil {
             print("Did recieve likeCommand for \(String(describing: assetPlayer.asset?.assetName))")
             return .success
-        }
-        else {
+        } else {
             return .noSuchContent
         }
     }
@@ -299,8 +284,7 @@ public class RemoteCommandManager: NSObject {
         if assetPlayer.asset != nil {
             print("Did recieve dislikeCommand for \(String(describing: assetPlayer.asset?.assetName))")
             return .success
-        }
-        else {
+        } else {
             return .noSuchContent
         }
     }
@@ -310,8 +294,7 @@ public class RemoteCommandManager: NSObject {
         if assetPlayer.asset != nil {
             print("Did recieve bookmarkCommand for \(String(describing: assetPlayer.asset?.assetName))")
             return .success
-        }
-        else {
+        } else {
             return .noSuchContent
         }
     }

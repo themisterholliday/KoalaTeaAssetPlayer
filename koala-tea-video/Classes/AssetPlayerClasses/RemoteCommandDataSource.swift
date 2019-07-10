@@ -9,17 +9,16 @@
 import Foundation
 
 class RemoteCommandDataSource: NSObject {
-    
     let remoteCommandManager: RemoteCommandManager
-    
+
     init(remoteCommandManager: RemoteCommandManager) {
         self.remoteCommandManager = remoteCommandManager
     }
-    
+
     /// Enumeration of the different sections of the UITableView.
-    private enum commandSection: Int {
+    private enum CommandSection: Int {
         case trackChanging, skipInterval, seek, feedback
-        
+
         func sectionTitle() -> String {
             switch self {
             case .trackChanging: return "Track Changing Commands"
@@ -29,52 +28,46 @@ class RemoteCommandDataSource: NSObject {
             }
         }
     }
-    
+
     /// Enumeration of the various commands supported by `MPRemoteCommandCenter`.
-    private enum command {
+    private enum Command {
         case nextTrack, previousTrack, skipForward, skipBackward, seekForward, seekBackward, changePlaybackPosition, like, dislike, bookmark
-        
+
         init?(_ section: Int, row: Int) {
-            guard let section = commandSection(rawValue: section) else { return nil }
-            
+            guard let section = CommandSection(rawValue: section) else { return nil }
+
             switch section {
             case .trackChanging:
                 if row == 0 {
                     self = .nextTrack
-                }
-                else {
+                } else {
                     self = .previousTrack
                 }
             case .skipInterval:
                 if row == 0 {
                     self = .skipForward
-                }
-                else {
+                } else {
                     self = .skipBackward
                 }
             case .seek:
                 if row == 0 {
                     self = .seekForward
-                }
-                else if row == 1 {
+                } else if row == 1 {
                     self = .seekBackward
-                }
-                else {
+                } else {
                     self = .changePlaybackPosition
                 }
             case .feedback:
                 if row == 0 {
                     self = .like
-                }
-                else if row == 1 {
+                } else if row == 1 {
                     self = .dislike
-                }
-                else {
+                } else {
                     self = .bookmark
                 }
             }
         }
-        
+
         func commandTitle() -> String {
             switch self {
             case .nextTrack: return "Next Track Command"
@@ -90,7 +83,7 @@ class RemoteCommandDataSource: NSObject {
             }
         }
     }
-    
+
     func numberOfRemoteCommandSections() -> Int {
         #if os(iOS)
             return 4
@@ -98,19 +91,19 @@ class RemoteCommandDataSource: NSObject {
             return 3
         #endif
     }
-    
+
     func titleForSection(_ section: Int) -> String {
-        guard let commandSection = commandSection(rawValue: section) else { return "Invalid Section" }
-        
+        guard let commandSection = CommandSection(rawValue: section) else { return "Invalid Section" }
+
         return commandSection.sectionTitle()
     }
-    
+
     func titleStringForCommand(at section: Int, row: Int) -> String {
-        guard let remoteCommand = command(section, row: row) else { return "Invalid Command" }
-        
+        guard let remoteCommand = Command(section, row: row) else { return "Invalid Command" }
+
         return remoteCommand.commandTitle()
     }
-    
+
     func numberOfItemsInSection(_ section: Int) -> Int {
         switch section {
         case 0: return 2
@@ -120,10 +113,10 @@ class RemoteCommandDataSource: NSObject {
         default: return 0
         }
     }
-    
+
     func toggleCommandHandler(with section: Int, row: Int, enable: Bool) {
-        guard let remoteCommand = command(section, row: row) else { return }
-        
+        guard let remoteCommand = Command(section, row: row) else { return }
+
         switch remoteCommand {
         case .nextTrack: remoteCommandManager.toggleNextTrackCommand(enable)
         case .previousTrack: remoteCommandManager.togglePreviousTrackCommand(enable)

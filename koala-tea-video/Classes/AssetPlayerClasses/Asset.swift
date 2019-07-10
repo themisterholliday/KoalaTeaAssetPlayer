@@ -49,7 +49,6 @@ public struct Asset: AssetProtocol {
 
 public extension Asset {
     struct PublicConstants {
-        // @TODO: Look in to using a dynamic time scale
         static let DefaultTimeScale: Int32 = 1000
     }
 

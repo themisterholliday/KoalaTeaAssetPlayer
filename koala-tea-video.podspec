@@ -37,4 +37,5 @@ Pod::Spec.new do |s|
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   s.dependency 'SwifterSwift', '~> 5.0.0'
+  s.dependency 'SwiftLint', '~> 0.33.0'
 end

@@ -1,6 +1,7 @@
 PODS:
   - koala-tea-video (0.1.0):
     - SwifterSwift (~> 5.0.0)
+    - SwiftLint (~> 0.33.0)
   - Nimble (8.0.2)
   - Quick (2.1.0)
   - SwifterSwift (5.0.0):
@@ -22,6 +23,7 @@ PODS:
   - SwifterSwift/SpriteKit (5.0.0)
   - SwifterSwift/SwiftStdlib (5.0.0)
   - SwifterSwift/UIKit (5.0.0)
+  - SwiftLint (0.33.0)
 
 DEPENDENCIES:
   - koala-tea-video (from `../`)
@@ -33,16 +35,18 @@ SPEC REPOS:
     - Nimble
     - Quick
     - SwifterSwift
+    - SwiftLint
 
 EXTERNAL SOURCES:
   koala-tea-video:
     :path: "../"
 
 SPEC CHECKSUMS:
-  koala-tea-video: 85972ee3d8acbcc299a2697b0ea5777ea8289a23
+  koala-tea-video: 16058f35836ebfcad682196fb59a42cab87192fe
   Nimble: 622629381bda1dd5678162f21f1368cec7cbba60
   Quick: 4be43f6634acfa727dd106bdf3929ce125ffa79d
   SwifterSwift: 96f90594b370802f01647c2b1229c74a84ffafee
+  SwiftLint: fed9c66336e41fc74dc48a73678380718f0c8b0e
 
 PODFILE CHECKSUM: d793bf4316fefadd53c76151a16be84401777b75
 

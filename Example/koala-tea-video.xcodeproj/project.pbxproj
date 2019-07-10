@@ -189,6 +189,7 @@
 				607FACCD1AFB9204008FA782 /* Frameworks */,
 				607FACCE1AFB9204008FA782 /* Resources */,
 				034C173B1B36FD9CF543334F /* [CP] Embed Pods Frameworks */,
+				1694E37C22D6A3FA00B3962C /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -330,6 +331,23 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-koala-tea-video_Tests/Pods-koala-tea-video_Tests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		1694E37C22D6A3FA00B3962C /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\nswiftlint\nelse\necho \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 		1A5107B784E4C20F67207532 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
