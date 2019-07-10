@@ -52,34 +52,34 @@ class ViewController: UIViewController {
 
 extension ViewController: AssetPlayerDelegate {
     func currentAssetDidChange(_ player: AssetPlayer) {
-
+//        print("currentAssetDidChange")
     }
 
     func playerIsSetup(_ player: AssetPlayer) {
-
+//        print("player is setup")
     }
 
     func playerPlaybackStateDidChange(_ player: AssetPlayer) {
-
+//        print("playerPlaybackStateDidChange")
     }
 
     func playerCurrentTimeDidChange(_ player: AssetPlayer) {
-
+//        print("playerCurrentTimeDidChange", player.currentTime)
     }
 
     func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer) {
-
+//        print("playerCurrentTimeDidChangeInMilliseconds")
     }
 
     func playerPlaybackDidEnd(_ player: AssetPlayer) {
-
+//        print("playerPlaybackDidEnd")
     }
 
     func playerIsLikelyToKeepUp(_ player: AssetPlayer) {
-
+//        print("playerIsLikelyToKeepUp")
     }
 
     func playerBufferTimeDidChange(_ player: AssetPlayer) {
-        
+//        print("playerBufferTimeDidChange")
     }
 }

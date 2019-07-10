@@ -206,6 +206,7 @@ open class AssetPlayer: NSObject {
     private var loadedTimeRangesObserver: NSKeyValueObservation?
     private var playbackStatusObserver: NSKeyValueObservation?
     private var playbackDurationObserver: NSKeyValueObservation?
+    private var playbackRateObserver: NSKeyValueObservation?
 
     public var previousState: AssetPlayerPlaybackState
 
@@ -243,8 +244,6 @@ open class AssetPlayer: NSObject {
         }
 
         player.pause()
-
-        removePlayerObservers()
 
         if avPlayerItem != nil {
             self.removePlayerItemObservers()
@@ -307,7 +306,7 @@ open class AssetPlayer: NSObject {
                 self.avPlayerItem = AVPlayerItem(asset: newAsset.urlAsset)
                 self.delegate?.currentAssetDidChange(self)
                 self.delegate?.playerIsSetup(self)
-
+                
                 if self.state != .playing, self.state != .paused, self.state != .buffering {
                     self.state = .none
                 }
@@ -466,11 +465,11 @@ extension AssetPlayer {
             self.durationText = createTimeString(time: newDurationSeconds)
 
             self.updateGeneralMetadata()
-            self.updatePlaybackRateMetadata()
+            self.updatePlaybackMetadata()
         }
         else if keyPath == #keyPath(AssetPlayer.player.rate) {
             // Handle any player rate changes
-            self.updatePlaybackRateMetadata()
+            self.updatePlaybackMetadata()
         }
         else if keyPath == #keyPath(AssetPlayer.player.currentItem.status) {
             // Display an error if status becomes `.Failed`.
@@ -538,7 +537,6 @@ extension AssetPlayer {
          and not those destined for a subclass that also happens to be observing
          these properties.
          */
-//        self.addPlayerObservers()
         self.updateGeneralMetadata()
 
         self.state = .setup(asset: asset)
@@ -556,7 +554,7 @@ extension AssetPlayer {
             strongSelf.timeElapsedText = strongSelf.createTimeString(time: timeElapsed)
 
             strongSelf.delegate?.playerCurrentTimeDidChange(strongSelf)
-            strongSelf.updatePlaybackRateMetadata()
+            strongSelf.updatePlaybackMetadata()
         }
 
         // Millisecond time observer
@@ -577,10 +575,7 @@ extension AssetPlayer {
             if let endTime = strongSelf.endTimeForLoop, timeElapsed >= endTime, strongSelf.shouldLoop {
                 strongSelf.state = .finished
             }
-            strongSelf.updatePlaybackRateMetadata()
         }
-
-
     }
 
     private func seekTo(_ newPosition: CMTime) {
@@ -593,7 +588,7 @@ extension AssetPlayer {
         let newPosition = CMTimeMakeWithSeconds(time, preferredTimescale: 1000)
         self.player.seek(to: newPosition, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero, completionHandler: completion)
 
-        self.updatePlaybackRateMetadata()
+        self.updatePlaybackMetadata()
     }
 
     private func changePlayerPlaybackRate(to newRate: Float) {
@@ -602,28 +597,8 @@ extension AssetPlayer {
     }
 }
 
-// @TODO: do we even need these or can we handle these some other way
 // MARK: Asset Player Observers
 extension AssetPlayer {
-    private func addPlayerObservers() {
-//        addObserver(self, forKeyPath: #keyPath(AssetPlayer.player.currentItem.duration), options: [.new, .initial], context: &AssetPlayerKVOContext)
-//        addObserver(self, forKeyPath: #keyPath(AssetPlayer.player.rate), options: [.new, .initial], context: &AssetPlayerKVOContext)
-//        addObserver(self, forKeyPath: #keyPath(AssetPlayer.player.currentItem.status), options: [.new, .initial], context: &AssetPlayerKVOContext)
-    }
-
-    private func removePlayerObservers() {
-//        // We have to manually remove these observers in < 9.0 and if we are in tests
-//        if #available(iOS 9.0, *), !UIApplication.isInTest() {
-//        } else {
-//            removeObserver(self, forKeyPath: #keyPath(AssetPlayer.player.currentItem.duration), context: &AssetPlayerKVOContext)
-//            removeObserver(self, forKeyPath: #keyPath(AssetPlayer.player.rate), context: &AssetPlayerKVOContext)
-//            removeObserver(self, forKeyPath: #keyPath(AssetPlayer.player.currentItem.status), context: &AssetPlayerKVOContext)
-//        }
-    }
-}
-
-extension AssetPlayer {
-    // Player buffer observers
     private func addPlayerItemObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(self.handleAVPlayerItemDidPlayToEndTimeNotification(notification:)), name: .AVPlayerItemDidPlayToEndTime, object: avPlayerItem)
 
@@ -647,6 +622,10 @@ extension AssetPlayer {
             // Should be ready to play here
             // @TODO: handle
         })
+
+        playbackRateObserver = player.observe(\.rate, options: [.new, .old, .initial], changeHandler: { (playerItem, change) in
+            self.updatePlaybackMetadata()
+        })
     }
 
     private func removePlayerItemObservers() {
@@ -657,6 +636,7 @@ extension AssetPlayer {
         loadedTimeRangesObserver?.invalidate()
         playbackStatusObserver?.invalidate()
         playbackDurationObserver?.invalidate()
+        playbackRateObserver?.invalidate()
     }
 
     private func handleBufferEmptyChange() {
@@ -678,14 +658,19 @@ extension AssetPlayer {
         // PlayerKeepUpKey
         if let item = self.avPlayerItem {
             if item.isPlaybackLikelyToKeepUp {
+                if self.state == .buffering, previousState == .playing {
+                    self.state = previousState
+                }
                 self.delegate?.playerIsLikelyToKeepUp(self)
+            } else {
+                if self.state != .buffering, self.state != .paused {
+                    self.state = .buffering
+                }
             }
         }
     }
 
     private func handleLoadedTimeRangesChange() {
-        // @TODO: fix buffering calculations and empty buffer actually being full buffer
-
         // No need to use this keypath if we are playing local video
         guard !isPlayingLocalAsset else { return }
 
@@ -695,29 +680,6 @@ extension AssetPlayer {
             if let timeRange = timeRanges.first?.timeRangeValue {
                 let bufferedTime = Double(CMTimeGetSeconds(CMTimeAdd(timeRange.start, timeRange.duration)))
                 self.bufferedTime = bufferedTime
-
-                // Smart Value check for buffered time to switch to playing state or to buffering state
-
-                // Acceptable buffer is {percent} of total asset duration with a dampening factor
-                // @TODO: There is a bit better buffering calculation we could do here
-                let percent = 100.0
-                let percentageOfDuration = self.duration * (percent / 100.0)
-//                // @TODO: Figure out dynamic dampening
-//                let acceptableBufferedTime = pow(percentageOfDuration, (1.0/2.0))
-                let acceptableBufferedTime = percentageOfDuration
-                let isBufferedEnough = (bufferedTime - self.currentTime) > acceptableBufferedTime || bufferedTime >= self.duration
-
-                switch isBufferedEnough {
-                case true:
-                    // Only switch to playing state if we are in buffering state and our previous state was playing
-                    if self.state == .buffering, previousState == .playing {
-                        self.state = previousState
-                    }
-                case false:
-                    if self.state != .buffering, self.state != .paused {
-                        self.state = .buffering
-                    }
-                }
             }
         }
     }
@@ -789,7 +751,7 @@ public extension AssetPlayer {
         nowPlayingInfoCenter.nowPlayingInfo = nowPlayingInfo
     }
 
-    func updatePlaybackRateMetadata() {
+    func updatePlaybackMetadata() {
         guard self.player.currentItem != nil else {
             nowPlayingInfoCenter.nowPlayingInfo = nil
 
