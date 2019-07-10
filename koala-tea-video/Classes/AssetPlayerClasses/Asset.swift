@@ -15,6 +15,7 @@ public protocol AssetProtocol {
     var naturalAssetSize: CGSize? { get }
     var assetName: String { get }
     var artworkURL: URL? { get }
+    var isLocalFile: Bool { get }
 }
 
 extension AssetProtocol {
@@ -29,6 +30,9 @@ public struct Asset: AssetProtocol {
     public var urlAsset: AVURLAsset
     public var assetName: String
     public var artworkURL: URL?
+    public var isLocalFile: Bool {
+        return urlAsset.url.isFileURL
+    }
 
     public init(url: URL, assetName: String? = nil, artworkURL: URL? = nil) {
         self.urlAsset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])

@@ -72,11 +72,11 @@ extension AssetPlayer {
     }
 
     public static var defaultLocalPlayer: AssetPlayer {
-        return AssetPlayer(isPlayingLocalAsset: true, shouldLoop: true)
+        return AssetPlayer()
     }
 
     public static var defaultRemotePlayer: AssetPlayer {
-        return AssetPlayer(isPlayingLocalAsset: true, shouldLoop: true)
+        return AssetPlayer()
     }
 }
 
@@ -224,11 +224,11 @@ open class AssetPlayer: NSObject {
     }
 
     // MARK: - Life Cycle
-    public init(isPlayingLocalAsset: Bool, shouldLoop: Bool) {
+    public override init() {
         self.state = .none
         self.previousState = .none
-        self.isPlayingLocalAsset = isPlayingLocalAsset
-        self.shouldLoop = shouldLoop
+        self.isPlayingLocalAsset = false
+        self.shouldLoop = false
 
         // Allow background audio or playing audio with silent switch on
         try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default)
@@ -320,9 +320,11 @@ open class AssetPlayer: NSObject {
     // MARK: Playback Control Methods.
     open func perform(action: AssetPlayerActions) {
         switch action {
-        case .setup(let asset, let startMuted):
+        case .setup(let asset, let startMuted, let shouldLoop):
             self.setup(with: asset)
             self.player.isMuted = startMuted
+            self.shouldLoop = shouldLoop
+            self.isPlayingLocalAsset = asset.isLocalFile
         case .play:
             self.state = .playing
         case .pause:
@@ -617,7 +619,7 @@ extension AssetPlayer {
 }
 
 public enum AssetPlayerActions {
-    case setup(with: AssetProtocol, startMuted: Bool)
+    case setup(with: AssetProtocol, startMuted: Bool, shouldLoop: Bool)
     case play
     case pause
     case togglePlayPause

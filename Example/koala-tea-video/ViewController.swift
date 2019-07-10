@@ -11,16 +11,30 @@ import AVFoundation
 import koala_tea_video
 
 class ViewController: UIViewController {
-    lazy var assetPlayer = AssetPlayer(isPlayingLocalAsset: false, shouldLoop: false)
+    lazy var assetPlayer = AssetPlayer()
     lazy var remoteCommandManager = RemoteCommandManager(assetPlaybackManager: assetPlayer)
+    lazy var playerView: PlayerView = {
+        let playerView = PlayerView()
+        playerView.translatesAutoresizingMaskIntoConstraints = false
+        playerView.player = assetPlayer.player
+        return playerView
+    }()
+    lazy var asset: Asset = {
+        return Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_1mb", withExtension: "mp4")!)
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        self.view.addSubview(playerView)
+        NSLayoutConstraint.activate([
+            playerView.topAnchor.constraint(equalTo: view.topAnchor),
+            playerView.heightAnchor.constraint(equalTo: playerView.widthAnchor),
+            playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ])
 
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            self.setup()
-//        }
+        self.setup()
     }
 
     override func didReceiveMemoryWarning() {
@@ -29,13 +43,13 @@ class ViewController: UIViewController {
     }
 
     func setup() {
-        guard let url = URL(string:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3") else {
-            assertionFailure()
-            return
-        }
-        let artworkURL = URL(string: "https://www.w3schools.com/w3images/fjords.jpg")
-        let asset = Asset(urlAsset: AVURLAsset(url: url), artworkURL: artworkURL)
-        assetPlayer.perform(action: .setup(with: asset, startMuted: false))
+//        guard let url = URL(string:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3") else {
+//            assertionFailure()
+//            return
+//        }
+//        let artworkURL = URL(string: "https://www.w3schools.com/w3images/fjords.jpg")
+//        let asset = Asset(urlAsset: AVURLAsset(url: url), artworkURL: artworkURL)
+        assetPlayer.perform(action: .setup(with: asset, startMuted: false, shouldLoop: true))
         assetPlayer.perform(action: .play)
         assetPlayer.delegate = self
         setupRemoteCommandManager()
