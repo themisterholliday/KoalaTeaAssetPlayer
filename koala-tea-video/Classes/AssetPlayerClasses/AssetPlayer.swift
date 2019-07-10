@@ -21,9 +21,7 @@ public protocol AssetPlayerDelegate: class {
     /// Current time change but in milliseconds
     func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer)
     func playerPlaybackDidEnd(_ player: AssetPlayer)
-
-    // Buffering
-    func playerIsLikelyToKeepUp(_ player: AssetPlayer)
+    
     // This is the time in seconds that the video has been buffered.
     // If implementing a UIProgressView, user this value / player.maximumDuration to set progress.
     func playerBufferTimeDidChange(_ player: AssetPlayer)
@@ -110,8 +108,12 @@ open class AssetPlayer: NSObject {
         }
     }
 
-    public var timeElapsedText: String = ""
-    public var durationText: String = ""
+    public var timeElapsedText: String {
+        return createTimeString(time: self.currentTime)
+    }
+    public var durationText: String {
+        return createTimeString(time: self.duration)
+    }
 
     public var timeLeftText: String {
         let timeLeft = duration - currentTime
@@ -121,7 +123,7 @@ open class AssetPlayer: NSObject {
     public var maxSecondValue: Float = 0
 
     public var duration: Double {
-        guard let currentItem = player.currentItem else { return 0.0 }
+        guard let currentItem = player.currentItem?.asset else { return 0.0 }
 
         return currentItem.duration.seconds
     }
@@ -431,88 +433,6 @@ extension AssetPlayer {
         self.delegate?.playerPlaybackStateDidChange(self)
     }
 
-    // MARK: - KVO Observation
-    open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        // Make sure the this KVO callback was intended for this view controller.
-        guard context == &AssetPlayerKVOContext else {
-            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
-            return
-        }
-
-        if keyPath == #keyPath(AssetPlayer.player.currentItem.duration) {
-            // @TODO: Better handle this guard
-            guard let _ = self.avPlayerItem else { return }
-            // Update timeSlider and enable/disable controls when duration > 0.0
-
-            /*
-             Handle `NSNull` value for `NSKeyValueChangeNewKey`, i.e. when
-             `player.currentItem` is nil.
-             */
-            let newDuration: CMTime
-            if let newDurationAsValue = change?[NSKeyValueChangeKey.newKey] as? NSValue {
-                newDuration = newDurationAsValue.timeValue
-            }
-            else {
-                newDuration = CMTime.zero
-            }
-
-            let hasValidDuration = newDuration.isNumeric && newDuration.value != 0
-            let newDurationSeconds = hasValidDuration ? CMTimeGetSeconds(newDuration) : 0.0
-            let currentTime = hasValidDuration ? player.currentTime().seconds : 0.0
-
-            self.maxSecondValue = Float(newDurationSeconds)
-            self.timeElapsedText = createTimeString(time: currentTime)
-            self.durationText = createTimeString(time: newDurationSeconds)
-
-            self.updateGeneralMetadata()
-            self.updatePlaybackMetadata()
-        }
-        else if keyPath == #keyPath(AssetPlayer.player.rate) {
-            // Handle any player rate changes
-            self.updatePlaybackMetadata()
-        }
-        else if keyPath == #keyPath(AssetPlayer.player.currentItem.status) {
-            // Display an error if status becomes `.Failed`.
-
-            /*
-             Handle `NSNull` value for `NSKeyValueChangeNewKey`, i.e. when
-             `player.currentItem` is nil.
-             */
-            let newStatus: AVPlayerItem.Status
-
-            if let newStatusAsNumber = change?[NSKeyValueChangeKey.newKey] as? NSNumber {
-                newStatus = AVPlayerItem.Status(rawValue: newStatusAsNumber.intValue)!
-            }
-            else {
-                newStatus = .unknown
-            }
-
-            if newStatus == .failed {
-                self.state = .failed(error: player.currentItem?.error)
-            }
-        }
-        // All Buffer observer values
-        else if keyPath == #keyPath(AVPlayerItem.isPlaybackBufferEmpty) {
-            self.handleBufferEmptyChange()
-        }
-        else if keyPath == #keyPath(AVPlayerItem.isPlaybackLikelyToKeepUp) {
-            self.handleLikelyToKeepUpChange()
-        }
-        else if keyPath == #keyPath(AVPlayerItem.loadedTimeRanges) {
-            self.handleLoadedTimeRangesChange()
-        }
-    }
-
-    // Trigger KVO for anyone observing our properties affected by player and player.currentItem
-    override open class func keyPathsForValuesAffectingValue(forKey key: String) -> Set<String> {
-        let affectedKeyPathsMappingByKey: [String: Set<String>] = [
-            "duration":     [#keyPath(AssetPlayer.player.currentItem.duration)],
-            "rate":         [#keyPath(AssetPlayer.player.rate)]
-        ]
-
-        return affectedKeyPathsMappingByKey[key] ?? super.keyPathsForValuesAffectingValue(forKey: key)
-    }
-
     // MARK: Notification Observing Methods
     @objc private func handleAVPlayerItemDidPlayToEndTimeNotification(notification: Notification) {
         guard !shouldLoop else {
@@ -544,37 +464,34 @@ extension AssetPlayer {
         // Seconds time observer
         let interval = CMTimeMake(value: 1, timescale: 1)
         timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [weak self] time in
-            guard let strongSelf = self else { return }
-
-            guard strongSelf.state != .finished else { return }
-
-            let timeElapsed = time.seconds
-
-            strongSelf.currentTime = timeElapsed
-            strongSelf.timeElapsedText = strongSelf.createTimeString(time: timeElapsed)
-
-            strongSelf.delegate?.playerCurrentTimeDidChange(strongSelf)
-            strongSelf.updatePlaybackMetadata()
+            self?.handleSecondTimeObserver(with: time)
         }
 
         // Millisecond time observer
         let millisecondInterval = CMTimeMake(value: 1, timescale: 100)
         timeObserverTokenMilliseconds = player.addPeriodicTimeObserver(forInterval: millisecondInterval, queue: DispatchQueue.main) { [weak self] time in
-            guard let strongSelf = self else { return }
+            self?.handleMillisecondTimeObserver(with: time)
+        }
+    }
 
-            guard strongSelf.state != .finished else { return }
+    func handleSecondTimeObserver(with time: CMTime) {
+        guard self.state != .finished else { return }
 
-            let timeElapsed = time.seconds
+        self.delegate?.playerCurrentTimeDidChange(self)
+        self.updatePlaybackMetadata()
+    }
 
-            strongSelf.currentTime = timeElapsed
-            strongSelf.timeElapsedText = strongSelf.createTimeString(time: timeElapsed)
+    func handleMillisecondTimeObserver(with time: CMTime) {
+        guard self.state != .finished else { return }
 
-            strongSelf.delegate?.playerCurrentTimeDidChangeInMilliseconds(strongSelf)
+        let timeElapsed = time.seconds
 
-            // Set finished state if we are looping and passed our loop end time
-            if let endTime = strongSelf.endTimeForLoop, timeElapsed >= endTime, strongSelf.shouldLoop {
-                strongSelf.state = .finished
-            }
+        self.currentTime = timeElapsed
+        self.delegate?.playerCurrentTimeDidChangeInMilliseconds(self)
+
+        // Set finished state if we are looping and passed our loop end time
+        if let endTime = self.endTimeForLoop, timeElapsed >= endTime, self.shouldLoop {
+            self.state = .finished
         }
     }
 
@@ -661,7 +578,6 @@ extension AssetPlayer {
                 if self.state == .buffering, previousState == .playing {
                     self.state = previousState
                 }
-                self.delegate?.playerIsLikelyToKeepUp(self)
             } else {
                 if self.state != .buffering, self.state != .paused {
                     self.state = .buffering

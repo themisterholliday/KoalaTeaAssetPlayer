@@ -75,10 +75,6 @@ extension ViewController: AssetPlayerDelegate {
 //        print("playerPlaybackDidEnd")
     }
 
-    func playerIsLikelyToKeepUp(_ player: AssetPlayer) {
-//        print("playerIsLikelyToKeepUp")
-    }
-
     func playerBufferTimeDidChange(_ player: AssetPlayer) {
 //        print("playerBufferTimeDidChange")
     }
