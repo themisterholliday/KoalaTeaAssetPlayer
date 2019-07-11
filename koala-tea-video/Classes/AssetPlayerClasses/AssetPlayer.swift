@@ -232,15 +232,14 @@ open class AssetPlayer: NSObject {
 
         super.init()
 
-        // Allow background audio or playing audio with silent switch on
-        try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default)
+        // Allow background audio and playing audio with silent switch on
+        try? AVAudioSession.sharedInstance().setCategory(.playback)
+        try? AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
 
-        NotificationCenter.default.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(appMovedToForeground), name: UIApplication.didBecomeActiveNotification, object: nil)
-    }
-
-    deinit {
-
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(appMovedToForeground), name: UIApplication.didBecomeActiveNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(handleInterruption), name: AVAudioSession.interruptionNotification, object: nil)
     }
 
     // MARK: - Asset Loading
@@ -365,6 +364,7 @@ open class AssetPlayer: NSObject {
     func handleStop() {
         NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: AVAudioSession.interruptionNotification, object: nil)
 
         if let timeObserverToken = timeObserverToken {
             player.removeTimeObserver(timeObserverToken)
@@ -708,6 +708,28 @@ private extension AssetPlayer {
         playerView.playerLayer.player = self.player
         UIView.animate(withDuration: 0.5) {
             self.playerView.alpha = 1
+        }
+    }
+
+    @objc func handleInterruption(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+            let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+            let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+                return
+        }
+        if type == .began {
+            // Interruption began, take appropriate actions
+        } else if type == .ended {
+            if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
+                let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+                if options.contains(.shouldResume) {
+                    // Interruption Ended - playback should resume
+                    self.perform(action: .play)
+                } else {
+                    // Interruption Ended - playback should NOT resume
+                    self.perform(action: .pause)
+                }
+            }
         }
     }
 }

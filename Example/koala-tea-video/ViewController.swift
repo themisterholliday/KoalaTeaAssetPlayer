@@ -33,12 +33,12 @@ class ViewController: UIViewController {
     }
 
     func setup() {
-//        guard let url = URL(string:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3") else {
-//            assertionFailure()
-//            return
-//        }
-//        let artworkURL = URL(string: "https://www.w3schools.com/w3images/fjords.jpg")
-//        let asset = Asset(urlAsset: AVURLAsset(url: url), artworkURL: artworkURL)
+        guard let url = URL(string:"http://traffic.libsyn.com/sedaily/PeriscopeData.mp3") else {
+            assertionFailure()
+            return
+        }
+        let artworkURL = URL(string: "https://www.w3schools.com/w3images/fjords.jpg")
+        let asset = Asset(urlAsset: AVURLAsset(url: url), artworkURL: artworkURL)
         assetPlayer.perform(action: .setup(with: asset, startMuted: false, shouldLoop: true))
         assetPlayer.perform(action: .play)
         assetPlayer.delegate = self
