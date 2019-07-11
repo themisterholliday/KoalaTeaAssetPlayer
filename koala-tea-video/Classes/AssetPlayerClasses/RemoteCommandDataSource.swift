@@ -33,6 +33,7 @@ class RemoteCommandDataSource: NSObject {
     private enum Command {
         case nextTrack, previousTrack, skipForward, skipBackward, seekForward, seekBackward, changePlaybackPosition, like, dislike, bookmark
 
+        // swiftlint:disable cyclomatic_complexity
         init?(_ section: Int, row: Int) {
             guard let section = CommandSection(rawValue: section) else { return nil }
 
@@ -67,6 +68,7 @@ class RemoteCommandDataSource: NSObject {
                 }
             }
         }
+        // swiftlint:enable cyclomatic_complexity
 
         func commandTitle() -> String {
             switch self {
@@ -114,6 +116,7 @@ class RemoteCommandDataSource: NSObject {
         }
     }
 
+    // swiftlint:disable cyclomatic_complexity
     func toggleCommandHandler(with section: Int, row: Int, enable: Bool) {
         guard let remoteCommand = Command(section, row: row) else { return }
 
@@ -130,4 +133,5 @@ class RemoteCommandDataSource: NSObject {
         case .bookmark: remoteCommandManager.toggleBookmarkCommand(enable)
         }
     }
+    // swiftlint:enable cyclomatic_complexity
 }

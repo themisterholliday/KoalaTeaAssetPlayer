@@ -235,27 +235,12 @@ open class AssetPlayer: NSObject {
         // Allow background audio or playing audio with silent switch on
         try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default)
 
-        let notificationCenter = NotificationCenter.default
-        notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(appMovedToForeground), name: UIApplication.didBecomeActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(appMovedToForeground), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
 
     deinit {
-        if let timeObserverToken = timeObserverToken {
-            player.removeTimeObserver(timeObserverToken)
-            self.timeObserverToken = nil
-        }
 
-        if let timeObserverTokenMilliseconds = timeObserverTokenMilliseconds {
-            player.removeTimeObserver(timeObserverTokenMilliseconds)
-            self.timeObserverTokenMilliseconds = nil
-        }
-
-        player.pause()
-
-        if avPlayerItem != nil {
-            self.removePlayerItemObservers()
-        }
     }
 
     // MARK: - Asset Loading
@@ -320,6 +305,7 @@ open class AssetPlayer: NSObject {
     }
 
     // MARK: Playback Control Methods.
+    // swiftlint:disable cyclomatic_complexity
     open func perform(action: AssetPlayerActions) {
         switch action {
         case .setup(let asset, let startMuted, let shouldLoop):
@@ -357,8 +343,7 @@ open class AssetPlayer: NSObject {
         case .changeIsMuted(let isMuted):
             self.player.isMuted = isMuted
         case .stop:
-            // @TODO: complete remove of everything
-            break
+            self.handleStop()
         case .beginFastForward:
             self.perform(action: .changePlayerPlaybackRate(to: 2.0))
         case .beginRewind:
@@ -373,6 +358,31 @@ open class AssetPlayer: NSObject {
             }
         case .skip(let interval):
             self.perform(action: .seekToTimeInSeconds(time: currentTime + interval))
+        }
+    }
+    // swiftlint:enable cyclomatic_complexity
+
+    func handleStop() {
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
+
+        if let timeObserverToken = timeObserverToken {
+            player.removeTimeObserver(timeObserverToken)
+            self.timeObserverToken = nil
+        }
+
+        if let timeObserverTokenMilliseconds = timeObserverTokenMilliseconds {
+            player.removeTimeObserver(timeObserverTokenMilliseconds)
+            self.timeObserverTokenMilliseconds = nil
+        }
+
+        player.pause()
+        avPlayerItem = nil
+        player.replaceCurrentItem(with: nil)
+        playerView.player = nil
+
+        if avPlayerItem != nil {
+            self.removePlayerItemObservers()
         }
     }
 
@@ -523,29 +533,29 @@ extension AssetPlayer {
     private func addPlayerItemObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(self.handleAVPlayerItemDidPlayToEndTimeNotification(notification:)), name: .AVPlayerItemDidPlayToEndTime, object: avPlayerItem)
 
-        playbackBufferEmptyObserver = avPlayerItem?.observe(\.isPlaybackBufferEmpty, options: [.new, .old, .initial], changeHandler: { _, _ in
-            self.handleBufferEmptyChange()
+        playbackBufferEmptyObserver = avPlayerItem?.observe(\.isPlaybackBufferEmpty, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
+            self?.handleBufferEmptyChange()
         })
 
-        playbackLikelyToKeepUpObserver = avPlayerItem?.observe(\.isPlaybackLikelyToKeepUp, options: [.new, .old, .initial], changeHandler: { _, _ in
-            self.handleLikelyToKeepUpChange()
+        playbackLikelyToKeepUpObserver = avPlayerItem?.observe(\.isPlaybackLikelyToKeepUp, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
+            self?.handleLikelyToKeepUpChange()
         })
 
-        loadedTimeRangesObserver = avPlayerItem?.observe(\.loadedTimeRanges, options: [.new, .old, .initial], changeHandler: { _, _ in
-            self.handleLoadedTimeRangesChange()
+        loadedTimeRangesObserver = avPlayerItem?.observe(\.loadedTimeRanges, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
+            self?.handleLoadedTimeRangesChange()
         })
 
-        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old, .initial], changeHandler: { _, change in
-            self.handleStatusChange(change: change)
+        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old, .initial], changeHandler: { [weak self] _, change in
+            self?.handleStatusChange(change: change)
         })
 
-        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old, .initial], changeHandler: { _, _ in
+        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
             // Should be ready to play here
             // @TODO: handle
         })
 
-        playbackRateObserver = player.observe(\.rate, options: [.new, .old, .initial], changeHandler: { _, _ in
-            self.updatePlaybackMetadata()
+        playbackRateObserver = player.observe(\.rate, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
+            self?.updatePlaybackMetadata()
         })
     }
 
