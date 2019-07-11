@@ -30,7 +30,7 @@ public class VideoFramesView: UIView {
             }
             UIView.transition(with: imageView, duration: Constants.ImageViewTransitionAnimationDuration, options: .transitionCrossDissolve, animations: {
                 imageView.image = image
-            },completion: nil)
+            }, completion: nil)
         }
 
         self.width = totalWidth

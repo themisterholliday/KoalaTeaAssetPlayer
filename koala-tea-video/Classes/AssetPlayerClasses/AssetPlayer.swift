@@ -21,9 +21,7 @@ public protocol AssetPlayerDelegate: class {
     /// Current time change but in milliseconds
     func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer)
     func playerPlaybackDidEnd(_ player: AssetPlayer)
-
-    // Buffering
-    func playerIsLikelyToKeepUp(_ player: AssetPlayer)
+    
     // This is the time in seconds that the video has been buffered.
     // If implementing a UIProgressView, user this value / player.maximumDuration to set progress.
     func playerBufferTimeDidChange(_ player: AssetPlayer)
@@ -44,7 +42,7 @@ public enum AssetPlayerPlaybackState: Equatable {
             return true
         case (.interrupted, .interrupted):
             return true
-        case (.failed(_), .failed(_)):
+        case (.failed, .failed):
             return true
         case (.buffering, .buffering):
             return true
@@ -58,12 +56,6 @@ public enum AssetPlayerPlaybackState: Equatable {
     }
 }
 
-/*
- KVO context used to differentiate KVO callbacks for this class versus other
- classes in its class hierarchy.
- */
-private var AssetPlayerKVOContext = 0
-
 extension AssetPlayer {
     private struct Constants {
         // Keys required for a playable item
@@ -74,11 +66,11 @@ extension AssetPlayer {
     }
 
     public static var defaultLocalPlayer: AssetPlayer {
-        return AssetPlayer(isPlayingLocalAsset: true, shouldLoop: true)
+        return AssetPlayer()
     }
 
     public static var defaultRemotePlayer: AssetPlayer {
-        return AssetPlayer(isPlayingLocalAsset: true, shouldLoop: true)
+        return AssetPlayer()
     }
 }
 
@@ -93,7 +85,7 @@ open class AssetPlayer: NSObject {
     public var startTimeForLoop: Double {
         return self._startTimeForLoop
     }
-    private var _endTimeForLoop: Double? = nil
+    private var _endTimeForLoop: Double?
     public var endTimeForLoop: Double? {
         return self._endTimeForLoop
     }
@@ -101,7 +93,7 @@ open class AssetPlayer: NSObject {
         return self.player.isMuted
     }
 
-    // Mark: Time Properties
+    // MARK: - Time Properties
     public var currentTime: Double = 0
 
     public var bufferedTime: Double = 0 {
@@ -110,8 +102,12 @@ open class AssetPlayer: NSObject {
         }
     }
 
-    public var timeElapsedText: String = ""
-    public var durationText: String = ""
+    public var timeElapsedText: String {
+        return createTimeString(time: self.currentTime)
+    }
+    public var durationText: String {
+        return createTimeString(time: self.duration)
+    }
 
     public var timeLeftText: String {
         let timeLeft = duration - currentTime
@@ -121,7 +117,7 @@ open class AssetPlayer: NSObject {
     public var maxSecondValue: Float = 0
 
     public var duration: Double {
-        guard let currentItem = player.currentItem else { return 0.0 }
+        guard let currentItem = player.currentItem?.asset else { return 0.0 }
 
         return currentItem.duration.seconds
     }
@@ -137,6 +133,9 @@ open class AssetPlayer: NSObject {
     }
 
     // MARK: AV Properties
+
+    /// The instance of `MPNowPlayingInfoCenter` that is used for updating metadata for the currently playing `Asset`.
+    private let nowPlayingInfoCenter = MPNowPlayingInfoCenter.default()
 
     /// AVPlayer to pass in to any PlayerView's
     @objc public let player = AVPlayer()
@@ -177,7 +176,7 @@ open class AssetPlayer: NSObject {
         }
     }
 
-    private var asset: AssetProtocol? {
+    public var asset: AssetProtocol? {
         didSet {
             guard let newAsset = self.asset else { return }
 
@@ -201,7 +200,9 @@ open class AssetPlayer: NSObject {
     private var playbackBufferEmptyObserver: NSKeyValueObservation?
     private var playbackLikelyToKeepUpObserver: NSKeyValueObservation?
     private var loadedTimeRangesObserver: NSKeyValueObservation?
-
+    private var playbackStatusObserver: NSKeyValueObservation?
+    private var playbackDurationObserver: NSKeyValueObservation?
+    private var playbackRateObserver: NSKeyValueObservation?
 
     public var previousState: AssetPlayerPlaybackState
 
@@ -216,32 +217,30 @@ open class AssetPlayer: NSObject {
         }
     }
 
+    public lazy var playerView: PlayerView = {
+        let playerView = PlayerView()
+        playerView.player = self.player
+        return playerView
+    }()
+
     // MARK: - Life Cycle
-    public init(isPlayingLocalAsset: Bool, shouldLoop: Bool) {
+    public override init() {
         self.state = .none
         self.previousState = .none
-        self.isPlayingLocalAsset = isPlayingLocalAsset
-        self.shouldLoop = shouldLoop
+        self.isPlayingLocalAsset = false
+        self.shouldLoop = false
+
+        super.init()
+
+        // Allow background audio or playing audio with silent switch on
+        try? AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, mode: .default)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(appMovedToForeground), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
 
     deinit {
-        if let timeObserverToken = timeObserverToken {
-            player.removeTimeObserver(timeObserverToken)
-            self.timeObserverToken = nil
-        }
 
-        if let timeObserverTokenMilliseconds = timeObserverTokenMilliseconds {
-            player.removeTimeObserver(timeObserverTokenMilliseconds)
-            self.timeObserverTokenMilliseconds = nil
-        }
-
-        player.pause()
-
-        removePlayerObservers()
-
-        if avPlayerItem != nil {
-            self.removePlayerItemObservers()
-        }
     }
 
     // MARK: - Asset Loading
@@ -265,7 +264,6 @@ open class AssetPlayer: NSObject {
                  */
                 guard newAsset.urlAsset == self.asset?.urlAsset else { return }
 
-                // @TODO: Handle errors
                 /*
                  Test whether the values of each of the keys we need have been
                  successfully loaded.
@@ -274,9 +272,6 @@ open class AssetPlayer: NSObject {
                     var error: NSError?
 
                     if newAsset.urlAsset.statusOfValue(forKey: key, error: &error) == .failed {
-                        let stringFormat = NSLocalizedString("error.asset_key_%@_failed.description", comment: "Can't use this AVAsset because one of it's keys failed to load")
-                        let _ = String.localizedStringWithFormat(stringFormat, key)
-
                         self.state = .failed(error: error as Error?)
 
                         return
@@ -300,7 +295,7 @@ open class AssetPlayer: NSObject {
                 self.avPlayerItem = AVPlayerItem(asset: newAsset.urlAsset)
                 self.delegate?.currentAssetDidChange(self)
                 self.delegate?.playerIsSetup(self)
-
+                
                 if self.state != .playing, self.state != .paused, self.state != .buffering {
                     self.state = .none
                 }
@@ -310,11 +305,14 @@ open class AssetPlayer: NSObject {
     }
 
     // MARK: Playback Control Methods.
+    // swiftlint:disable cyclomatic_complexity
     open func perform(action: AssetPlayerActions) {
         switch action {
-        case .setup(let asset, let startMuted):
+        case .setup(let asset, let startMuted, let shouldLoop):
             self.setup(with: asset)
             self.player.isMuted = startMuted
+            self.shouldLoop = shouldLoop
+            self.isPlayingLocalAsset = asset.isLocalFile
         case .play:
             self.state = .playing
         case .pause:
@@ -337,7 +335,6 @@ open class AssetPlayer: NSObject {
             guard self.duration != 0 else {
                 return
             }
-
             guard time < self.duration else {
                 self._endTimeForLoop = self.duration
                 return
@@ -345,6 +342,47 @@ open class AssetPlayer: NSObject {
             self._endTimeForLoop = time
         case .changeIsMuted(let isMuted):
             self.player.isMuted = isMuted
+        case .stop:
+            self.handleStop()
+        case .beginFastForward:
+            self.perform(action: .changePlayerPlaybackRate(to: 2.0))
+        case .beginRewind:
+            self.perform(action: .changePlayerPlaybackRate(to: -2.0))
+        case .endRewind, .endFastForward:
+            self.perform(action: .changePlayerPlaybackRate(to: 1.0))
+        case .togglePlayPause:
+            if state == .playing {
+                self.perform(action: .pause)
+            } else {
+                self.perform(action: .play)
+            }
+        case .skip(let interval):
+            self.perform(action: .seekToTimeInSeconds(time: currentTime + interval))
+        }
+    }
+    // swiftlint:enable cyclomatic_complexity
+
+    func handleStop() {
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
+
+        if let timeObserverToken = timeObserverToken {
+            player.removeTimeObserver(timeObserverToken)
+            self.timeObserverToken = nil
+        }
+
+        if let timeObserverTokenMilliseconds = timeObserverTokenMilliseconds {
+            player.removeTimeObserver(timeObserverTokenMilliseconds)
+            self.timeObserverTokenMilliseconds = nil
+        }
+
+        player.pause()
+        avPlayerItem = nil
+        player.replaceCurrentItem(with: nil)
+        playerView.player = nil
+
+        if avPlayerItem != nil {
+            self.removePlayerItemObservers()
         }
     }
 
@@ -409,84 +447,6 @@ extension AssetPlayer {
         self.delegate?.playerPlaybackStateDidChange(self)
     }
 
-    // MARK: - KVO Observation
-    override open func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
-        // Make sure the this KVO callback was intended for this view controller.
-        guard context == &AssetPlayerKVOContext else {
-//            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
-            return
-        }
-
-        if keyPath == #keyPath(AssetPlayer.player.currentItem.duration) {
-            // @TODO: Better handle this guard
-            guard let _ = self.avPlayerItem else { return }
-            // Update timeSlider and enable/disable controls when duration > 0.0
-
-            /*
-             Handle `NSNull` value for `NSKeyValueChangeNewKey`, i.e. when
-             `player.currentItem` is nil.
-             */
-            let newDuration: CMTime
-            if let newDurationAsValue = change?[NSKeyValueChangeKey.newKey] as? NSValue {
-                newDuration = newDurationAsValue.timeValue
-            }
-            else {
-                newDuration = CMTime.zero
-            }
-
-            let hasValidDuration = newDuration.isNumeric && newDuration.value != 0
-            let newDurationSeconds = hasValidDuration ? CMTimeGetSeconds(newDuration) : 0.0
-            let currentTime = hasValidDuration ? player.currentTime().seconds : 0.0
-
-            self.maxSecondValue = Float(newDurationSeconds)
-            self.timeElapsedText = createTimeString(time: currentTime)
-            self.durationText = createTimeString(time: newDurationSeconds)
-        }
-        else if keyPath == #keyPath(AssetPlayer.player.rate) {
-            // Handle any player rate changes
-        }
-        else if keyPath == #keyPath(AssetPlayer.player.currentItem.status) {
-            // Display an error if status becomes `.Failed`.
-
-            /*
-             Handle `NSNull` value for `NSKeyValueChangeNewKey`, i.e. when
-             `player.currentItem` is nil.
-             */
-            let newStatus: AVPlayerItem.Status
-
-            if let newStatusAsNumber = change?[NSKeyValueChangeKey.newKey] as? NSNumber {
-                newStatus = AVPlayerItem.Status(rawValue: newStatusAsNumber.intValue)!
-            }
-            else {
-                newStatus = .unknown
-            }
-
-            if newStatus == .failed {
-                self.state = .failed(error: player.currentItem?.error)
-            }
-        }
-        // All Buffer observer values
-        else if keyPath == #keyPath(AVPlayerItem.isPlaybackBufferEmpty) {
-            self.handleBufferEmptyChange()
-        }
-        else if keyPath == #keyPath(AVPlayerItem.isPlaybackLikelyToKeepUp) {
-            self.handleLikelyToKeepUpChange()
-        }
-        else if keyPath == #keyPath(AVPlayerItem.loadedTimeRanges) {
-            self.handleLoadedTimeRangesChange()
-        }
-    }
-
-    // Trigger KVO for anyone observing our properties affected by player and player.currentItem
-    override open class func keyPathsForValuesAffectingValue(forKey key: String) -> Set<String> {
-        let affectedKeyPathsMappingByKey: [String: Set<String>] = [
-            "duration":     [#keyPath(AssetPlayer.player.currentItem.duration)],
-            "rate":         [#keyPath(AssetPlayer.player.rate)]
-        ]
-
-        return affectedKeyPathsMappingByKey[key] ?? super.keyPathsForValuesAffectingValue(forKey: key)
-    }
-
     // MARK: Notification Observing Methods
     @objc private func handleAVPlayerItemDidPlayToEndTimeNotification(notification: Notification) {
         guard !shouldLoop else {
@@ -511,43 +471,41 @@ extension AssetPlayer {
          and not those destined for a subclass that also happens to be observing
          these properties.
          */
-        self.addPlayerObservers()
+        self.updateGeneralMetadata()
 
         self.state = .setup(asset: asset)
 
         // Seconds time observer
         let interval = CMTimeMake(value: 1, timescale: 1)
         timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [weak self] time in
-            guard let strongSelf = self else { return }
-
-            guard strongSelf.state != .finished else { return }
-
-            let timeElapsed = time.seconds
-
-            strongSelf.currentTime = timeElapsed
-            strongSelf.timeElapsedText = strongSelf.createTimeString(time: timeElapsed)
-
-            strongSelf.delegate?.playerCurrentTimeDidChange(strongSelf)
+            self?.handleSecondTimeObserver(with: time)
         }
 
         // Millisecond time observer
         let millisecondInterval = CMTimeMake(value: 1, timescale: 100)
         timeObserverTokenMilliseconds = player.addPeriodicTimeObserver(forInterval: millisecondInterval, queue: DispatchQueue.main) { [weak self] time in
-            guard let strongSelf = self else { return }
+            self?.handleMillisecondTimeObserver(with: time)
+        }
+    }
 
-            guard strongSelf.state != .finished else { return }
+    func handleSecondTimeObserver(with time: CMTime) {
+        guard self.state != .finished else { return }
 
-            let timeElapsed = time.seconds
+        self.delegate?.playerCurrentTimeDidChange(self)
+        self.updatePlaybackMetadata()
+    }
 
-            strongSelf.currentTime = timeElapsed
-            strongSelf.timeElapsedText = strongSelf.createTimeString(time: timeElapsed)
+    func handleMillisecondTimeObserver(with time: CMTime) {
+        guard self.state != .finished else { return }
 
-            strongSelf.delegate?.playerCurrentTimeDidChangeInMilliseconds(strongSelf)
+        let timeElapsed = time.seconds
 
-            // Set finished state if we are looping and passed our loop end time
-            if let endTime = strongSelf.endTimeForLoop, timeElapsed >= endTime, strongSelf.shouldLoop {
-                strongSelf.state = .finished
-            }
+        self.currentTime = timeElapsed
+        self.delegate?.playerCurrentTimeDidChangeInMilliseconds(self)
+
+        // Set finished state if we are looping and passed our loop end time
+        if let endTime = self.endTimeForLoop, timeElapsed >= endTime, self.shouldLoop {
+            self.state = .finished
         }
     }
 
@@ -560,6 +518,8 @@ extension AssetPlayer {
         guard asset != nil else { return }
         let newPosition = CMTimeMakeWithSeconds(time, preferredTimescale: 1000)
         self.player.seek(to: newPosition, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero, completionHandler: completion)
+
+        self.updatePlaybackMetadata()
     }
 
     private func changePlayerPlaybackRate(to newRate: Float) {
@@ -568,41 +528,34 @@ extension AssetPlayer {
     }
 }
 
-// @TODO: do we even need these or can we handle these some other way
 // MARK: Asset Player Observers
 extension AssetPlayer {
-    private func addPlayerObservers() {
-//        addObserver(self, forKeyPath: #keyPath(AssetPlayer.player.currentItem.duration), options: [.new, .initial], context: &AssetPlayerKVOContext)
-//        addObserver(self, forKeyPath: #keyPath(AssetPlayer.player.rate), options: [.new, .initial], context: &AssetPlayerKVOContext)
-//        addObserver(self, forKeyPath: #keyPath(AssetPlayer.player.currentItem.status), options: [.new, .initial], context: &AssetPlayerKVOContext)
-    }
-
-    private func removePlayerObservers() {
-//        // We have to manually remove these observers in < 9.0 and if we are in tests
-//        if #available(iOS 9.0, *), !UIApplication.isInTest() {
-//        } else {
-//            removeObserver(self, forKeyPath: #keyPath(AssetPlayer.player.currentItem.duration), context: &AssetPlayerKVOContext)
-//            removeObserver(self, forKeyPath: #keyPath(AssetPlayer.player.rate), context: &AssetPlayerKVOContext)
-//            removeObserver(self, forKeyPath: #keyPath(AssetPlayer.player.currentItem.status), context: &AssetPlayerKVOContext)
-//        }
-    }
-}
-
-extension AssetPlayer {
-    // Player buffer observers
     private func addPlayerItemObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(self.handleAVPlayerItemDidPlayToEndTimeNotification(notification:)), name: .AVPlayerItemDidPlayToEndTime, object: avPlayerItem)
 
-        playbackBufferEmptyObserver = avPlayerItem?.observe(\.isPlaybackBufferEmpty, options: [.new, .old], changeHandler: { (playerItem, change) in
-            self.handleBufferEmptyChange()
+        playbackBufferEmptyObserver = avPlayerItem?.observe(\.isPlaybackBufferEmpty, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
+            self?.handleBufferEmptyChange()
         })
 
-        playbackLikelyToKeepUpObserver = avPlayerItem?.observe(\.isPlaybackLikelyToKeepUp, options: [.new, .old], changeHandler: { (playerItem, change) in
-            self.handleLikelyToKeepUpChange()
+        playbackLikelyToKeepUpObserver = avPlayerItem?.observe(\.isPlaybackLikelyToKeepUp, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
+            self?.handleLikelyToKeepUpChange()
         })
 
-        loadedTimeRangesObserver = avPlayerItem?.observe(\.loadedTimeRanges, options: [.new, .old], changeHandler: { (playerItem, change) in
-            self.handleLoadedTimeRangesChange()
+        loadedTimeRangesObserver = avPlayerItem?.observe(\.loadedTimeRanges, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
+            self?.handleLoadedTimeRangesChange()
+        })
+
+        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old, .initial], changeHandler: { [weak self] _, change in
+            self?.handleStatusChange(change: change)
+        })
+
+        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
+            // Should be ready to play here
+            // @TODO: handle
+        })
+
+        playbackRateObserver = player.observe(\.rate, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
+            self?.updatePlaybackMetadata()
         })
     }
 
@@ -612,6 +565,9 @@ extension AssetPlayer {
         playbackBufferEmptyObserver?.invalidate()
         playbackLikelyToKeepUpObserver?.invalidate()
         loadedTimeRangesObserver?.invalidate()
+        playbackStatusObserver?.invalidate()
+        playbackDurationObserver?.invalidate()
+        playbackRateObserver?.invalidate()
     }
 
     private func handleBufferEmptyChange() {
@@ -633,14 +589,18 @@ extension AssetPlayer {
         // PlayerKeepUpKey
         if let item = self.avPlayerItem {
             if item.isPlaybackLikelyToKeepUp {
-                self.delegate?.playerIsLikelyToKeepUp(self)
+                if self.state == .buffering, previousState == .playing {
+                    self.state = previousState
+                }
+            } else {
+                if self.state != .buffering, self.state != .paused {
+                    self.state = .buffering
+                }
             }
         }
     }
 
     private func handleLoadedTimeRangesChange() {
-        // @TODO: fix buffering calculations and empty buffer actually being full buffer
-
         // No need to use this keypath if we are playing local video
         guard !isPlayingLocalAsset else { return }
 
@@ -650,43 +610,104 @@ extension AssetPlayer {
             if let timeRange = timeRanges.first?.timeRangeValue {
                 let bufferedTime = Double(CMTimeGetSeconds(CMTimeAdd(timeRange.start, timeRange.duration)))
                 self.bufferedTime = bufferedTime
-
-                // Smart Value check for buffered time to switch to playing state or to buffering state
-
-                // Acceptable buffer is {percent} of total asset duration with a dampening factor
-                // @TODO: There is a bit better buffering calculation we could do here
-                let percent = 100.0
-                let percentageOfDuration = self.duration * (percent / 100.0)
-//                // @TODO: Figure out dynamic dampening
-//                let acceptableBufferedTime = pow(percentageOfDuration, (1.0/2.0))
-                let acceptableBufferedTime = percentageOfDuration
-                let isBufferedEnough = (bufferedTime - self.currentTime) > acceptableBufferedTime || bufferedTime >= self.duration
-
-                switch isBufferedEnough {
-                case true:
-                    // Only switch to playing state if we are in buffering state and our previous state was playing
-                    if self.state == .buffering, previousState == .playing {
-                        self.state = previousState
-                    }
-                case false:
-                    if self.state != .buffering, self.state != .paused {
-                        self.state = .buffering
-                    }
-                }
             }
         }
+    }
+
+    private func handleStatusChange(change: NSKeyValueObservedChange<AVPlayerItem.Status>) {
+        var newStatus: AVPlayerItem.Status
+
+        if let status = change.newValue {
+            newStatus = status
+        } else {
+            newStatus = .unknown
+        }
+
+        if newStatus == .failed, newStatus == .unknown {
+            self.state = .failed(error: player.currentItem?.error)
+        }
+        updateGeneralMetadata()
     }
 }
 
 public enum AssetPlayerActions {
-    case setup(with: AssetProtocol, startMuted: Bool)
+    case setup(with: AssetProtocol, startMuted: Bool, shouldLoop: Bool)
     case play
     case pause
+    case togglePlayPause
+    case stop
+    case beginFastForward
+    case endFastForward
+    case beginRewind
+    case endRewind
     case seekToTimeInSeconds(time: Double)
+    case skip(by: TimeInterval)
     case changePlayerPlaybackRate(to: Float)
     case changeIsPlayingLocalAsset(to: Bool)
     case changeShouldLoop(to: Bool)
     case changeStartTimeForLoop(to: Double)
     case changeEndTimeForLoop(to: Double)
     case changeIsMuted(to: Bool)
+}
+
+// MARK: MPNowPlayingInforCenter Management Methods
+public extension AssetPlayer {
+    func updateGeneralMetadata() {
+        guard self.player.currentItem != nil, let urlAsset = self.player.currentItem?.asset else {
+            nowPlayingInfoCenter.nowPlayingInfo = nil
+            return
+        }
+
+        var nowPlayingInfo = nowPlayingInfoCenter.nowPlayingInfo ?? [String: Any]()
+
+        let title = AVMetadataItem.metadataItems(from: urlAsset.commonMetadata, withKey: AVMetadataKey.commonKeyTitle, keySpace: AVMetadataKeySpace.common).first?.value as? String ?? asset?.assetName
+        let album = AVMetadataItem.metadataItems(from: urlAsset.commonMetadata, withKey: AVMetadataKey.commonKeyAlbumName, keySpace: AVMetadataKeySpace.common).first?.value as? String ?? ""
+        var artworkData = AVMetadataItem.metadataItems(from: urlAsset.commonMetadata, withKey: AVMetadataKey.commonKeyArtwork, keySpace: AVMetadataKeySpace.common).first?.value as? Data ?? Data()
+        if let url = asset?.artworkURL {
+            if let data = try? Data(contentsOf: url) {
+                artworkData = data
+            }
+        }
+
+        let image = UIImage(data: artworkData) ?? UIImage()
+        let artwork = MPMediaItemArtwork(boundsSize: image.size, requestHandler: {  (_) -> UIImage in
+            return image
+        })
+
+        nowPlayingInfo[MPMediaItemPropertyTitle] = title
+        nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = album
+        nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
+
+        nowPlayingInfoCenter.nowPlayingInfo = nowPlayingInfo
+    }
+
+    func updatePlaybackMetadata() {
+        guard self.player.currentItem != nil else {
+            nowPlayingInfoCenter.nowPlayingInfo = nil
+
+            return
+        }
+
+        var nowPlayingInfo = nowPlayingInfoCenter.nowPlayingInfo ?? [String: Any]()
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(self.player.currentItem?.currentTime() ?? .zero)
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = self.player.rate
+        nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = self.player.rate
+
+        nowPlayingInfoCenter.nowPlayingInfo = nowPlayingInfo
+    }
+}
+
+private extension AssetPlayer {
+    @objc func appMovedToBackground() {
+        playerView.playerLayer.player = nil
+        playerView.alpha = 0
+    }
+
+    @objc func appMovedToForeground() {
+        playerView.playerLayer.player = self.player
+        UIView.animate(withDuration: 0.5) {
+            self.playerView.alpha = 1
+        }
+    }
 }

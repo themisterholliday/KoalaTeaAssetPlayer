@@ -1,8 +1,8 @@
 //
 //  VideoExporterOrientationHelper.swift
-//  AssetPlayer
+//  koala-tea-video
 //
-//  Created by Craig Holliday on 8/27/18.
+//  Created by Craig Holliday on 7/7/19.
 //
 
 import Foundation

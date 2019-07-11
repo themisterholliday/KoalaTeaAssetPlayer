@@ -71,7 +71,7 @@ public class VideoFramesScrollingView: UIView {
 
         self.addSubview(scrollView)
 
-        self.scrollView.contentOffset = CGPoint(x: -(scrollView.width / 2) , y: 0)
+        self.scrollView.contentOffset = CGPoint(x: -(scrollView.width / 2), y: 0)
 
         self.scrollView.showsHorizontalScrollIndicator = false
         self.scrollView.showsVerticalScrollIndicator = false

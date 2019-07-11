@@ -7,15 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		16B6F3702212104400F2677C /* SampleVideo_1280x720_5mb.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 16B6F36F2212104400F2677C /* SampleVideo_1280x720_5mb.mp4 */; };
-		16B6F3722212105400F2677C /* VideoExporterSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16B6F3712212105400F2677C /* VideoExporterSpec.swift */; };
+		160738D522D286DF00221BB7 /* AssetPlayerSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160738D422D286DF00221BB7 /* AssetPlayerSpec.swift */; };
+		160738DB22D2877E00221BB7 /* SampleVideo_2.5.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 160738D722D2877E00221BB7 /* SampleVideo_2.5.mp4 */; };
+		160738DD22D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 160738D922D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 */; };
 		16B6F3762212186600F2677C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16B6F3752212186600F2677C /* Images.xcassets */; };
+		16E740DC22D6799200D11479 /* SampleVideo_1280x720_1mb.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 160738D822D2877E00221BB7 /* SampleVideo_1280x720_1mb.mp4 */; };
+		16E740DD22D6799300D11479 /* SampleVideo_1280x720_1mb.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 160738D822D2877E00221BB7 /* SampleVideo_1280x720_1mb.mp4 */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
-		EC5C5F48A41876A25A835402 /* Pods_koala_tea_video_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 57AD04EB0ECAD6459243397D /* Pods_koala_tea_video_Example.framework */; };
-		F476205E43AE442D1CAE2BC6 /* Pods_koala_tea_video_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42D87BB65C2295E9A5E93D44 /* Pods_koala_tea_video_Tests.framework */; };
+		6F74E503368CFCD31EA1397E /* Pods_koala_tea_video_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5D87DAEF090596227713263 /* Pods_koala_tea_video_Example.framework */; };
+		F5B665E6791DDD72864E8E4C /* Pods_koala_tea_video_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F244243A96E13393F7A5E08D /* Pods_koala_tea_video_Tests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,13 +32,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		16B6F36F2212104400F2677C /* SampleVideo_1280x720_5mb.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SampleVideo_1280x720_5mb.mp4; sourceTree = "<group>"; };
-		16B6F3712212105400F2677C /* VideoExporterSpec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoExporterSpec.swift; sourceTree = "<group>"; };
+		160738D422D286DF00221BB7 /* AssetPlayerSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetPlayerSpec.swift; sourceTree = "<group>"; };
+		160738D722D2877E00221BB7 /* SampleVideo_2.5.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SampleVideo_2.5.mp4; sourceTree = "<group>"; };
+		160738D822D2877E00221BB7 /* SampleVideo_1280x720_1mb.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SampleVideo_1280x720_1mb.mp4; sourceTree = "<group>"; };
+		160738D922D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SampleVideo_1280x720_5mb.mp4; sourceTree = "<group>"; };
 		16B6F3752212186600F2677C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		17A2010EE1EF514633CE69D4 /* Pods-koala-tea-video_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-koala-tea-video_Example.debug.xcconfig"; path = "Target Support Files/Pods-koala-tea-video_Example/Pods-koala-tea-video_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		39B23D639D269DE1EF3E33C3 /* Pods-koala-tea-video_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-koala-tea-video_Tests.release.xcconfig"; path = "Target Support Files/Pods-koala-tea-video_Tests/Pods-koala-tea-video_Tests.release.xcconfig"; sourceTree = "<group>"; };
-		42D87BB65C2295E9A5E93D44 /* Pods_koala_tea_video_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_koala_tea_video_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		57AD04EB0ECAD6459243397D /* Pods_koala_tea_video_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_koala_tea_video_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		479D7DC96EDD5EFC21F3E487 /* Pods-koala-tea-video_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-koala-tea-video_Tests.debug.xcconfig"; path = "Target Support Files/Pods-koala-tea-video_Tests/Pods-koala-tea-video_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* koala-tea-video_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "koala-tea-video_Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -44,11 +46,14 @@
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		607FACE51AFB9204008FA782 /* koala-tea-video_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "koala-tea-video_Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		648BFEDEA068D3E9234E3C34 /* Pods-koala-tea-video_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-koala-tea-video_Example.release.xcconfig"; path = "Target Support Files/Pods-koala-tea-video_Example/Pods-koala-tea-video_Example.release.xcconfig"; sourceTree = "<group>"; };
 		66B6ADD29A18101E95B58633 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		697802BE77C2786347EB1E0F /* Pods-koala-tea-video_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-koala-tea-video_Tests.debug.xcconfig"; path = "Target Support Files/Pods-koala-tea-video_Tests/Pods-koala-tea-video_Tests.debug.xcconfig"; sourceTree = "<group>"; };
-		89A6550BDFB2A400DDF5B3A2 /* Pods-koala-tea-video_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-koala-tea-video_Example.release.xcconfig"; path = "Target Support Files/Pods-koala-tea-video_Example/Pods-koala-tea-video_Example.release.xcconfig"; sourceTree = "<group>"; };
 		9484C17706131423D0F785F9 /* koala-tea-video.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = "koala-tea-video.podspec"; path = "../koala-tea-video.podspec"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		9BEA3C261CAECBFFC9D2D2EF /* Pods-koala-tea-video_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-koala-tea-video_Tests.release.xcconfig"; path = "Target Support Files/Pods-koala-tea-video_Tests/Pods-koala-tea-video_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		C9E62702EF7430CD897FEAFD /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		D5D87DAEF090596227713263 /* Pods_koala_tea_video_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_koala_tea_video_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F244243A96E13393F7A5E08D /* Pods_koala_tea_video_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_koala_tea_video_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F2BA91B5FCF8436E50F315A1 /* Pods-koala-tea-video_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-koala-tea-video_Example.debug.xcconfig"; path = "Target Support Files/Pods-koala-tea-video_Example/Pods-koala-tea-video_Example.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,7 +61,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EC5C5F48A41876A25A835402 /* Pods_koala_tea_video_Example.framework in Frameworks */,
+				6F74E503368CFCD31EA1397E /* Pods_koala_tea_video_Example.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -64,13 +69,32 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F476205E43AE442D1CAE2BC6 /* Pods_koala_tea_video_Tests.framework in Frameworks */,
+				F5B665E6791DDD72864E8E4C /* Pods_koala_tea_video_Tests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		160738D622D2877E00221BB7 /* example_assets */ = {
+			isa = PBXGroup;
+			children = (
+				160738D722D2877E00221BB7 /* SampleVideo_2.5.mp4 */,
+				160738D822D2877E00221BB7 /* SampleVideo_1280x720_1mb.mp4 */,
+				160738D922D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 */,
+			);
+			path = example_assets;
+			sourceTree = "<group>";
+		};
+		34597969D00169800B1A2D0E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D5D87DAEF090596227713263 /* Pods_koala_tea_video_Example.framework */,
+				F244243A96E13393F7A5E08D /* Pods_koala_tea_video_Tests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		607FACC71AFB9204008FA782 = {
 			isa = PBXGroup;
 			children = (
@@ -79,7 +103,7 @@
 				607FACE81AFB9204008FA782 /* Tests */,
 				607FACD11AFB9204008FA782 /* Products */,
 				F10991C3A3158A021B57006B /* Pods */,
-				B6EDBFF27E6CD458B24E264A /* Frameworks */,
+				34597969D00169800B1A2D0E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -117,8 +141,8 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				16B6F3712212105400F2677C /* VideoExporterSpec.swift */,
-				16B6F36F2212104400F2677C /* SampleVideo_1280x720_5mb.mp4 */,
+				160738D422D286DF00221BB7 /* AssetPlayerSpec.swift */,
+				160738D622D2877E00221BB7 /* example_assets */,
 				607FACE91AFB9204008FA782 /* Supporting Files */,
 			);
 			path = Tests;
@@ -142,22 +166,13 @@
 			name = "Podspec Metadata";
 			sourceTree = "<group>";
 		};
-		B6EDBFF27E6CD458B24E264A /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				57AD04EB0ECAD6459243397D /* Pods_koala_tea_video_Example.framework */,
-				42D87BB65C2295E9A5E93D44 /* Pods_koala_tea_video_Tests.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		F10991C3A3158A021B57006B /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				17A2010EE1EF514633CE69D4 /* Pods-koala-tea-video_Example.debug.xcconfig */,
-				89A6550BDFB2A400DDF5B3A2 /* Pods-koala-tea-video_Example.release.xcconfig */,
-				697802BE77C2786347EB1E0F /* Pods-koala-tea-video_Tests.debug.xcconfig */,
-				39B23D639D269DE1EF3E33C3 /* Pods-koala-tea-video_Tests.release.xcconfig */,
+				F2BA91B5FCF8436E50F315A1 /* Pods-koala-tea-video_Example.debug.xcconfig */,
+				648BFEDEA068D3E9234E3C34 /* Pods-koala-tea-video_Example.release.xcconfig */,
+				479D7DC96EDD5EFC21F3E487 /* Pods-koala-tea-video_Tests.debug.xcconfig */,
+				9BEA3C261CAECBFFC9D2D2EF /* Pods-koala-tea-video_Tests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -169,11 +184,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 607FACEF1AFB9204008FA782 /* Build configuration list for PBXNativeTarget "koala-tea-video_Example" */;
 			buildPhases = (
-				1A46EB3A387001BFB762A43B /* [CP] Check Pods Manifest.lock */,
+				1A5107B784E4C20F67207532 /* [CP] Check Pods Manifest.lock */,
 				607FACCC1AFB9204008FA782 /* Sources */,
 				607FACCD1AFB9204008FA782 /* Frameworks */,
 				607FACCE1AFB9204008FA782 /* Resources */,
-				DDE3A03192F7DE10A39280F0 /* [CP] Embed Pods Frameworks */,
+				034C173B1B36FD9CF543334F /* [CP] Embed Pods Frameworks */,
+				1694E37C22D6A3FA00B3962C /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -188,10 +204,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 607FACF21AFB9204008FA782 /* Build configuration list for PBXNativeTarget "koala-tea-video_Tests" */;
 			buildPhases = (
-				7AF949F2C69A96C9156D0740 /* [CP] Check Pods Manifest.lock */,
+				2FC94A5171ABF48412FDB86D /* [CP] Check Pods Manifest.lock */,
 				607FACE11AFB9204008FA782 /* Sources */,
 				607FACE21AFB9204008FA782 /* Frameworks */,
 				607FACE31AFB9204008FA782 /* Resources */,
+				0741A18FDD3BCD90B2EB97EC /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -215,11 +232,18 @@
 				TargetAttributes = {
 					607FACCF1AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = 6MS9QWALYV;
 						LastSwiftMigration = 0900;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 					607FACE41AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
-						LastSwiftMigration = 1010;
+						DevelopmentTeam = 6MS9QWALYV;
+						LastSwiftMigration = 1020;
 						TestTargetID = 607FACCF1AFB9204008FA782;
 					};
 				};
@@ -251,6 +275,7 @@
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
 				607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */,
 				16B6F3762212186600F2677C /* Images.xcassets in Resources */,
+				16E740DC22D6799200D11479 /* SampleVideo_1280x720_1mb.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,14 +283,73 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				16B6F3702212104400F2677C /* SampleVideo_1280x720_5mb.mp4 in Resources */,
+				16E740DD22D6799300D11479 /* SampleVideo_1280x720_1mb.mp4 in Resources */,
+				160738DD22D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 in Resources */,
+				160738DB22D2877E00221BB7 /* SampleVideo_2.5.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		1A46EB3A387001BFB762A43B /* [CP] Check Pods Manifest.lock */ = {
+		034C173B1B36FD9CF543334F /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-koala-tea-video_Example/Pods-koala-tea-video_Example-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/SwifterSwift/SwifterSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/koala-tea-video/koala_tea_video.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwifterSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/koala_tea_video.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-koala-tea-video_Example/Pods-koala-tea-video_Example-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		0741A18FDD3BCD90B2EB97EC /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-koala-tea-video_Tests/Pods-koala-tea-video_Tests-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Nimble/Nimble.framework",
+				"${BUILT_PRODUCTS_DIR}/Quick/Quick.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Nimble.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Quick.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-koala-tea-video_Tests/Pods-koala-tea-video_Tests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		1694E37C22D6A3FA00B3962C /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\nswiftlint\nelse\necho \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+		1A5107B784E4C20F67207532 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -287,7 +371,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		7AF949F2C69A96C9156D0740 /* [CP] Check Pods Manifest.lock */ = {
+		2FC94A5171ABF48412FDB86D /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -309,30 +393,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		DDE3A03192F7DE10A39280F0 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-koala-tea-video_Example/Pods-koala-tea-video_Example-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/Nimble/Nimble.framework",
-				"${BUILT_PRODUCTS_DIR}/Quick/Quick.framework",
-				"${BUILT_PRODUCTS_DIR}/SwifterSwift/SwifterSwift.framework",
-				"${BUILT_PRODUCTS_DIR}/koala-tea-video/koala_tea_video.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Nimble.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Quick.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwifterSwift.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/koala_tea_video.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-koala-tea-video_Example/Pods-koala-tea-video_Example-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -349,7 +409,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				16B6F3722212105400F2677C /* VideoExporterSpec.swift in Sources */,
+				160738D522D286DF00221BB7 /* AssetPlayerSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -413,6 +473,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_BITCODE = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -469,6 +530,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_BITCODE = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -490,9 +552,11 @@
 		};
 		607FACF01AFB9204008FA782 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 17A2010EE1EF514633CE69D4 /* Pods-koala-tea-video_Example.debug.xcconfig */;
+			baseConfigurationReference = F2BA91B5FCF8436E50F315A1 /* Pods-koala-tea-video_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 6MS9QWALYV;
+				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = "koala-tea-video/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
@@ -505,9 +569,11 @@
 		};
 		607FACF11AFB9204008FA782 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 89A6550BDFB2A400DDF5B3A2 /* Pods-koala-tea-video_Example.release.xcconfig */;
+			baseConfigurationReference = 648BFEDEA068D3E9234E3C34 /* Pods-koala-tea-video_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 6MS9QWALYV;
+				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = "koala-tea-video/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
@@ -520,9 +586,11 @@
 		};
 		607FACF31AFB9204008FA782 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 697802BE77C2786347EB1E0F /* Pods-koala-tea-video_Tests.debug.xcconfig */;
+			baseConfigurationReference = 479D7DC96EDD5EFC21F3E487 /* Pods-koala-tea-video_Tests.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = 6MS9QWALYV;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -544,9 +612,11 @@
 		};
 		607FACF41AFB9204008FA782 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 39B23D639D269DE1EF3E33C3 /* Pods-koala-tea-video_Tests.release.xcconfig */;
+			baseConfigurationReference = 9BEA3C261CAECBFFC9D2D2EF /* Pods-koala-tea-video_Tests.release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = 6MS9QWALYV;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",

@@ -60,8 +60,8 @@ public class SecondsTickView: UIView {
         static let CropViewBorderWidth: CGFloat = 4
         static let ShorterTickHeight: CGFloat = 3
         static let LongerTickHeight: CGFloat = 5
-        static let ShorterTickColor = UIColor(red:0.67, green:0.70, blue:0.70, alpha:1.0)
-        static let LongerTickColor = UIColor(red:0.19, green:0.19, blue:0.21, alpha:1.0)
+        static let ShorterTickColor = UIColor(red: 0.67, green: 0.70, blue: 0.70, alpha: 1.0)
+        static let LongerTickColor = UIColor(red: 0.19, green: 0.19, blue: 0.21, alpha: 1.0)
         static let LabelXSpacing: CGFloat = -6
         static let LabelTopSpacing: CGFloat = 1
         static let LabelWidthAndHeight: CGFloat = 12
