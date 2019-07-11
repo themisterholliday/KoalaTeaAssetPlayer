@@ -1,6 +1,6 @@
 //
 //  AssetPlayerSpec.swift
-//  koala-tea-video_Tests
+//  KoalaTeaVideo_Tests
 //
 //  Created by Craig Holliday on 7/7/19.
 //  Copyright © 2019 CocoaPods. All rights reserved.

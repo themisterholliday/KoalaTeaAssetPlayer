@@ -1,9 +1,9 @@
 use_frameworks!
 
-target 'koala-tea-video_Example' do
-  pod 'koala-tea-video', :path => '../'
+target 'KoalaTeaVideo_Example' do
+  pod 'KoalaTeaVideo', :path => '../'
 
-  target 'koala-tea-video_Tests' do
+  target 'KoalaTeaVideo_Tests' do
     inherit! :search_paths
 
     pod 'Quick', '~> 2.1.0'

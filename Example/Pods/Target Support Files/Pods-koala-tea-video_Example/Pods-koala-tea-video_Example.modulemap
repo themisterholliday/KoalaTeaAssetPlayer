@@ -1,6 +1,0 @@
-framework module Pods_koala_tea_video_Example {
-  umbrella header "Pods-koala-tea-video_Example-umbrella.h"
-
-  export *
-  module * { export * }
-}
