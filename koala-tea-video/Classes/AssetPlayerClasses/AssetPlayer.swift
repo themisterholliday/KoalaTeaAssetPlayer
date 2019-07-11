@@ -29,7 +29,7 @@ public protocol AssetPlayerDelegate: class {
 
 public enum AssetPlayerPlaybackState: Equatable {
     case setup(asset: AssetProtocol)
-    case playing, paused, interrupted, buffering, finished, none
+    case playing, paused, buffering, finished, none
     case failed(error: Error?)
 
     public static func == (lhs: AssetPlayerPlaybackState, rhs: AssetPlayerPlaybackState) -> Bool {
@@ -39,8 +39,6 @@ public enum AssetPlayerPlaybackState: Equatable {
         case (.playing, .playing):
             return true
         case (.paused, .paused):
-            return true
-        case (.interrupted, .interrupted):
             return true
         case (.failed, .failed):
             return true
@@ -425,8 +423,6 @@ extension AssetPlayer {
                 self.player.play()
             }
         case .paused:
-            self.player.pause()
-        case .interrupted:
             self.player.pause()
         case .failed:
             self.player.pause()
