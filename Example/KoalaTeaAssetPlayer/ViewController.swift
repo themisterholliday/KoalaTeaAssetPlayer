@@ -29,7 +29,7 @@ class ViewController: UIViewController {
             playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ])
 
-        self.setup()
+//        self.setup()
     }
 
     func setup() {
@@ -55,31 +55,24 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: AssetPlayerDelegate {
-    func currentAssetDidChange(_ player: AssetPlayer) {
-//        print("currentAssetDidChange")
-    }
-
     func playerIsSetup(_ player: AssetPlayer) {
-//        print("player is setup")
+        let properties = player.assetPlayerProperties
+        print(properties.state)
+        print(properties.currentTime)
+        print(properties.durationText)
+        print(properties.timeLeftText)
+        print(properties.currentTimeText)
     }
 
-    func playerPlaybackStateDidChange(_ player: AssetPlayer) {
-//        print("playerPlaybackStateDidChange")
-    }
+    func playerPlaybackStateDidChange(_ player: AssetPlayer) {}
 
     func playerCurrentTimeDidChange(_ player: AssetPlayer) {
-//        print("playerCurrentTimeDidChange", player.currentTime)
+        print(player.assetPlayerProperties.timeLeftText)
     }
 
-    func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer) {
-//        print("playerCurrentTimeDidChangeInMilliseconds")
-    }
+    func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer) {}
 
-    func playerPlaybackDidEnd(_ player: AssetPlayer) {
-//        print("playerPlaybackDidEnd")
-    }
+    func playerPlaybackDidEnd(_ player: AssetPlayer) {}
 
-    func playerBufferTimeDidChange(_ player: AssetPlayer) {
-//        print("playerBufferTimeDidChange")
-    }
+    func playerBufferedTimeDidChange(_ player: AssetPlayer) {}
 }
