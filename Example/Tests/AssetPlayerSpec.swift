@@ -27,7 +27,7 @@ class AssetPlayerSpec: QuickSpec {
                 var assetPlayer: AssetPlayer!
 
                 beforeEach {
-                    assetPlayer = AssetPlayer(isPlayingLocalAsset: true, shouldLoop: false)
+                    assetPlayer = AssetPlayer()
                 }
 
                 afterEach {
@@ -37,7 +37,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("actionable state changes") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, startMuted: false))
+                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, startMuted: false, shouldLoop: false))
                     }
 
                     it("should have SETUP state") {
@@ -79,7 +79,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("finished state test") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false, shouldLoop: false))
                     }
 
                     it("should have FINISHED state") {
@@ -99,7 +99,7 @@ class AssetPlayerSpec: QuickSpec {
                 // @TODO: Test failure states with assets with protected content or non playable assets
                 describe("failed state test") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false, shouldLoop: false))
                     }
 
                     it("should have FAILED state") {
@@ -113,7 +113,7 @@ class AssetPlayerSpec: QuickSpec {
                     var mockAssetPlayerDelegate: MockAssetPlayerDelegate!
 
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false, shouldLoop: false))
                         mockAssetPlayerDelegate = MockAssetPlayerDelegate(assetPlayer: assetPlayer)
                     }
 
@@ -154,7 +154,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 beforeEach {
                     // @TODO: fix buffering
-                    assetPlayer = AssetPlayer(isPlayingLocalAsset: true, shouldLoop: false)
+                    assetPlayer = AssetPlayer()
                 }
 
                 afterEach {
@@ -164,7 +164,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("actionable state changes") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, startMuted: false))
+                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, startMuted: false, shouldLoop: false))
                     }
 
                     it("should have SETUP state") {
@@ -197,7 +197,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("finished state test") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false, shouldLoop: false))
                     }
 
                     it("should have FINISHED state") {
@@ -217,7 +217,7 @@ class AssetPlayerSpec: QuickSpec {
                 // @TODO: Test failure states with assets with protected content or non playable assets
                 describe("failed state test") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false, shouldLoop: false))
                     }
 
                     it("should have FAILED state") {
@@ -231,7 +231,7 @@ class AssetPlayerSpec: QuickSpec {
                     var mockAssetPlayerDelegate: MockAssetPlayerDelegate!
 
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false, shouldLoop: false))
                         mockAssetPlayerDelegate = MockAssetPlayerDelegate(assetPlayer: assetPlayer)
                     }
 
@@ -253,17 +253,11 @@ class AssetPlayerSpec: QuickSpec {
                         assetPlayer.perform(action: .play)
                         expect(mockAssetPlayerDelegate.playbackEnded).toEventually(equal(true), timeout: minimumSetupTime + 20)
                     }
-
-                    // @TODO: put these back when we fix buffering
-                    //                    it("should fire playerIsLikelyToKeepUp delegate") {
-                    //                        assetPlayer.perform(action: .play)
-                    //                        expect(mockAssetPlayerDelegate.playerIsLikelyToKeepUp).toEventually(equal(true), timeout: minimumSetupTime)
-                    //                    }
-
-                    //                    it("should fire playerBufferTimeDidChange delegate") {
-                    //                        assetPlayer.perform(action: .play)
-                    //                        expect(mockAssetPlayerDelegate.bufferTime).toEventually(beGreaterThanOrEqualTo(5.0), timeout: minimumSetupTime + 5)
-                    //                    }
+                      
+                    it("should fire playerBufferTimeDidChange delegate") {
+                        assetPlayer.perform(action: .play)
+                        expect(mockAssetPlayerDelegate.bufferTime).toEventually(beGreaterThanOrEqualTo(5.0), timeout: minimumSetupTime + 5)
+                    }
                 }
             }
         }
@@ -308,10 +302,6 @@ class MockAssetPlayerDelegate: AssetPlayerDelegate {
 
     func playerPlaybackDidEnd(_ player: AssetPlayer) {
         self.playbackEnded = true
-    }
-
-    func playerIsLikelyToKeepUp(_ player: AssetPlayer) {
-        playerIsLikelyToKeepUp = true
     }
 
     func playerBufferTimeDidChange(_ player: AssetPlayer) {
