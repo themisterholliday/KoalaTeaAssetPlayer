@@ -729,3 +729,7 @@ private extension AssetPlayer {
         }
     }
 }
+
+public struct AssetPlayerProperties {
+    
+}

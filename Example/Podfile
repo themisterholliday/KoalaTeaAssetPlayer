@@ -1,9 +1,11 @@
+platform :ios, '10.3'
+
 use_frameworks!
 
-target 'KoalaTeaVideo_Example' do
-  pod 'KoalaTeaVideo', :path => '../'
+target 'KoalaTeaAssetPlayer_Example' do
+  pod 'KoalaTeaAssetPlayer', :path => '../'
 
-  target 'KoalaTeaVideo_Tests' do
+  target 'KoalaTeaAssetPlayer_Tests' do
     inherit! :search_paths
 
     pod 'Quick', '~> 2.1.0'

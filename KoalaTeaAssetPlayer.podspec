@@ -1,5 +1,5 @@
 #
-# Be sure to run `pod lib lint KoalaTeaVideo.podspec' to ensure this is a
+# Be sure to run `pod lib lint KoalaTeaAssetPlayer.podspec' to ensure this is a
 # valid spec before submitting.
 #
 # Any lines starting with a # are optional, but their use is encouraged
@@ -7,9 +7,9 @@
 #
 
 Pod::Spec.new do |s|
-  s.name             = 'KoalaTeaVideo'
+  s.name             = 'KoalaTeaAssetPlayer'
   s.version          = '0.1.0'
-  s.summary          = 'A short description of KoalaTeaVideo.'
+  s.summary          = 'A short description of KoalaTeaAssetPlayer.'
 
   # This description is used to generate tags and improve search results.
   #   * Think: What does it do? Why did you write it? What is the focus?
@@ -19,20 +19,20 @@ Pod::Spec.new do |s|
 
   s.description      = 'nothing'
 
-  s.homepage         = 'https://github.com/themisterholliday/KoalaTeaVideo'
+  s.homepage         = 'https://github.com/themisterholliday/KoalaTeaAssetPlayer'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'themisterholliday' => 'themisterholliday@gmail.com' }
-  s.source           = { :git => 'https://github.com/themisterholliday/KoalaTeaVideo.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/themisterholliday/KoalaTeaAssetPlayer.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '10.3'
   s.swift_version = '5.0'
 
-  s.source_files = 'KoalaTeaVideo/Classes/**/*'
+  s.source_files = 'KoalaTeaAssetPlayer/Classes/**/*'
 
   # s.resource_bundles = {
-  #   'KoalaTeaVideo' => ['KoalaTeaVideo/Assets/*.png']
+  #   'KoalaTeaAssetPlayer' => ['KoalaTeaAssetPlayer/Assets/*.png']
   # }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'

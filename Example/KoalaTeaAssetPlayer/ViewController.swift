@@ -1,6 +1,6 @@
 //
 //  ViewController.swift
-//  KoalaTeaVideo
+//  KoalaTeaAssetPlayer
 //
 //  Created by themisterholliday on 02/11/2019.
 //  Copyright (c) 2019 themisterholliday. All rights reserved.
@@ -8,7 +8,7 @@
 
 import UIKit
 import AVFoundation
-import KoalaTeaVideo
+import KoalaTeaAssetPlayer
 
 class ViewController: UIViewController {
     lazy var assetPlayer = AssetPlayer()

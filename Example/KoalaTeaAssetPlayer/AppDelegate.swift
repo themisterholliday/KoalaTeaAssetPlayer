@@ -1,6 +1,6 @@
 //
 //  AppDelegate.swift
-//  KoalaTeaVideo
+//  KoalaTeaAssetPlayer
 //
 //  Created by themisterholliday on 02/11/2019.
 //  Copyright (c) 2019 themisterholliday. All rights reserved.
