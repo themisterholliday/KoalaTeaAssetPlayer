@@ -23,10 +23,12 @@ public protocol AssetPlayerDelegate: class {
     // This is the time in seconds that the video has been buffered.
     // If implementing a UIProgressView, user this value / player.maximumDuration to set buffering progress.
     func playerBufferedTimeDidChange(_ player: AssetPlayer)
+
+    func playerDidFail(_ error: Error?)
 }
 
 public enum AssetPlayerPlaybackState: Equatable {
-    case setup(asset: AssetProtocol)
+    case setup(asset: Asset)
     case playing, paused, buffering, finished, none
     case failed(error: Error?)
 
@@ -52,7 +54,7 @@ public enum AssetPlayerPlaybackState: Equatable {
     }
 }
 
-extension AssetPlayer {
+open class AssetPlayer: NSObject {
     private struct Constants {
         // Keys required for a playable item
         static let AssetKeysRequiredToPlay = [
@@ -60,10 +62,7 @@ extension AssetPlayer {
             "hasProtectedContent"
         ]
     }
-}
 
-open class AssetPlayer: NSObject {
-    /// Player delegate.
     public weak var delegate: AssetPlayerDelegate?
 
     // MARK: Properties
@@ -133,7 +132,7 @@ open class AssetPlayer: NSObject {
         }
     }
 
-    internal var asset: AssetProtocol? {
+    internal var asset: Asset? {
         didSet {
             guard let newAsset = self.asset else { return }
 
@@ -192,7 +191,7 @@ open class AssetPlayer: NSObject {
     }
 
     // MARK: - Asset Loading
-    private func asynchronouslyLoadURLAsset(_ newAsset: AssetProtocol) {
+    private func asynchronouslyLoadURLAsset(_ newAsset: Asset) {
         /*
          Using AVAsset now runs the risk of blocking the current thread (the
          main UI thread) whilst I/O happens to populate the properties. It's
@@ -278,8 +277,9 @@ extension AssetPlayer {
             self.player.playImmediately(atRate: self.rate)
         case .paused:
             self.player.pause()
-        case .failed:
+        case .failed(let error):
             self.player.pause()
+            self.delegate?.playerDidFail(error)
         case .buffering:
             self.player.pause()
         case .finished:

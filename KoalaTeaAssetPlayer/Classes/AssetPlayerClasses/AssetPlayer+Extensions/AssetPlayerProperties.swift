@@ -6,7 +6,7 @@
 //
 
 public struct AssetPlayerProperties {
-    public let asset: AssetProtocol?
+    public let asset: Asset?
     public let startTimeForLoop: Double
     public let endTimeForLoop: Double?
     public let isMuted: Bool

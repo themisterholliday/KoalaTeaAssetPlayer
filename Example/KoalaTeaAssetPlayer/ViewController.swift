@@ -39,7 +39,7 @@ class ViewController: UIViewController {
         }
         let artworkURL = URL(string: "https://www.w3schools.com/w3images/fjords.jpg")
         let asset = Asset(urlAsset: AVURLAsset(url: url), artworkURL: artworkURL)
-        assetPlayer.perform(action: .setup(with: asset, startMuted: false, shouldLoop: true))
+        assetPlayer.perform(action: .setup(with: asset, options: []))
         assetPlayer.perform(action: .play)
         assetPlayer.delegate = self
         setupRemoteCommandManager()
@@ -75,4 +75,6 @@ extension ViewController: AssetPlayerDelegate {
     func playerPlaybackDidEnd(_ player: AssetPlayer) {}
 
     func playerBufferedTimeDidChange(_ player: AssetPlayer) {}
+
+    func playerDidFail(_ error: Error?) {}
 }

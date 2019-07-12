@@ -8,8 +8,23 @@
 import Foundation
 import AVKit
 
+public struct AssetPlayerSetupOptions: OptionSet {
+    public let rawValue: Int
+
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
+    }
+
+    public static let startMuted = AssetPlayerSetupOptions(rawValue: 1 << 0)
+    public static let shouldLoop = AssetPlayerSetupOptions(rawValue: 1 << 1)
+
+    public static let all: AssetPlayerSetupOptions = [
+        .startMuted, .shouldLoop
+    ]
+}
+
 public enum AssetPlayerActions {
-    case setup(with: AssetProtocol, startMuted: Bool, shouldLoop: Bool)
+    case setup(with: Asset, options: AssetPlayerSetupOptions)
     case play
     case pause
     case togglePlayPause
@@ -32,10 +47,10 @@ extension AssetPlayer {
     // swiftlint:disable cyclomatic_complexity
     open func perform(action: AssetPlayerActions) {
         switch action {
-        case .setup(let asset, let startMuted, let shouldLoop):
+        case .setup(let asset, let options):
             self.setup(with: asset)
-            self.player.isMuted = startMuted
-            self.shouldLoop = shouldLoop
+            self.player.isMuted = options.contains(.startMuted)
+            self.shouldLoop = options.contains(.shouldLoop)
             self.isPlayingLocalAsset = asset.isLocalFile
         case .play:
             self.state = .playing
@@ -86,7 +101,7 @@ extension AssetPlayer {
     }
     // swiftlint:enable cyclomatic_complexity
 
-    private func setup(with asset: AssetProtocol) {
+    private func setup(with asset: Asset) {
         self.updateGeneralMetadata()
 
         self.state = .setup(asset: asset)

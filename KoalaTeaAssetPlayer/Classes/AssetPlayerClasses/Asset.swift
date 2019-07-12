@@ -9,24 +9,7 @@
 import Foundation
 import AVFoundation
 
-public protocol AssetProtocol {
-    /// The `AVURLAsset` corresponding to an asset in either the application bundle or on the Internet.
-    var urlAsset: AVURLAsset { get }
-    var naturalAssetSize: CGSize? { get }
-    var assetName: String { get }
-    var artworkURL: URL? { get }
-    var isLocalFile: Bool { get }
-}
-
-extension AssetProtocol {
-    public var naturalAssetSize: CGSize? {
-        return self.urlAsset.getFirstVideoTrack()?.naturalSize
-    }
-}
-
-// MARK: Asset
-
-public struct Asset: AssetProtocol {
+open class Asset: NSObject {
     public var urlAsset: AVURLAsset
     public var assetName: String
     public var artworkURL: URL?
@@ -59,5 +42,9 @@ public extension Asset {
 
         let newDuration = duration.convertScale(PublicConstants.DefaultTimeScale, method: .default)
         return newDuration
+    }
+
+    var naturalAssetSize: CGSize? {
+        return self.urlAsset.getFirstVideoTrack()?.naturalSize
     }
 }

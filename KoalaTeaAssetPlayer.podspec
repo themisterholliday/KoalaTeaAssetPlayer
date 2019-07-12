@@ -24,18 +24,13 @@ Pod::Spec.new do |s|
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'themisterholliday' => 'themisterholliday@gmail.com' }
   s.source           = { :git => 'https://github.com/themisterholliday/KoalaTeaAssetPlayer.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.social_media_url = 'https://twitter.com/TheMrHolliday'
 
   s.ios.deployment_target = '10.3'
   s.swift_version = '5.0'
 
   s.source_files = 'KoalaTeaAssetPlayer/Classes/**/*'
 
-  # s.resource_bundles = {
-  #   'KoalaTeaAssetPlayer' => ['KoalaTeaAssetPlayer/Assets/*.png']
-  # }
-
-  # s.public_header_files = 'Pod/Classes/**/*.h'
   s.dependency 'SwifterSwift', '~> 5.0.0'
   s.dependency 'SwiftLint', '~> 0.33.0'
 end

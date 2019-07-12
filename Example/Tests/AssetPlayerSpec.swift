@@ -37,7 +37,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("actionable state changes") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, startMuted: false, shouldLoop: false))
+                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, options: []))
                     }
 
                     it("should have SETUP state") {
@@ -79,7 +79,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("finished state test") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false, shouldLoop: false))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: []))
                     }
 
                     it("should have FINISHED state") {
@@ -113,7 +113,7 @@ class AssetPlayerSpec: QuickSpec {
                     var mockAssetPlayerDelegate: MockAssetPlayerDelegate!
 
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false, shouldLoop: false))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: []))
                         mockAssetPlayerDelegate = MockAssetPlayerDelegate(assetPlayer: assetPlayer)
                     }
 
@@ -164,7 +164,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("actionable state changes") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, startMuted: false, shouldLoop: false))
+                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, options: []))
                     }
 
                     it("should have SETUP state") {
@@ -197,7 +197,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("finished state test") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false, shouldLoop: false))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: []))
                     }
 
                     it("should have FINISHED state") {
@@ -231,7 +231,7 @@ class AssetPlayerSpec: QuickSpec {
                     var mockAssetPlayerDelegate: MockAssetPlayerDelegate!
 
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, startMuted: false, shouldLoop: false))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: []))
                         mockAssetPlayerDelegate = MockAssetPlayerDelegate(assetPlayer: assetPlayer)
                     }
 
@@ -265,7 +265,7 @@ class AssetPlayerSpec: QuickSpec {
 }
 
 class MockAssetPlayerDelegate: AssetPlayerDelegate {
-    var currentAsset: AssetProtocol?
+    var currentAsset: Asset?
     var currentTimeInSeconds: Double = 0
     var currentTimeInMilliSeconds: Double = 0
     var timeElapsedText: String = ""
@@ -304,8 +304,9 @@ class MockAssetPlayerDelegate: AssetPlayerDelegate {
 
     func playerBufferedTimeDidChange(_ player: AssetPlayer) {
         let properties = player.assetPlayerProperties
-        print(properties.bufferedTime)
         self.bufferTime = Double(properties.bufferedTime)
     }
+
+    func playerDidFail(_ error: Error?) {}
 }
 
