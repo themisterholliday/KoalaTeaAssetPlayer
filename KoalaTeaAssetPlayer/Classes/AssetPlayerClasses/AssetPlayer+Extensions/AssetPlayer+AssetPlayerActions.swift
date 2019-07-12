@@ -34,7 +34,7 @@ public enum AssetPlayerActions {
     case beginRewind
     case endRewind
     case seekToTimeInSeconds(time: Double)
-    case skip(by: TimeInterval)
+    case skip(by: Double)
     case changePlayerPlaybackRate(to: Float)
     case changeIsPlayingLocalAsset(to: Bool)
     case changeShouldLoop(to: Bool)

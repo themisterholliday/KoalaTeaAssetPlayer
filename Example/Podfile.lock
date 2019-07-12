@@ -42,7 +42,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  KoalaTeaAssetPlayer: 008c7bf083afd6e185f3c483a675867460aecd70
+  KoalaTeaAssetPlayer: 83d4f7e8d9a7d22c17f80daffb7d9f2041f941fb
   Nimble: 622629381bda1dd5678162f21f1368cec7cbba60
   Quick: 4be43f6634acfa727dd106bdf3929ce125ffa79d
   SwifterSwift: 96f90594b370802f01647c2b1229c74a84ffafee
