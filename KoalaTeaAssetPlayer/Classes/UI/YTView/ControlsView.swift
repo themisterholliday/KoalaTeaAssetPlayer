@@ -49,7 +49,6 @@ public class ControlsView: PassThroughView {
             switch self.isVisible {
             case true:
                 self.fadeInSliders()
-                break
             case false:
                 self.fadeOutSliders()
             }
@@ -62,10 +61,13 @@ public class ControlsView: PassThroughView {
 
     var fadingTime = 0.3
 
+    private var rotatedConstraints: [NSLayoutConstraint] = []
+    private var defaultConstraints: [NSLayoutConstraint] = []
+
     override init(frame: CGRect) {
-        super.init(frame: frame);
+        super.init(frame: frame)
         
-//        self.addSubview(blackView)
+        self.addSubview(blackView)
 
         self.blackView.frame = frame
         self.blackView.backgroundColor = .black
@@ -73,15 +75,15 @@ public class ControlsView: PassThroughView {
         self.blackView.isUserInteractionEnabled = false
         self.blackView.constrainEdgesToSuperView()
 
-//        self.setupButtons()
-//        self.setupActivityIndicator()
+        self.setupButtons()
+        self.setupActivityIndicator()
         self.addPlaybackSlider()
 
-        self.setDefaultConstraints()
+        
     }
 
     required public init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented");
+        fatalError("init(coder:) has not been implemented")
     }
     
     func setupActivityIndicator() {
@@ -108,21 +110,21 @@ public class ControlsView: PassThroughView {
         guard !isWaiting else { return }
         self.fadeSelfIn()
         self.isWaiting = true
-//        Helpers.wait(time: 4, completion: {
-//            guard self.assetPlaybackManager.state == .playing else { return }
-//            self.isWaiting = false
-//            self.fadeSelfOut()
-//        })
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            guard self.assetPlaybackManager.state == .playing else { return }
+            self.isWaiting = false
+            self.fadeSelfOut()
+        }
     }
     
     func waitAndFadeOut() {
         guard !isWaiting else { return }
         self.isWaiting = true
-//        Helpers.wait(time: 4, completion: {
-//            guard self.assetPlaybackManager.state == .playing else { return }
-//            self.isWaiting = false
-//            self.fadeSelfOut()
-//        })
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            guard self.assetPlaybackManager.state == .playing else { return }
+            self.isWaiting = false
+            self.fadeSelfOut()
+        }
     }
     
     func fadeSelfIn() {
@@ -139,9 +141,9 @@ public class ControlsView: PassThroughView {
             }
         })
         self.fadeInSliders()
-//        Helpers.wait(time: fadingTime / 2, completion: {
-//            self.playbackSliderView?.showSliderThumbImage()
-//        })
+        DispatchQueue.main.asyncAfter(deadline: .now() + fadingTime / 2) {
+            self.playbackSliderView.showSliderThumbImage()
+        }
     }
     
     func fadeSelfOut() {
@@ -158,9 +160,9 @@ public class ControlsView: PassThroughView {
             }
         })
         self.fadeOutSliders()
-//        Helpers.wait(time: fadingTime / 2, completion: {
-//            self.playbackSliderView?.hideSliderThumbImage()
-//        })
+        DispatchQueue.main.asyncAfter(deadline: .now() + fadingTime / 2) {
+            self.playbackSliderView.hideSliderThumbImage()
+        }
     }
     
     func fadeInSliders() {

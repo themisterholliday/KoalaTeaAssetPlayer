@@ -31,6 +31,8 @@ public protocol YTPlayerViewDelegate: NSObjectProtocol {
 }
 
 public class YTPlayerView: UIView {
+    public weak var delegate: YTPlayerViewDelegate?
+    
     private let assetPlayer = AssetPlayer()
     private lazy var remoteCommandManager = RemoteCommandManager(assetPlaybackManager: assetPlayer)
     
@@ -46,8 +48,7 @@ public class YTPlayerView: UIView {
         skipView.delegate = self
         return skipView
     }()
-    
-    public weak var delegate: YTPlayerViewDelegate?
+
     private var direction = Direction.none
     private var state = YTPlayerState.portrait {
         didSet {
@@ -56,10 +57,10 @@ public class YTPlayerView: UIView {
     }
 
     private var isRotated: Bool {
-        get {
-            return self.state == .landscapeLeft || self.state == .landscapeRight
-        }
+        return self.state == .landscapeLeft || self.state == .landscapeRight
     }
+    private var rotatedConstraints: [NSLayoutConstraint] = []
+    private var defaultConstraints: [NSLayoutConstraint] = []
     
     public required init() {
         self.playerView = assetPlayer.playerView
@@ -70,10 +71,25 @@ public class YTPlayerView: UIView {
         self.addSubview(controlsView)
 //        self.addSubview(skipView)
 
-        playerView.constrainEdgesToSuperView()
+        defaultConstraints = playerView.constrainEdgesToSuperView() ?? []
+
+        rotatedConstraints = playerView.returnedLayout {
+            return [
+                $0.height == self.widthAnchor,
+                $0.width == self.heightAnchor,
+                $0.centerXAnchor == self.centerXAnchor,
+                $0.centerYAnchor == self.centerYAnchor,
+            ]
+        }
+        rotatedConstraints.deactivateAll()
+
         controlsView.constrainEdgesToSuperView()
 //        skipView.constrainEdgesToSuperView()
 //        self.setupGestureRecognizer()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+//            self.state = .landscapeRight
+        }
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -107,7 +123,6 @@ public class YTPlayerView: UIView {
             
             controlsView.playButton.isHidden = false
             controlsView.pauseButton.isHidden = true
-            break
         case .playing:
             controlsView.enableAllButtons()
             controlsView.activityView.stopAnimating()
@@ -116,13 +131,11 @@ public class YTPlayerView: UIView {
             controlsView.pauseButton.isHidden = false
 
             self.controlsView.waitAndFadeOut()
-            break
         case .paused:
             controlsView.activityView.stopAnimating()
             
             controlsView.playButton.isHidden = false
             controlsView.pauseButton.isHidden = true
-            break
         case .failed:
             break
         case .buffering:
@@ -130,7 +143,6 @@ public class YTPlayerView: UIView {
             
             controlsView.playButton.isHidden = true
             controlsView.pauseButton.isHidden = true
-            break
         case .finished:
             break
         case .none:
@@ -268,10 +280,10 @@ extension YTPlayerView: SkipViewDelegate {
 
 extension YTPlayerView: UIGestureRecognizerDelegate {
     func animate(to: YTPlayerState) {
-        guard let superView = self.superview else { return }
+//        guard let superView = self.superview else { return }
 
-        let originPoint = CGPoint(x: 0, y: 0)
-        self.layer.anchorPoint = originPoint
+//        let originPoint = CGPoint(x: 0, y: 0)
+//        self.layer.anchorPoint = originPoint
 
         switch self.state {
         case .minimized:
@@ -305,11 +317,13 @@ extension YTPlayerView: UIGestureRecognizerDelegate {
 //            })
         case .landscapeRight:
             self.controlsView.isRotated = true
-//            UIView.animate(withDuration: 0.3, animations: {
+            defaultConstraints.deactivateAll()
+            rotatedConstraints.activateAll()
+            UIView.animate(withDuration: 0.3, animations: {
 //                // This is an EXACT order for left and right
 //                // Transform > Change height and width > Change layer position
-//                let newTransform = CGAffineTransform(rotationAngle: -(CGFloat.pi / 2))
-//                self.transform = newTransform
+                let newTransform = CGAffineTransform(rotationAngle: -(CGFloat.pi / 2))
+                self.playerView.transform = newTransform
 //
 //                self.height = superView.width
 //                self.width = superView.height
@@ -320,7 +334,8 @@ extension YTPlayerView: UIGestureRecognizerDelegate {
 //                }
 //
 //                self.layer.position = CGPoint(x: 0, y: superView.frame.maxY)
-//            })
+                self.layoutIfNeeded()
+            })
         case .portrait:
             self.controlsView.isRotated = false
 //            UIView.animate(withDuration: 0.3, animations: {

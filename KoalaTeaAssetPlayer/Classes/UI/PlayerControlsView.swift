@@ -16,8 +16,10 @@ public class PlayerControlsView: UIView {
     required init() {
         super.init(frame: .zero)
 
+        var constraint: NSLayoutConstraint?
         addSubview(slider)
         slider.layout {
+            constraint = $0.bottom.equal(to: self.bottomAnchor)
             $0.bottom == self.bottomAnchor - 20
             $0.leading == self.leadingAnchor + 20
             $0.trailing == self.trailingAnchor - 20
@@ -25,6 +27,10 @@ public class PlayerControlsView: UIView {
         }
         
         slider.maximumValue = 100
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            constraint?.isActive = false
+        }
     }
 
     required init?(coder aDecoder: NSCoder) {

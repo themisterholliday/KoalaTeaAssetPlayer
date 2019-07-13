@@ -26,7 +26,7 @@ class AssetPlayerSliderView: PassThroughView {
 
     var playbackSliderColor: UIColor = .red
 
-    var sliderCircleColor: UIColor = .white
+    var sliderCircleColor: UIColor = .black
 
     var currentTimeLabel: UILabel = UILabel(frame: .zero)
 
@@ -36,20 +36,13 @@ class AssetPlayerSliderView: PassThroughView {
 
     var isFirstLoad: Bool = false
 
-    var smallCircle: UIImage? {
-        get {
-            let bundle = Bundle(for: classForCoder.self)
-            guard let image = UIImage(named: "SmallCircle", in: bundle, compatibleWith: nil) else { return nil }
-            return image.filled(withColor: self.sliderCircleColor)
-        }
-    }
-    var bigCircle: UIImage? {
-        get {
-            let bundle = Bundle(for: classForCoder.self)
-            guard let image = UIImage(named: "BigCircle", in: bundle, compatibleWith: nil) else { return nil }
-            return image.filled(withColor: self.sliderCircleColor)
-        }
-    }
+    lazy var smallCircle: UIImage? = {
+        return UIImage(named: "SmallCircle", in: Bundle(for: AssetPlayerSliderView.self), compatibleWith: nil)?.filled(withColor: self.sliderCircleColor)
+    }()
+
+    lazy var bigCircle: UIImage? = {
+        return UIImage(named: "BigCircle", in: Bundle(for: AssetPlayerSliderView.self), compatibleWith: nil)?.filled(withColor: self.sliderCircleColor)
+    }()
 
     override init(frame: CGRect) {
         super.init(frame: frame)

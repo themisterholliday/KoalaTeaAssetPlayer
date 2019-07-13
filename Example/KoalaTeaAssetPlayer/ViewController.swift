@@ -25,7 +25,8 @@ class ViewController: UIViewController {
         self.view.addSubview(assetPlayerView)
         NSLayoutConstraint.activate([
             assetPlayerView.topAnchor.constraint(equalTo: view.topAnchor),
-            assetPlayerView.heightAnchor.constraint(equalTo: assetPlayerView.widthAnchor),
+//            assetPlayerView.heightAnchor.constraint(equalTo: assetPlayerView.widthAnchor),
+            assetPlayerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             assetPlayerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             assetPlayerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ])
