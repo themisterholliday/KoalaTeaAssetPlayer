@@ -37,6 +37,7 @@
 		15332F2171797A6199109B8025073073 /* ArrayExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB4EC1334A8D991BB0F7416793A612D /* ArrayExtensions.swift */; };
 		1619CC5DF835D29CFE745C443B8728DD /* BeLessThanOrEqual.swift in Sources */ = {isa = PBXBuildFile; fileRef = 468AEC5E5ED4A8FC8285309C4BEA37BC /* BeLessThanOrEqual.swift */; settings = {COMPILER_FLAGS = "-DPRODUCT_NAME=Nimble/Nimble"; }; };
 		16A9066A22D93B62009811B9 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16A9066922D93B62009811B9 /* Media.xcassets */; };
+		16A9066C22DA63E5009811B9 /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A9066B22DA63E5009811B9 /* Action.swift */; };
 		17A60050B2AC439E06E7EE6F41498D68 /* ErrorUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17128CFD80AFB018CEF1F67D278A66ED /* ErrorUtility.swift */; };
 		19756A88FFFBE4639A1FB65D8367C01B /* Expectation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1516AE7402C91EE3F974A026E06F2AD7 /* Expectation.swift */; settings = {COMPILER_FLAGS = "-DPRODUCT_NAME=Nimble/Nimble"; }; };
 		19BA8AF46D9CC49E3E2CEDCAF6354442 /* CwlPreconditionTesting.h in Headers */ = {isa = PBXBuildFile; fileRef = 9AAC02263A02BF49A501953EFBAE454D /* CwlPreconditionTesting.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -58,7 +59,7 @@
 		28BB2578BBB2BD655445D24269AF7605 /* UITextFieldExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 682F996069ADBC4F4BA874172F4FEE1E /* UITextFieldExtensions.swift */; };
 		2A1DF0FC694CEA178B0D392A77ACE9DC /* VideoFramesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2515CAA97E12A5948AE5EAD325EAD7D /* VideoFramesView.swift */; };
 		2B34BDED4C05B6392E3999BF68A16694 /* ControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4B64E0595C9130CB9C7DD7CF46429 /* ControlsView.swift */; };
-		2D1B07A07726D9B3E52BCDF21C83A590 /* YTSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E7698B0EAE92F3C72E030653E2A909 /* YTSlider.swift */; };
+		2D1B07A07726D9B3E52BCDF21C83A590 /* AssetPlayerSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E7698B0EAE92F3C72E030653E2A909 /* AssetPlayerSliderView.swift */; };
 		2D31004CC6E96B15859A347B6CB47EA2 /* SkipControlIconLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E7471EE68F0F4BBCF3CED315B41490 /* SkipControlIconLabelView.swift */; };
 		2D85C43C14A590B4136EB71397970FCD /* UserDefaultsExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E7F60C2F93B88B3EE5415B4AD29359 /* UserDefaultsExtensions.swift */; };
 		2DBF35E81CA291E0A68E593F2AB4321C /* ThrowError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215CDD35F8C70B6F7CA79372DB843E58 /* ThrowError.swift */; settings = {COMPILER_FLAGS = "-DPRODUCT_NAME=Nimble/Nimble"; }; };
@@ -328,6 +329,7 @@
 		15FBEC7ACE276D1D50F2C9DF3196D580 /* UIRefreshControlExtensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UIRefreshControlExtensions.swift; path = Sources/SwifterSwift/UIKit/UIRefreshControlExtensions.swift; sourceTree = "<group>"; };
 		1626C175DB0130F3FE2B198281FE29E7 /* QuickSpec.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = QuickSpec.m; path = Sources/QuickObjectiveC/QuickSpec.m; sourceTree = "<group>"; };
 		16A9066922D93B62009811B9 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Media.xcassets; path = KoalaTeaAssetPlayer/Assets/Media.xcassets; sourceTree = "<group>"; };
+		16A9066B22DA63E5009811B9 /* Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
 		17128CFD80AFB018CEF1F67D278A66ED /* ErrorUtility.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ErrorUtility.swift; path = Sources/Quick/ErrorUtility.swift; sourceTree = "<group>"; };
 		18993DFAD7B1FBBC5E72F92CF70356C6 /* Expression.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Expression.swift; path = Sources/Nimble/Expression.swift; sourceTree = "<group>"; };
 		18C2EEF2C984C18CEBF8F2E053ED13AC /* Pods-KoalaTeaAssetPlayer_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-KoalaTeaAssetPlayer_Example-acknowledgements.plist"; sourceTree = "<group>"; };
@@ -537,7 +539,7 @@
 		E36952081CC13F78CD2A17DD28FB838D /* YTPlayerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = YTPlayerView.swift; sourceTree = "<group>"; };
 		E3BE2F9E7B737C3B46965E1F07920B17 /* UIScrollViewExtensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UIScrollViewExtensions.swift; path = Sources/SwifterSwift/UIKit/UIScrollViewExtensions.swift; sourceTree = "<group>"; };
 		E5B959E4D505DCB7E03AA9C5308CA8B8 /* SwifterSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwifterSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E5E7698B0EAE92F3C72E030653E2A909 /* YTSlider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = YTSlider.swift; sourceTree = "<group>"; };
+		E5E7698B0EAE92F3C72E030653E2A909 /* AssetPlayerSliderView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AssetPlayerSliderView.swift; sourceTree = "<group>"; };
 		E6127DB4E4BD3AA6E3480FF5F101BAA1 /* Functional.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Functional.swift; path = Sources/Nimble/Utils/Functional.swift; sourceTree = "<group>"; };
 		E631E3007BC3EDECA02B0DE4E6AE27E7 /* CGPointExtensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CGPointExtensions.swift; path = Sources/SwifterSwift/CoreGraphics/CGPointExtensions.swift; sourceTree = "<group>"; };
 		E6BB02BCC34DE5040498EDA9E72CF131 /* Pods-KoalaTeaAssetPlayer_Tests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-KoalaTeaAssetPlayer_Tests.modulemap"; sourceTree = "<group>"; };
@@ -865,7 +867,7 @@
 				19E7471EE68F0F4BBCF3CED315B41490 /* SkipControlIconLabelView.swift */,
 				2EBFF5AAF0D84647DD88D2671E33B183 /* SkipView.swift */,
 				E36952081CC13F78CD2A17DD28FB838D /* YTPlayerView.swift */,
-				E5E7698B0EAE92F3C72E030653E2A909 /* YTSlider.swift */,
+				E5E7698B0EAE92F3C72E030653E2A909 /* AssetPlayerSliderView.swift */,
 				597B330144C482835CC4F0183C0E57E6 /* YTViewController.swift */,
 				2F9241BD17F30DFB405E562D409E0149 /* YTViewControllerPresenters.swift */,
 			);
@@ -1061,6 +1063,7 @@
 			children = (
 				D0E0F6A35BB74719A2304CF60C218B32 /* AVAssetExtensions.swift */,
 				D2C8B1C0005D7B2AE90268F34CBB5BC1 /* CMBufferHelper.swift */,
+				16A9066B22DA63E5009811B9 /* Action.swift */,
 			);
 			name = MiscExtensions;
 			path = KoalaTeaAssetPlayer/Classes/MiscExtensions;
@@ -1570,6 +1573,7 @@
 				7BFE121F541E2BA07D1264E0DE018D50 /* NavVC.swift in Sources */,
 				005CDF78F432D7069C95C5774E155A03 /* PassThroughView.swift in Sources */,
 				2EE967E0C6EEE14AE8EF730955C2BC40 /* PlaybackLineIndicatorView.swift in Sources */,
+				16A9066C22DA63E5009811B9 /* Action.swift in Sources */,
 				F918B3C93E7500FB4BA8043DDCF39203 /* PlayerControlsView.swift in Sources */,
 				CD7D37180231139E8A909D0E5437207A /* PlayerView.swift in Sources */,
 				A25AC5D857EE9FAE6D14FB4C0A841A08 /* RemoteCommandManager.swift in Sources */,
@@ -1583,7 +1587,7 @@
 				49087E465201AEA443D4EEC1ED7D4D91 /* VideoFramesScrollingView.swift in Sources */,
 				2A1DF0FC694CEA178B0D392A77ACE9DC /* VideoFramesView.swift in Sources */,
 				D3457230F3D08CAE2E33C1963F4121B4 /* YTPlayerView.swift in Sources */,
-				2D1B07A07726D9B3E52BCDF21C83A590 /* YTSlider.swift in Sources */,
+				2D1B07A07726D9B3E52BCDF21C83A590 /* AssetPlayerSliderView.swift in Sources */,
 				D8216C8400B96D2663F6D2971C62D29F /* YTViewController.swift in Sources */,
 				ECD350920B35DB1FA15D6AB8EAE8AAB3 /* YTViewControllerPresenters.swift in Sources */,
 			);

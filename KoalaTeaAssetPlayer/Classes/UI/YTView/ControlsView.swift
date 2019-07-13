@@ -27,7 +27,19 @@ public class ControlsView: PassThroughView {
     var fullscreenButton = UIButton()
     var minimizeButton = UIButton()
     var blackView = UIView()
-    var playbackSliderView: AssetPlayerSliderView = AssetPlayerSliderView(frame: .zero)
+    lazy var playbackSliderView: AssetPlayerSliderView = {
+        return AssetPlayerSliderView(actions: (
+            sliderDragDidBegin: { view, _ in
+                print("sliderDragDidBegin")
+        },
+            sliderDidMove: { view, time in
+                print(time, "moved")
+        },
+            sliderDragDidEnd: { view, time in
+                print(time, "testing")
+        }
+        ))
+    }()
 
     var isVisible: Bool {
         get {
@@ -181,7 +193,6 @@ public class ControlsView: PassThroughView {
  
     func addPlaybackSlider() {
         self.addSubview(playbackSliderView)
-        playbackSliderView.delegate = self
         playbackSliderView.layout {
             $0.bottom == self.bottomAnchor
             $0.leading == self.leadingAnchor + 10
@@ -277,8 +288,8 @@ public class ControlsView: PassThroughView {
     }
 }
 
-extension ControlsView: AssetPlayerSliderViewDelegate {
-    func playbackSliderValueChanged(value: Float) {
-        self.delegate?.playbackSliderValueChanged(value: value)
-    }
-}
+//extension ControlsView: AssetPlayerSliderViewDelegate {
+//    func playbackSliderValueChanged(value: Float) {
+//        self.delegate?.playbackSliderValueChanged(value: value)
+//    }
+//}

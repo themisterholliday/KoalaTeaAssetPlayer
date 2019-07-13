@@ -23,13 +23,17 @@ class ViewController: UIViewController {
 
         assetPlayerView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(assetPlayerView)
-        NSLayoutConstraint.activate([
-            assetPlayerView.topAnchor.constraint(equalTo: view.topAnchor),
-//            assetPlayerView.heightAnchor.constraint(equalTo: assetPlayerView.widthAnchor),
-            assetPlayerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            assetPlayerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            assetPlayerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-            ])
+        if #available(iOS 11.0, *) {
+            NSLayoutConstraint.activate([
+                assetPlayerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                //            assetPlayerView.heightAnchor.constraint(equalTo: assetPlayerView.widthAnchor),
+                assetPlayerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+                assetPlayerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                assetPlayerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+                ])
+        } else {
+            // Fallback on earlier versions
+        }
 
         assetPlayerView.setupPlayback(asset: asset, options: [])
 //        self.setup()
