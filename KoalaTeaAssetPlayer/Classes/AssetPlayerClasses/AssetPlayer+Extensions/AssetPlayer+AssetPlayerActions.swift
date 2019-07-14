@@ -30,6 +30,7 @@ public enum AssetPlayerActions {
     case changeStartTimeForLoop(to: Double)
     case changeEndTimeForLoop(to: Double)
     case changeIsMuted(to: Bool)
+    case changeVolume(to: Float)
 }
 
 extension AssetPlayer {
@@ -46,13 +47,7 @@ extension AssetPlayer {
         case .pause:
             self.state = .paused
         case .seekToTimeInSeconds(let time):
-            let previousState = self.previousState
-            self.state = .paused
-            self.seekToTimeInSeconds(time) { _ in
-                if previousState == .playing {
-                    self.state = .playing
-                }
-            }
+            self.seekToTimeInSeconds(time) { _ in }
         case .changePlayerPlaybackRate(let rate):
             self.changePlayerPlaybackRate(to: rate)
         case .changeIsPlayingLocalAsset(let isPlayingLocalAsset):
@@ -92,6 +87,8 @@ extension AssetPlayer {
             }
         case .skip(let interval):
             self.perform(action: .seekToTimeInSeconds(time: currentTime + interval))
+        case .changeVolume(let newVolume):
+            self.player.volume = newVolume
         }
     }
     // swiftlint:enable cyclomatic_complexity
