@@ -36,6 +36,7 @@
 		1619CC5DF835D29CFE745C443B8728DD /* BeLessThanOrEqual.swift in Sources */ = {isa = PBXBuildFile; fileRef = 468AEC5E5ED4A8FC8285309C4BEA37BC /* BeLessThanOrEqual.swift */; settings = {COMPILER_FLAGS = "-DPRODUCT_NAME=Nimble/Nimble"; }; };
 		16A9066A22D93B62009811B9 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16A9066922D93B62009811B9 /* Media.xcassets */; };
 		16A9066C22DA63E5009811B9 /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A9066B22DA63E5009811B9 /* Action.swift */; };
+		16A9067122DB8A93009811B9 /* RemoteCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A9067022DB8A93009811B9 /* RemoteCommand.swift */; };
 		17A60050B2AC439E06E7EE6F41498D68 /* ErrorUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17128CFD80AFB018CEF1F67D278A66ED /* ErrorUtility.swift */; };
 		19756A88FFFBE4639A1FB65D8367C01B /* Expectation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1516AE7402C91EE3F974A026E06F2AD7 /* Expectation.swift */; settings = {COMPILER_FLAGS = "-DPRODUCT_NAME=Nimble/Nimble"; }; };
 		19BA8AF46D9CC49E3E2CEDCAF6354442 /* CwlPreconditionTesting.h in Headers */ = {isa = PBXBuildFile; fileRef = 9AAC02263A02BF49A501953EFBAE454D /* CwlPreconditionTesting.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -314,6 +315,7 @@
 		1626C175DB0130F3FE2B198281FE29E7 /* QuickSpec.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = QuickSpec.m; path = Sources/QuickObjectiveC/QuickSpec.m; sourceTree = "<group>"; };
 		16A9066922D93B62009811B9 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Media.xcassets; path = KoalaTeaAssetPlayer/Assets/Media.xcassets; sourceTree = "<group>"; };
 		16A9066B22DA63E5009811B9 /* Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
+		16A9067022DB8A93009811B9 /* RemoteCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommand.swift; sourceTree = "<group>"; };
 		17128CFD80AFB018CEF1F67D278A66ED /* ErrorUtility.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ErrorUtility.swift; path = Sources/Quick/ErrorUtility.swift; sourceTree = "<group>"; };
 		18993DFAD7B1FBBC5E72F92CF70356C6 /* Expression.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Expression.swift; path = Sources/Nimble/Expression.swift; sourceTree = "<group>"; };
 		18C2EEF2C984C18CEBF8F2E053ED13AC /* Pods-KoalaTeaAssetPlayer_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-KoalaTeaAssetPlayer_Example-acknowledgements.plist"; sourceTree = "<group>"; };
@@ -1033,6 +1035,7 @@
 				9C7B86D58A5E5D6491900012ADA74764 /* RemoteCommandManager.swift */,
 				7F4FF5B46B8A462B7368CACE90BD953E /* VideoExporterOrientationHelper.swift */,
 				EA3D8240ABA879DE7B8769D8D742E272 /* AssetPlayer+Extensions */,
+				16A9067022DB8A93009811B9 /* RemoteCommand.swift */,
 			);
 			name = AssetPlayerClasses;
 			path = KoalaTeaAssetPlayer/Classes/AssetPlayerClasses;
@@ -1525,6 +1528,7 @@
 				AC90516EF23FFC2EE49FBACA18E3F6B4 /* VideoExporterOrientationHelper.swift in Sources */,
 				D3457230F3D08CAE2E33C1963F4121B4 /* AssetPlayerView.swift in Sources */,
 				2D1B07A07726D9B3E52BCDF21C83A590 /* AssetPlayerSliderView.swift in Sources */,
+				16A9067122DB8A93009811B9 /* RemoteCommand.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

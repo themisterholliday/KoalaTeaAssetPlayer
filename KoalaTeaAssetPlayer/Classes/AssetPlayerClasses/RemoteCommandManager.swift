@@ -39,9 +39,9 @@ public class RemoteCommandManager: NSObject {
         toggleSeekForwardCommand(false)
         toggleSeekBackwardCommand(false)
         toggleChangePlaybackPositionCommand(false)
-        toggleLikeCommand(false)
-        toggleDislikeCommand(false)
-        toggleBookmarkCommand(false)
+        toggleLikeCommand(false, localizedTitle: nil, localizedShortTitle: nil)
+        toggleDislikeCommand(false, localizedTitle: nil, localizedShortTitle: nil)
+        toggleBookmarkCommand(false, localizedTitle: nil, localizedShortTitle: nil)
     }
     
     // MARK: MPRemoteCommand Activation/Deactivation Methods
@@ -146,7 +146,10 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.changePlaybackPositionCommand.isEnabled = enable
     }
     
-    public func toggleLikeCommand(_ enable: Bool) {
+    public func toggleLikeCommand(_ enable: Bool, localizedTitle: String?, localizedShortTitle: String?) {
+        remoteCommandCenter.likeCommand.localizedTitle = localizedTitle ?? ""
+        remoteCommandCenter.likeCommand.localizedShortTitle = localizedShortTitle ?? ""
+
         if enable {
             remoteCommandCenter.likeCommand.addTarget(self, action: #selector(RemoteCommandManager.handleLikeCommandEvent(event:)))
         } else {
@@ -156,7 +159,10 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.likeCommand.isEnabled = enable
     }
     
-    public func toggleDislikeCommand(_ enable: Bool) {
+    public func toggleDislikeCommand(_ enable: Bool, localizedTitle: String?, localizedShortTitle: String?) {
+        remoteCommandCenter.dislikeCommand.localizedTitle = localizedTitle ?? ""
+        remoteCommandCenter.dislikeCommand.localizedShortTitle = localizedShortTitle ?? ""
+
         if enable {
             remoteCommandCenter.dislikeCommand.addTarget(self, action: #selector(RemoteCommandManager.handleDislikeCommandEvent(event:)))
         } else {
@@ -166,7 +172,10 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.dislikeCommand.isEnabled = enable
     }
     
-    public func toggleBookmarkCommand(_ enable: Bool) {
+    public func toggleBookmarkCommand(_ enable: Bool, localizedTitle: String?, localizedShortTitle: String?) {
+        remoteCommandCenter.bookmarkCommand.localizedTitle = localizedTitle ?? ""
+        remoteCommandCenter.bookmarkCommand.localizedShortTitle = localizedShortTitle ?? ""
+
         if enable {
             remoteCommandCenter.bookmarkCommand.addTarget(self, action: #selector(RemoteCommandManager.handleBookmarkCommandEvent(event:)))
         } else {
@@ -296,6 +305,36 @@ public class RemoteCommandManager: NSObject {
             return .success
         } else {
             return .noSuchContent
+        }
+    }
+
+    internal func enableCommands(from commands: [RemoteCommand]) {
+        commands.forEach({ enableRemoteCommand($0) })
+    }
+
+    private func enableRemoteCommand(_ remoteCommand: RemoteCommand) {
+        switch remoteCommand {
+        case .playback:
+            activatePlaybackCommands(true)
+        case .next:
+            toggleNextTrackCommand(true)
+        case .previous:
+            togglePreviousTrackCommand(true)
+        case .changePlaybackPosition:
+            toggleChangePlaybackPositionCommand(true)
+        case .skipForward(let interval):
+            toggleSkipForwardCommand(true, interval: interval)
+        case .skipBackward(let interval):
+            toggleSkipBackwardCommand(true, interval: interval)
+        case .seekForwardAndBackward:
+            toggleSeekForwardCommand(true)
+            toggleSeekBackwardCommand(true)
+        case .like(let localizedTitle, let localizedShortTitle):
+            toggleLikeCommand(true, localizedTitle: localizedTitle, localizedShortTitle: localizedShortTitle)
+        case .dislike(let localizedTitle, let localizedShortTitle):
+            toggleDislikeCommand(true, localizedTitle: localizedTitle, localizedShortTitle: localizedShortTitle)
+        case .bookmark(let localizedTitle, let localizedShortTitle):
+            toggleBookmarkCommand(true, localizedTitle: localizedTitle, localizedShortTitle: localizedShortTitle)
         }
     }
 }

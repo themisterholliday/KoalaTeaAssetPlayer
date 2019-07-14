@@ -42,7 +42,7 @@ class ViewController: UIViewController {
 //        let artworkURL = URL(string: "https://www.w3schools.com/w3images/fjords.jpg")
 //        let asset = Asset(urlAsset: AVURLAsset(url: url), artworkURL: artworkURL)
 
-        assetPlayerView.setupPlayback(asset: asset, options: [.shouldLoop])
+        assetPlayerView.setupPlayback(asset: asset, options: [.shouldLoop], remoteCommands: .all(skipInterval: 30))
     }
 }
 

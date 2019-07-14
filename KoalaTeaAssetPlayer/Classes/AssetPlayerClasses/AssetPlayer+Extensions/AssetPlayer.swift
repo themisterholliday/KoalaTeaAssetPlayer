@@ -169,6 +169,9 @@ open class AssetPlayer: NSObject {
         return playerView
     }()
 
+    private var remoteCommands: [RemoteCommand] = []
+    private lazy var remoteCommandManager: RemoteCommandManager = RemoteCommandManager(assetPlaybackManager: self)
+
     // MARK: - Life Cycle
     public override init() {
         self.state = .idle
@@ -177,10 +180,6 @@ open class AssetPlayer: NSObject {
         self.shouldLoop = false
 
         super.init()
-
-        // Allow background audio and playing audio with silent switch on
-        try? AVAudioSession.sharedInstance().setCategory(.playback)
-        try? AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
 
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
@@ -444,5 +443,11 @@ extension AssetPlayer {
         UIView.animate(withDuration: 0.5) {
             self.playerView.alpha = 1
         }
+    }
+}
+
+extension AssetPlayer {
+    func enableRemoteCommands(_ commands: [RemoteCommand]) {
+        self.remoteCommandManager.enableCommands(from: commands)
     }
 }

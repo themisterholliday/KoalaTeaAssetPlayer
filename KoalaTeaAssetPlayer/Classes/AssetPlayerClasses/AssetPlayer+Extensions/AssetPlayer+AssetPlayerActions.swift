@@ -13,7 +13,7 @@ public enum AssetPlayerSetupOptions {
 }
 
 public enum AssetPlayerActions {
-    case setup(with: Asset, options: [AssetPlayerSetupOptions])
+    case setup(with: Asset, options: [AssetPlayerSetupOptions], remoteCommands: [RemoteCommand])
     case play
     case pause
     case togglePlayPause
@@ -37,8 +37,8 @@ extension AssetPlayer {
     // swiftlint:disable cyclomatic_complexity
     open func perform(action: AssetPlayerActions) {
         switch action {
-        case .setup(let asset, let options):
-            handleSetup(with: asset, options: options)
+        case .setup(let asset, let options, let remoteCommands):
+            handleSetup(with: asset, options: options, remoteCommands: remoteCommands)
         case .play:
             self.state = .playing
         case .pause:
@@ -75,11 +75,16 @@ extension AssetPlayer {
     }
     // swiftlint:enable cyclomatic_complexity
 
-    private func handleSetup(with asset: Asset, options: [AssetPlayerSetupOptions]) {
+    private func handleSetup(with asset: Asset, options: [AssetPlayerSetupOptions], remoteCommands: [RemoteCommand]) {
         self.setup(with: asset)
         self.player.isMuted = options.contains(.startMuted)
         self.shouldLoop = options.contains(.shouldLoop)
         self.isPlayingLocalAsset = asset.isLocalFile
+        self.enableRemoteCommands(remoteCommands)
+        
+        // Allow background audio and playing audio with silent switch on
+        try? AVAudioSession.sharedInstance().setCategory(.playback)
+        try? AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
     }
 
     private func handleChangeStartTimeForLoop(to time: Double) {
