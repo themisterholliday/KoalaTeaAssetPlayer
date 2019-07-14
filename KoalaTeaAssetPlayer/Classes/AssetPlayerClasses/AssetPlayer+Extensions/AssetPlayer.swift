@@ -23,8 +23,6 @@ public protocol AssetPlayerDelegate: class {
     // This is the time in seconds that the video has been buffered.
     // If implementing a UIProgressView, user this value / player.maximumDuration to set buffering progress.
     func playerBufferedTimeDidChange(_ player: AssetPlayer)
-
-    func playerDidFail(_ error: Error?)
 }
 
 public enum AssetPlayerPlaybackState: Equatable {
@@ -277,9 +275,8 @@ extension AssetPlayer {
             self.player.playImmediately(atRate: self.rate)
         case .paused:
             self.player.pause()
-        case .failed(let error):
+        case .failed:
             self.player.pause()
-            self.delegate?.playerDidFail(error)
         case .buffering:
             self.player.pause()
         case .finished:
@@ -315,7 +312,7 @@ extension AssetPlayer {
             self?.handleLoadedTimeRangesChange()
         })
 
-        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old, .initial], changeHandler: { [weak self] _, change in
+        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old], changeHandler: { [weak self] _, change in
             self?.handleStatusChange(change: change)
         })
 
@@ -407,7 +404,7 @@ extension AssetPlayer {
             newStatus = .unknown
         }
 
-        if newStatus == .failed, newStatus == .unknown {
+        if newStatus == .failed {
             self.state = .failed(error: player.currentItem?.error)
         }
         updateGeneralMetadata()

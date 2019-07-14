@@ -9,9 +9,9 @@ import Foundation
 
 extension AssetPlayerSliderView {
     typealias Actions = (
-        sliderDragDidBegin: Action<Void, Void>.Sync,
-        sliderDidMove: Action<Double, Void>.Sync,
-        sliderDragDidEnd: Action<Double, Void>.Sync
+        sliderDragDidBegin: ViewAction<Void, Void>.Sync,
+        sliderDidMove: ViewAction<Double, Void>.Sync,
+        sliderDragDidEnd: ViewAction<Double, Void>.Sync
     )
 }
 
@@ -104,11 +104,11 @@ class AssetPlayerSliderView: PassThroughView {
         let timeInSeconds = slider.value
         switch touchEvent.phase {
         case .began:
-            actions.sliderDragDidBegin(self, ())
+            actions.sliderDragDidBegin(())
         case .moved:
-            actions.sliderDidMove(self, timeInSeconds.double)
+            actions.sliderDidMove(timeInSeconds.double)
         case .ended:
-            actions.sliderDragDidEnd(self, timeInSeconds.double)
+            actions.sliderDragDidEnd(timeInSeconds.double)
         default:
             break
         }

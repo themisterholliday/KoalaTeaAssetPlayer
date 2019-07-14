@@ -16,7 +16,7 @@ class ViewController: UIViewController {
     lazy var asset: Asset = {
         return Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_5mb", withExtension: "mp4")!)
     }()
-    lazy var assetPlayerView = YTPlayerView()
+    lazy var assetPlayerView = AssetPlayerView()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,8 +35,14 @@ class ViewController: UIViewController {
             // Fallback on earlier versions
         }
 
+        guard let url = URL(string:"http://traffic.libsyn.com/sedaily/PeriscopeData.mp3") else {
+            assertionFailure()
+            return
+        }
+        let artworkURL = URL(string: "https://www.w3schools.com/w3images/fjords.jpg")
+        let asset = Asset(urlAsset: AVURLAsset(url: url), artworkURL: artworkURL)
+
         assetPlayerView.setupPlayback(asset: asset, options: [])
-//        self.setup()
     }
 
     func setup() {

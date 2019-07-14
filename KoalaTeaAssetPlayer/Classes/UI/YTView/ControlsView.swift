@@ -9,75 +9,60 @@
 import UIKit
 import SwifterSwift
 
-/// Player delegate protocol
-public protocol ControlsViewDelegate: NSObjectProtocol {
-    func playButtonPressed()
-    func pauseButtonPressed()
-    func playbackSliderValueChanged(value: Float)
-    func fullscreenButtonPressed()
-    func minimizeButtonPressed()
+enum ControlsViewState: Equatable {
+    case buffering
+    case setup(viewModel: ControlsViewModel)
+    case updating(viewModel: ControlsViewModel)
+    case playing
+    case paused
+    case finished
 }
 
-public class ControlsView: PassThroughView {
-    open weak var delegate: ControlsViewDelegate?
-    
-    lazy var activityView: UIActivityIndicatorView = UIActivityIndicatorView(frame: .zero)
-    var playButton = UIButton()
-    var pauseButton = UIButton()
-    var fullscreenButton = UIButton()
-    var minimizeButton = UIButton()
-    var blackView = UIView()
-    lazy var playbackSliderView: AssetPlayerSliderView = {
+struct ControlsViewModel: Equatable {
+    let currentTime: Float
+    let bufferedTime: Float
+    let maxValueForSlider: Float
+    let currentTimeText: String
+    let timeLeftText: String
+}
+
+extension ControlsView {
+    typealias Actions = (
+        playButtonPressed: ViewAction<Void, Void>.Sync,
+        pauseButtonPressed: ViewAction<Void, Void>.Sync,
+        didStartDraggingSlider: ViewAction<Void, Void>.Sync,
+        didDragToTime: ViewAction<Double, Void>.Sync
+    )
+}
+
+public class ControlsView: UIView {
+    private lazy var activityView: UIActivityIndicatorView = UIActivityIndicatorView(frame: .zero)
+    private lazy var playButton = UIButton()
+    private lazy var pauseButton = UIButton()
+    private lazy var blackView = UIView()
+    private lazy var playbackSliderView: AssetPlayerSliderView = {
         return AssetPlayerSliderView(actions: (
-            sliderDragDidBegin: { view, _ in
-                print("sliderDragDidBegin")
+            sliderDragDidBegin: { _ in
+                self.actions.didStartDraggingSlider(())
         },
-            sliderDidMove: { view, time in
-                print(time, "moved")
+            sliderDidMove: { time in
+
         },
-            sliderDragDidEnd: { view, time in
-                print(time, "testing")
+            sliderDragDidEnd: { time in
+                self.actions.didDragToTime(time)
         }
         ))
     }()
 
-    var isVisible: Bool {
-        get {
-            return self.blackView.alpha > 0
-        }
-    }
-    
-    var isRotated: Bool = false {
-        didSet {
-            self.fullscreenButton.isSelected = isRotated
-            switch isRotated {
-            case true:
-                self.setRotatedConstraints()
-            case false:
-                self.setDefaultConstraints()
-                self.fadeInSliders()
-            }
+    private var isWaiting: Bool = false
+    private var blackViewAlpha: CGFloat = 0.15
+    private var fadingTime = 0.3
 
-            switch self.isVisible {
-            case true:
-                self.fadeInSliders()
-            case false:
-                self.fadeOutSliders()
-            }
-        }
-    }
-    
-    var isWaiting: Bool = false
-    var assetPlaybackManager: AssetPlayer!
-    var blackViewAlpha: CGFloat = 0.15
+    private let actions: Actions
 
-    var fadingTime = 0.3
-
-    private var rotatedConstraints: [NSLayoutConstraint] = []
-    private var defaultConstraints: [NSLayoutConstraint] = []
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    required init(actions: Actions) {
+        self.actions = actions
+        super.init(frame: .zero)
         
         self.addSubview(blackView)
 
@@ -89,109 +74,46 @@ public class ControlsView: PassThroughView {
 
         self.setupButtons()
         self.setupActivityIndicator()
-        self.addPlaybackSlider()
-
-        
+        self.setupPlaybackSlider()
     }
 
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    func configure(with state: ControlsViewState) {
+        if state != .buffering { activityView.stopAnimating() }
+        switch state {
+        case .buffering:
+            activityView.startAnimating()
+            playButton.isHidden = true
+            pauseButton.isHidden = true
+        case .paused:
+            playButton.isHidden = false
+            pauseButton.isHidden = true
+        case .playing:
+            pauseButton.isHidden = false
+            playButton.isHidden = true
+        case .updating(let viewModel):
+            //        self.controlsView.playbackSliderView.updateTimeLabels(currentTimeText: properties.currentTimeText, timeLeftText: properties.timeLeftText)
+            playbackSliderView.updateSlider(currentValue: viewModel.currentTime)
+            playbackSliderView.updateBufferSlider(bufferValue: viewModel.bufferedTime)
+        case .finished:
+            break
+        case .setup(let viewModel):
+            playbackSliderView.updateSlider(maxValue: viewModel.maxValueForSlider)
+            playbackSliderView.updateSlider(currentValue: viewModel.currentTime)
+            playbackSliderView.updateBufferSlider(bufferValue: viewModel.bufferedTime)
+        }
+    }
     
-    func setupActivityIndicator() {
+    private func setupActivityIndicator() {
         activityView.style = .whiteLarge
         self.addSubview(activityView)
         activityView.constrainEdgesToSuperView()
     }
-    
-    func enableAllButtons() {
-        self.playButton.isEnabled = true
-        self.pauseButton.isEnabled = true
-        self.fullscreenButton.isEnabled = true
-        self.minimizeButton.isEnabled = true
-    }
-    
-    func disableAllButtons() {
-        self.playButton.isEnabled = false
-        self.pauseButton.isEnabled = false
-        self.fullscreenButton.isEnabled = false
-        self.minimizeButton.isEnabled = false
-    }
-    
-    func fadeInThenSetWait() {
-        guard !isWaiting else { return }
-        self.fadeSelfIn()
-        self.isWaiting = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-            guard self.assetPlaybackManager.state == .playing else { return }
-            self.isWaiting = false
-            self.fadeSelfOut()
-        }
-    }
-    
-    func waitAndFadeOut() {
-        guard !isWaiting else { return }
-        self.isWaiting = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-            guard self.assetPlaybackManager.state == .playing else { return }
-            self.isWaiting = false
-            self.fadeSelfOut()
-        }
-    }
-    
-    func fadeSelfIn() {
-        UIView.animate(withDuration: fadingTime, animations: {
-            self.blackView.alpha = self.blackViewAlpha
-            self.playButton.alpha = 1
-            self.pauseButton.alpha = 1
-            self.fullscreenButton.alpha = 1
-            self.minimizeButton.alpha = 1
-            self.playbackSliderView.showLabels()
-            
-            if self.isRotated {
-                self.playbackSliderView.showSliders()
-            }
-        })
-        self.fadeInSliders()
-        DispatchQueue.main.asyncAfter(deadline: .now() + fadingTime / 2) {
-            self.playbackSliderView.showSliderThumbImage()
-        }
-    }
-    
-    func fadeSelfOut() {
-        UIView.animate(withDuration: fadingTime / 2, animations: {
-            self.blackView.alpha = 0
-            self.playButton.alpha = 0
-            self.pauseButton.alpha = 0
-            self.fullscreenButton.alpha = 0
-            self.minimizeButton.alpha = 0
-            self.playbackSliderView.hideLabels()
 
-            if self.isRotated {
-                self.playbackSliderView.hideSliders()
-            }
-        })
-        self.fadeOutSliders()
-        DispatchQueue.main.asyncAfter(deadline: .now() + fadingTime / 2) {
-            self.playbackSliderView.hideSliderThumbImage()
-        }
-    }
-    
-    func fadeInSliders() {
-        UIView.animate(withDuration: fadingTime / 2, animations: {
-            self.playbackSliderView.showSliders()
-        })
-    }
-    
-    func fadeOutSliders() {
-        UIView.animate(withDuration: fadingTime / 2, animations: {
-            if self.isRotated {
-                self.playbackSliderView.hideSliders()
-            }
-        })
-    }
- 
-    func addPlaybackSlider() {
+    private func setupPlaybackSlider() {
         self.addSubview(playbackSliderView)
         playbackSliderView.layout {
             $0.bottom == self.bottomAnchor
@@ -200,35 +122,10 @@ public class ControlsView: PassThroughView {
             $0.height == 40
         }
     }
-    
-    func setDefaultConstraints() {
-        self.playbackSliderView.setDefaultConstraints()
-        
-//        fullscreenButton.snp.makeConstraints { (make) in
-//            make.right.equalToSuperview().inset(UIView.getValueScaledByScreenWidthFor(baseValue: 5))
-//            make.bottom.equalToSuperview().inset(UIView.getValueScaledByScreenHeightFor(baseValue: 5))
-//        }
-//
-//        minimizeButton.snp.makeConstraints { (make) in
-//            make.top.equalToSuperview()
-//            make.left.equalToSuperview()
-//        }
-    }
-    
-    func setRotatedConstraints() {
-        self.playbackSliderView.setRotatedConstraints()
-        
-//        fullscreenButton.snp.makeConstraints { (make) in
-//            make.right.equalToSuperview().inset(UIView.getValueScaledByScreenWidthFor(baseValue: 5))
-//            make.bottom.equalToSuperview().inset(UIView.getValueScaledByScreenHeightFor(baseValue: 5))
-//        }
-    }
-    
-    func setupButtons() {
+
+    private func setupButtons() {
         self.addSubview(playButton)
         self.addSubview(pauseButton)
-        self.addSubview(fullscreenButton)
-        self.addSubview(minimizeButton)
 
         playButton.layout {
             $0.height == 40
@@ -247,49 +144,74 @@ public class ControlsView: PassThroughView {
 
         playButton.setTitle("Play", for: .normal)
         pauseButton.setTitle("Pause", for: .normal)
-//
-//        let iconHeight = UIView.getValueScaledByScreenHeightFor(baseValue: 35)
-//        let iconColor: UIColor = .white
-//
-//        playButton.setIcon(icon: .fontAwesome(.play), iconSize: iconHeight, color: iconColor, forState: .normal)
-//        pauseButton.setIcon(icon: .fontAwesome(.pause), iconSize: iconHeight, color: iconColor, forState: .normal)
-//
-//        playButton.anchorCenterSuperview()
-//        pauseButton.anchorCenterSuperview()
-//
-//        playButton.addTarget(self, action: #selector(self.playButtonPressed), for: .touchUpInside)
-//        pauseButton.addTarget(self, action: #selector(self.pauseButtonPressed), for: .touchUpInside)
-//
-//        playButton.isHidden = true
-//
-//        fullscreenButton.setIcon(icon: .linearIcons(.frameExpand), iconSize: UIView.getValueScaledByScreenHeightFor(baseValue: 20), color: iconColor, forState: .normal)
-//        fullscreenButton.setIcon(icon: .linearIcons(.frameContract), iconSize: UIView.getValueScaledByScreenHeightFor(baseValue: 20), color: iconColor, forState: .selected)
-//        fullscreenButton.addTarget(self, action: #selector(fullscreenButtonPressed(_:)), for: .touchUpInside)
-//
-//        minimizeButton.setIcon(icon: .fontAwesome(.chevronDown), iconSize: UIView.getValueScaledByScreenHeightFor(baseValue: 20), color: iconColor, forState: .normal)
-//        minimizeButton.addTarget(self, action: #selector(minimizeButtonPressed(_:)), for: .touchUpInside)
+
+        playButton.addTarget(self, action: #selector(self.playButtonPressed), for: .touchUpInside)
+        pauseButton.addTarget(self, action: #selector(self.pauseButtonPressed), for: .touchUpInside)
+    }
+
+    // @TODO: do fade in
+    private func fadeInThenSetWait() {
+        guard !isWaiting else { return }
+        self.fadeSelfIn()
+        self.isWaiting = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            self.isWaiting = false
+            self.fadeSelfOut()
+        }
     }
     
-    // MARK: - Play/Pause Functions
-    @objc func playButtonPressed() {
-        self.delegate?.playButtonPressed()
+    private func waitAndFadeOut() {
+        guard !isWaiting else { return }
+        self.isWaiting = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            self.isWaiting = false
+            self.fadeSelfOut()
+        }
     }
     
-    @objc func pauseButtonPressed() {
-        self.delegate?.pauseButtonPressed()
+    private func fadeSelfIn() {
+        UIView.animate(withDuration: fadingTime, animations: {
+            self.blackView.alpha = self.blackViewAlpha
+            self.playButton.alpha = 1
+            self.pauseButton.alpha = 1
+        })
+        self.fadeInSliders()
+        DispatchQueue.main.asyncAfter(deadline: .now() + fadingTime / 2) {
+            self.playbackSliderView.showSliderThumbImage()
+        }
     }
     
-    @objc func fullscreenButtonPressed(_ sender: UIButton) {
-        self.delegate?.fullscreenButtonPressed()
+    private func fadeSelfOut() {
+        UIView.animate(withDuration: fadingTime / 2, animations: {
+            self.blackView.alpha = 0
+            self.playButton.alpha = 0
+            self.pauseButton.alpha = 0
+        })
+        self.fadeOutSliders()
+        DispatchQueue.main.asyncAfter(deadline: .now() + fadingTime / 2) {
+            self.playbackSliderView.hideSliderThumbImage()
+        }
     }
     
-    @objc func minimizeButtonPressed(_ sender: UIButton) {
-        self.delegate?.minimizeButtonPressed()
+    private func fadeInSliders() {
+        UIView.animate(withDuration: fadingTime / 2, animations: {
+            self.playbackSliderView.showSliders()
+        })
+    }
+    
+    private func fadeOutSliders() {
+        UIView.animate(withDuration: fadingTime / 2, animations: {
+            self.playbackSliderView.hideSliders()
+        })
     }
 }
 
-//extension ControlsView: AssetPlayerSliderViewDelegate {
-//    func playbackSliderValueChanged(value: Float) {
-//        self.delegate?.playbackSliderValueChanged(value: value)
-//    }
-//}
+extension ControlsView {
+    @objc func playButtonPressed() {
+        self.actions.playButtonPressed(())
+    }
+    
+    @objc func pauseButtonPressed() {
+        self.actions.pauseButtonPressed(())
+    }
+}

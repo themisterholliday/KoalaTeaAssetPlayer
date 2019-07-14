@@ -57,7 +57,13 @@ extension AssetPlayer {
         case .pause:
             self.state = .paused
         case .seekToTimeInSeconds(let time):
-            self.seekToTimeInSeconds(time) { _ in }
+            let previousState = self.previousState
+            self.state = .paused
+            self.seekToTimeInSeconds(time) { _ in
+                if previousState == .playing {
+                    self.state = .playing
+                }
+            }
         case .changePlayerPlaybackRate(let rate):
             self.changePlayerPlaybackRate(to: rate)
         case .changeIsPlayingLocalAsset(let isPlayingLocalAsset):
@@ -165,15 +171,20 @@ extension AssetPlayer {
         }
     }
 
-    internal func seekTo(_ newPosition: CMTime) {
+    private func seekTo(_ newPosition: CMTime) {
         guard asset != nil else { return }
         self.player.seek(to: newPosition, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero)
     }
 
-    internal func seekToTimeInSeconds(_ time: Double, completion: @escaping (Bool) -> Void) {
+    internal func seekToTimeInSeconds(_ time: Double, completion: ((Bool) -> Void)?) {
         guard asset != nil else { return }
         let newPosition = CMTimeMakeWithSeconds(time, preferredTimescale: 1000)
-        self.player.seek(to: newPosition, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero, completionHandler: completion)
+        if let completion = completion {
+            self.player.seek(to: newPosition, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero, completionHandler: completion)
+        } else {
+            self.player.seek(to: newPosition, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero)
+        }
+
 
         self.updatePlaybackMetadata()
     }
