@@ -51,7 +51,7 @@ public class AssetPlayerView: UIView {
         print("player view deinit")
     }
     
-    public func setupPlayback(asset: Asset, options: AssetPlayerSetupOptions) {
+    public func setupPlayback(asset: Asset, options: [AssetPlayerSetupOptions]) {
         assetPlayer.perform(action: .setup(with: asset, options: options))
         assetPlayer.perform(action: .play)
         assetPlayer.delegate = self

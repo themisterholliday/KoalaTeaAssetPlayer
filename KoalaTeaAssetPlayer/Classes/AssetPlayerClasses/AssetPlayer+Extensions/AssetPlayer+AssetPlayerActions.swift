@@ -8,23 +8,12 @@
 import Foundation
 import AVKit
 
-public struct AssetPlayerSetupOptions: OptionSet {
-    public let rawValue: Int
-
-    public init(rawValue: Int) {
-        self.rawValue = rawValue
-    }
-
-    public static let startMuted = AssetPlayerSetupOptions(rawValue: 1 << 0)
-    public static let shouldLoop = AssetPlayerSetupOptions(rawValue: 1 << 1)
-
-    public static let all: AssetPlayerSetupOptions = [
-        .startMuted, .shouldLoop
-    ]
+public enum AssetPlayerSetupOptions {
+    case startMuted, shouldLoop
 }
 
 public enum AssetPlayerActions {
-    case setup(with: Asset, options: AssetPlayerSetupOptions)
+    case setup(with: Asset, options: [AssetPlayerSetupOptions])
     case play
     case pause
     case togglePlayPause
