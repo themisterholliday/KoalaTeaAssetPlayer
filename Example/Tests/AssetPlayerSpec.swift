@@ -70,7 +70,7 @@ class AssetPlayerSpec: QuickSpec {
                         assetPlayer.perform(action: .changeStartTimeForLoop(to: 5.0))
                         expect(assetPlayer.properties.startTimeForLoop).to(equal(5.0))
 
-                        expect(assetPlayer.properties.state).toEventually(equal(AssetPlayerPlaybackState.none), timeout: 20)
+                        expect(assetPlayer.properties.state).toEventually(equal(AssetPlayerPlaybackState.idle), timeout: 20)
 
                         assetPlayer.perform(action: .changeEndTimeForLoop(to: 10.0))
                         expect(assetPlayer.properties.endTimeForLoop).to(equal(10.0))

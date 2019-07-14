@@ -27,7 +27,7 @@ public protocol AssetPlayerDelegate: class {
 
 public enum AssetPlayerPlaybackState: Equatable {
     case setup(asset: Asset)
-    case playing, paused, buffering, finished, none
+    case playing, paused, buffering, finished, idle
     case failed(error: Error?)
 
     public static func == (lhs: AssetPlayerPlaybackState, rhs: AssetPlayerPlaybackState) -> Bool {
@@ -44,7 +44,7 @@ public enum AssetPlayerPlaybackState: Equatable {
             return true
         case (.finished, .finished):
             return true
-        case (.none, .none):
+        case (.idle, .idle):
             return true
         default:
             return false
@@ -171,8 +171,8 @@ open class AssetPlayer: NSObject {
 
     // MARK: - Life Cycle
     public override init() {
-        self.state = .none
-        self.previousState = .none
+        self.state = .idle
+        self.previousState = .idle
         self.isPlayingLocalAsset = false
         self.shouldLoop = false
 
@@ -241,7 +241,7 @@ open class AssetPlayer: NSObject {
                 self.delegate?.playerIsSetup(self)
                 
                 if self.state != .playing, self.state != .paused, self.state != .buffering {
-                    self.state = .none
+                    self.state = .idle
                 }
 
             }
@@ -267,7 +267,7 @@ open class AssetPlayer: NSObject {
 extension AssetPlayer {
     private func handleStateChange(_ state: AssetPlayerPlaybackState) {
         switch state {
-        case .none:
+        case .idle:
             self.player.pause()
         case .setup(let asset):
             self.asset = asset

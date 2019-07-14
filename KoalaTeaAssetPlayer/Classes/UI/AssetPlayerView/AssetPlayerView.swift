@@ -80,7 +80,7 @@ public class AssetPlayerView: UIView {
             controlsView.configure(with: .buffering)
         case .finished:
             controlsView.configure(with: .finished)
-        case .none:
+        case .idle:
             break
         }
     }

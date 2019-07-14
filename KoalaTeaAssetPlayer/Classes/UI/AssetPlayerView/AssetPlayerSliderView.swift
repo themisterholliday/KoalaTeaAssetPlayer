@@ -15,7 +15,7 @@ extension AssetPlayerSliderView {
     )
 }
 
-class AssetPlayerSliderView: PassThroughView {
+class AssetPlayerSliderView: UIView {
     private var bufferSlider: UISlider = UISlider(frame: .zero)
     private var bufferBackgroundSlider: UISlider = UISlider(frame: .zero)
     private var playbackSlider: UISlider = UISlider(frame: .zero)

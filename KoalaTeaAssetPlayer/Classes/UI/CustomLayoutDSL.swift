@@ -119,7 +119,7 @@ extension LayoutDimensionProperty {
 }
 
 internal extension UIView {
-    func layout(_ closure: (LayoutProxy) -> Void){
+    func layout(_ closure: (LayoutProxy) -> Void) {
         translatesAutoresizingMaskIntoConstraints = false
         closure(LayoutProxy(view: self))
     }

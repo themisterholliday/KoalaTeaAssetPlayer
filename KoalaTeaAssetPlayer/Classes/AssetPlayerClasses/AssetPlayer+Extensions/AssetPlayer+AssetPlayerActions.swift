@@ -184,8 +184,7 @@ extension AssetPlayer {
         } else {
             self.player.seek(to: newPosition, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero)
         }
-
-
+        
         self.updatePlaybackMetadata()
     }
 
