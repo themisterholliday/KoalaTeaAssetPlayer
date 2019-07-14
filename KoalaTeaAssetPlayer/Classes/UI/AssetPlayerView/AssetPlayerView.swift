@@ -11,7 +11,6 @@ import AVFoundation
 
 public class AssetPlayerView: UIView {
     private lazy var assetPlayer = AssetPlayer()
-    private lazy var remoteCommandManager = RemoteCommandManager(assetPlaybackManager: assetPlayer)
     
     private lazy var playerView: PlayerView = assetPlayer.playerView
     private lazy var controlsView: ControlsView = {
@@ -49,19 +48,10 @@ public class AssetPlayerView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func setupPlayback(asset: Asset, options: [AssetPlayerSetupOptions]) {
-        assetPlayer.perform(action: .setup(with: asset, options: options))
+    public func setupPlayback(asset: Asset, options: [AssetPlayerSetupOptions], remoteCommands: [RemoteCommand]) {
+        assetPlayer.perform(action: .setup(with: asset, options: options, remoteCommands: remoteCommands))
         assetPlayer.perform(action: .play)
         assetPlayer.delegate = self
-        setupRemoteCommandManager()
-    }
-
-    private func setupRemoteCommandManager() {
-        // Always enable playback commands in MPRemoteCommandCenter.
-        remoteCommandManager.activatePlaybackCommands(true)
-        remoteCommandManager.toggleChangePlaybackPositionCommand(true)
-        remoteCommandManager.toggleSkipBackwardCommand(true, interval: 30)
-        remoteCommandManager.toggleSkipForwardCommand(true, interval: 30)
     }
 
     private func handleAssetPlaybackManagerStateChange(to state: AssetPlayerPlaybackState) {

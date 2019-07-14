@@ -37,7 +37,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("actionable state changes") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, options: []))
+                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, options: [], remoteCommands: []))
                     }
 
                     it("should have SETUP state") {
@@ -79,7 +79,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("finished state test") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: []))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: [], remoteCommands: []))
                     }
 
                     it("should have FINISHED state") {
@@ -113,7 +113,7 @@ class AssetPlayerSpec: QuickSpec {
                     var mockAssetPlayerDelegate: MockAssetPlayerDelegate!
 
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: []))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: [], remoteCommands: []))
                         mockAssetPlayerDelegate = MockAssetPlayerDelegate(assetPlayer: assetPlayer)
                     }
 
@@ -164,7 +164,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("actionable state changes") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, options: []))
+                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, options: [], remoteCommands: []))
                     }
 
                     it("should have SETUP state") {
@@ -197,7 +197,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("finished state test") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: []))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: [], remoteCommands: []))
                     }
 
                     it("should have FINISHED state") {
@@ -231,7 +231,7 @@ class AssetPlayerSpec: QuickSpec {
                     var mockAssetPlayerDelegate: MockAssetPlayerDelegate!
 
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: []))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: [], remoteCommands: []))
                         mockAssetPlayerDelegate = MockAssetPlayerDelegate(assetPlayer: assetPlayer)
                     }
 
