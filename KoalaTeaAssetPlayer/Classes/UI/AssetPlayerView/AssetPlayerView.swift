@@ -27,7 +27,9 @@ public class AssetPlayerView: UIView {
         },
             didDragToTime: { [weak self] time in
                 self?.assetPlayer.perform(action: .seekToTimeInSeconds(time: time))
-                self?.assetPlayer.perform(action: .play)
+                if self?.assetPlayer.properties.previousState == .playing {
+                    self?.assetPlayer.perform(action: .play)
+                }
         }
         ))
     }()
@@ -45,10 +47,6 @@ public class AssetPlayerView: UIView {
     
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    deinit {
-        print("player view deinit")
     }
     
     public func setupPlayback(asset: Asset, options: [AssetPlayerSetupOptions]) {

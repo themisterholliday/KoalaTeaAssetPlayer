@@ -38,80 +38,78 @@ extension AssetPlayer {
     open func perform(action: AssetPlayerActions) {
         switch action {
         case .setup(let asset, let options):
-            self.setup(with: asset)
-            self.player.isMuted = options.contains(.startMuted)
-            self.shouldLoop = options.contains(.shouldLoop)
-            self.isPlayingLocalAsset = asset.isLocalFile
+            handleSetup(with: asset, options: options)
         case .play:
             self.state = .playing
         case .pause:
             self.state = .paused
         case .seekToTimeInSeconds(let time):
-            self.seekToTimeInSeconds(time) { _ in }
+            seekToTimeInSeconds(time) { _ in }
         case .changePlayerPlaybackRate(let rate):
-            self.changePlayerPlaybackRate(to: rate)
+            changePlayerPlaybackRate(to: rate)
         case .changeIsPlayingLocalAsset(let isPlayingLocalAsset):
             self.isPlayingLocalAsset = isPlayingLocalAsset
         case .changeShouldLoop(let shouldLoop):
             self.shouldLoop = shouldLoop
         case .changeStartTimeForLoop(let time):
-            guard time > 0 else {
-                self.startTimeForLoop = 0
-                return
-            }
-            self.startTimeForLoop = time
+            handleChangeStartTimeForLoop(to: time)
         case .changeEndTimeForLoop(let time):
-            guard self.duration != 0 else {
-                return
-            }
-            guard time < self.duration else {
-                self.endTimeForLoop = self.duration
-                return
-            }
-            self.endTimeForLoop = time
+            handleChangeEndTimeForLoop(to: time)
         case .changeIsMuted(let isMuted):
-            self.player.isMuted = isMuted
+            player.isMuted = isMuted
         case .stop:
-            self.handleStop()
+            handleStop()
         case .beginFastForward:
-            self.perform(action: .changePlayerPlaybackRate(to: 2.0))
+            perform(action: .changePlayerPlaybackRate(to: 2.0))
         case .beginRewind:
-            self.perform(action: .changePlayerPlaybackRate(to: -2.0))
+            perform(action: .changePlayerPlaybackRate(to: -2.0))
         case .endRewind, .endFastForward:
-            self.perform(action: .changePlayerPlaybackRate(to: 1.0))
+            perform(action: .changePlayerPlaybackRate(to: 1.0))
         case .togglePlayPause:
-            if state == .playing {
-                self.perform(action: .pause)
-            } else {
-                self.perform(action: .play)
-            }
+            handleTogglePlayPause()
         case .skip(let interval):
-            self.perform(action: .seekToTimeInSeconds(time: currentTime + interval))
+            perform(action: .seekToTimeInSeconds(time: currentTime + interval))
         case .changeVolume(let newVolume):
-            self.player.volume = newVolume
+            player.volume = newVolume
         }
     }
     // swiftlint:enable cyclomatic_complexity
 
-    private func setup(with asset: Asset) {
-        self.updateGeneralMetadata()
+    private func handleSetup(with asset: Asset, options: [AssetPlayerSetupOptions]) {
+        self.setup(with: asset)
+        self.player.isMuted = options.contains(.startMuted)
+        self.shouldLoop = options.contains(.shouldLoop)
+        self.isPlayingLocalAsset = asset.isLocalFile
+    }
 
-        self.state = .setup(asset: asset)
-
-        // Seconds time observer
-        let interval = CMTimeMake(value: 1, timescale: 2)
-        timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [weak self] time in
-            self?.handleSecondTimeObserver(with: time)
+    private func handleChangeStartTimeForLoop(to time: Double) {
+        guard time > 0 else {
+            self.startTimeForLoop = 0
+            return
         }
+        self.startTimeForLoop = time
+    }
 
-        // Millisecond time observer
-        let millisecondInterval = CMTimeMake(value: 1, timescale: 100)
-        timeObserverTokenMilliseconds = player.addPeriodicTimeObserver(forInterval: millisecondInterval, queue: DispatchQueue.main) { [weak self] time in
-            self?.handleMillisecondTimeObserver(with: time)
+    private func handleChangeEndTimeForLoop(to time: Double) {
+        guard self.duration != 0 else {
+            return
+        }
+        guard time < self.duration else {
+            self.endTimeForLoop = self.duration
+            return
+        }
+        self.endTimeForLoop = time
+    }
+
+    private func handleTogglePlayPause() {
+        if state == .playing {
+            self.perform(action: .pause)
+        } else {
+            self.perform(action: .play)
         }
     }
 
-    func handleStop() {
+    internal func handleStop() {
         NotificationCenter.default.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: AVAudioSession.interruptionNotification, object: nil)
@@ -133,6 +131,24 @@ extension AssetPlayer {
 
         if avPlayerItem != nil {
             self.removePlayerItemObservers()
+        }
+    }
+
+    private func setup(with asset: Asset) {
+        self.updateGeneralMetadata()
+
+        self.state = .setup(asset: asset)
+
+        // Seconds time observer
+        let interval = CMTimeMake(value: 1, timescale: 2)
+        timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [weak self] time in
+            self?.handleSecondTimeObserver(with: time)
+        }
+
+        // Millisecond time observer
+        let millisecondInterval = CMTimeMake(value: 1, timescale: 100)
+        timeObserverTokenMilliseconds = player.addPeriodicTimeObserver(forInterval: millisecondInterval, queue: DispatchQueue.main) { [weak self] time in
+            self?.handleMillisecondTimeObserver(with: time)
         }
     }
 
@@ -162,7 +178,7 @@ extension AssetPlayer {
         self.player.seek(to: newPosition, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero)
     }
 
-    internal func seekToTimeInSeconds(_ time: Double, completion: ((Bool) -> Void)?) {
+    private func seekToTimeInSeconds(_ time: Double, completion: ((Bool) -> Void)?) {
         guard asset != nil else { return }
         let newPosition = CMTimeMakeWithSeconds(time, preferredTimescale: 1000)
         if let completion = completion {

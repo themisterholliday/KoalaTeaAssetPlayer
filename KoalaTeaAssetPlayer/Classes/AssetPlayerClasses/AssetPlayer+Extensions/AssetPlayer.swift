@@ -188,6 +188,10 @@ open class AssetPlayer: NSObject {
         notificationCenter.addObserver(self, selector: #selector(handleInterruption), name: AVAudioSession.interruptionNotification, object: nil)
     }
 
+    deinit {
+        handleStop()
+    }
+
     // MARK: - Asset Loading
     private func asynchronouslyLoadURLAsset(_ newAsset: Asset) {
         /*
@@ -284,9 +288,8 @@ extension AssetPlayer {
 
             guard !shouldLoop else {
                 self.currentTime = startTimeForLoop
-                self.seekToTimeInSeconds(startTimeForLoop) { _ in
-                    self.state = .playing
-                }
+                self.perform(action: .seekToTimeInSeconds(time: startTimeForLoop))
+                self.state = .playing
                 return
             }
         }
@@ -316,7 +319,7 @@ extension AssetPlayer {
             self?.handleStatusChange(change: change)
         })
 
-        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old, .initial], changeHandler: { _, _ in
+        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old, .initial], changeHandler: { [weak self]  _, _ in
             // Should be ready to play here
             // @TODO: handle
         })
@@ -340,9 +343,8 @@ extension AssetPlayer {
     @objc private func handleAVPlayerItemDidPlayToEndTimeNotification(notification: Notification) {
         guard !shouldLoop else {
             self.currentTime = startTimeForLoop
-            self.seekToTimeInSeconds(startTimeForLoop) { _ in
-                self.state = .playing
-            }
+            self.perform(action: .seekToTimeInSeconds(time: startTimeForLoop))
+            self.state = .playing
             return
         }
 

@@ -16,8 +16,8 @@ class ViewController: UIViewController {
     lazy var asset: Asset = {
         return Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_5mb", withExtension: "mp4")!)
     }()
-    lazy var assetPlayerView = AssetPlayerView()
-
+    lazy var assetPlayerView: AssetPlayerView = AssetPlayerView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -35,14 +35,14 @@ class ViewController: UIViewController {
             // Fallback on earlier versions
         }
 
-        guard let url = URL(string:"https://www.podtrac.com/pts/redirect.mp3/audio.wnyc.org/adulting/adulting070919_s1e8.mp3") else {
-            assertionFailure()
-            return
-        }
-        let artworkURL = URL(string: "https://www.w3schools.com/w3images/fjords.jpg")
-        let asset = Asset(urlAsset: AVURLAsset(url: url), artworkURL: artworkURL)
+//        guard let url = URL(string:"https://www.podtrac.com/pts/redirect.mp3/audio.wnyc.org/adulting/adulting070919_s1e8.mp3") else {
+//            assertionFailure()
+//            return
+//        }
+//        let artworkURL = URL(string: "https://www.w3schools.com/w3images/fjords.jpg")
+//        let asset = Asset(urlAsset: AVURLAsset(url: url), artworkURL: artworkURL)
 
-        assetPlayerView.setupPlayback(asset: asset, options: [])
+        assetPlayerView.setupPlayback(asset: asset, options: [.shouldLoop])
     }
 }
 

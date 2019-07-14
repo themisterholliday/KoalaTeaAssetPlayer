@@ -18,6 +18,7 @@ public struct AssetPlayerProperties {
     public let duration: Double
     public let rate: Float
     public let state: AssetPlayerPlaybackState
+    public let previousState: AssetPlayerPlaybackState
 }
 
 public extension AssetPlayer {
@@ -34,7 +35,8 @@ public extension AssetPlayer {
             timeLeftText: "-\(createTimeString(time: duration - currentTime))",
             duration: duration,
             rate: rate,
-            state: state)
+            state: state,
+            previousState: previousState)
     }
 
     private func createTimeString(time: Double) -> String {

@@ -12,6 +12,8 @@
 		160738DD22D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 160738D922D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 */; };
 		16A9066422D93358009811B9 /* SampleVideo_1280x720_5mb.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 160738D922D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 */; };
 		16A9066622D9364A009811B9 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16A9066522D9364A009811B9 /* Images.xcassets */; };
+		16A9066E22DAF64D009811B9 /* DeinitTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A9066D22DAF64D009811B9 /* DeinitTest.swift */; };
+		16A9066F22DAF671009811B9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		16E740DC22D6799200D11479 /* SampleVideo_1280x720_1mb.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 160738D822D2877E00221BB7 /* SampleVideo_1280x720_1mb.mp4 */; };
 		16E740DD22D6799300D11479 /* SampleVideo_1280x720_1mb.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 160738D822D2877E00221BB7 /* SampleVideo_1280x720_1mb.mp4 */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
@@ -38,6 +40,7 @@
 		160738D822D2877E00221BB7 /* SampleVideo_1280x720_1mb.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SampleVideo_1280x720_1mb.mp4; sourceTree = "<group>"; };
 		160738D922D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SampleVideo_1280x720_5mb.mp4; sourceTree = "<group>"; };
 		16A9066522D9364A009811B9 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		16A9066D22DAF64D009811B9 /* DeinitTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeinitTest.swift; sourceTree = "<group>"; };
 		1BC77B61B99A2B3BE483FA2B /* Pods-KoalaTeaVideo_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-KoalaTeaVideo_Example.release.xcconfig"; path = "Target Support Files/Pods-KoalaTeaVideo_Example/Pods-KoalaTeaVideo_Example.release.xcconfig"; sourceTree = "<group>"; };
 		27DFE2672687B0F109CB174E /* Pods-KoalaTeaAssetPlayer_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-KoalaTeaAssetPlayer_Example.release.xcconfig"; path = "Target Support Files/Pods-KoalaTeaAssetPlayer_Example/Pods-KoalaTeaAssetPlayer_Example.release.xcconfig"; sourceTree = "<group>"; };
 		479D7DC96EDD5EFC21F3E487 /* Pods-koala-tea-video_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-koala-tea-video_Tests.debug.xcconfig"; path = "Target Support Files/Pods-koala-tea-video_Tests/Pods-koala-tea-video_Tests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -153,6 +156,7 @@
 				160738D422D286DF00221BB7 /* AssetPlayerSpec.swift */,
 				160738D622D2877E00221BB7 /* example_assets */,
 				607FACE91AFB9204008FA782 /* Supporting Files */,
+				16A9066D22DAF64D009811B9 /* DeinitTest.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -427,6 +431,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				16A9066F22DAF671009811B9 /* ViewController.swift in Sources */,
+				16A9066E22DAF64D009811B9 /* DeinitTest.swift in Sources */,
 				160738D522D286DF00221BB7 /* AssetPlayerSpec.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
