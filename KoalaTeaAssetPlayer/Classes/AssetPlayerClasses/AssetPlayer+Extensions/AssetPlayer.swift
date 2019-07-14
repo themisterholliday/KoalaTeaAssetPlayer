@@ -23,13 +23,11 @@ public protocol AssetPlayerDelegate: class {
     // This is the time in seconds that the video has been buffered.
     // If implementing a UIProgressView, user this value / player.maximumDuration to set buffering progress.
     func playerBufferedTimeDidChange(_ player: AssetPlayer)
-
-    func playerDidFail(_ error: Error?)
 }
 
 public enum AssetPlayerPlaybackState: Equatable {
     case setup(asset: Asset)
-    case playing, paused, buffering, finished, none
+    case playing, paused, buffering, finished, idle
     case failed(error: Error?)
 
     public static func == (lhs: AssetPlayerPlaybackState, rhs: AssetPlayerPlaybackState) -> Bool {
@@ -46,7 +44,7 @@ public enum AssetPlayerPlaybackState: Equatable {
             return true
         case (.finished, .finished):
             return true
-        case (.none, .none):
+        case (.idle, .idle):
             return true
         default:
             return false
@@ -173,8 +171,8 @@ open class AssetPlayer: NSObject {
 
     // MARK: - Life Cycle
     public override init() {
-        self.state = .none
-        self.previousState = .none
+        self.state = .idle
+        self.previousState = .idle
         self.isPlayingLocalAsset = false
         self.shouldLoop = false
 
@@ -188,6 +186,10 @@ open class AssetPlayer: NSObject {
         notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(appMovedToForeground), name: UIApplication.didBecomeActiveNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(handleInterruption), name: AVAudioSession.interruptionNotification, object: nil)
+    }
+
+    deinit {
+        handleStop()
     }
 
     // MARK: - Asset Loading
@@ -243,7 +245,7 @@ open class AssetPlayer: NSObject {
                 self.delegate?.playerIsSetup(self)
                 
                 if self.state != .playing, self.state != .paused, self.state != .buffering {
-                    self.state = .none
+                    self.state = .idle
                 }
 
             }
@@ -269,7 +271,7 @@ open class AssetPlayer: NSObject {
 extension AssetPlayer {
     private func handleStateChange(_ state: AssetPlayerPlaybackState) {
         switch state {
-        case .none:
+        case .idle:
             self.player.pause()
         case .setup(let asset):
             self.asset = asset
@@ -277,9 +279,8 @@ extension AssetPlayer {
             self.player.playImmediately(atRate: self.rate)
         case .paused:
             self.player.pause()
-        case .failed(let error):
+        case .failed:
             self.player.pause()
-            self.delegate?.playerDidFail(error)
         case .buffering:
             self.player.pause()
         case .finished:
@@ -287,9 +288,8 @@ extension AssetPlayer {
 
             guard !shouldLoop else {
                 self.currentTime = startTimeForLoop
-                self.seekToTimeInSeconds(startTimeForLoop) { _ in
-                    self.state = .playing
-                }
+                self.perform(action: .seekToTimeInSeconds(time: startTimeForLoop))
+                self.state = .playing
                 return
             }
         }
@@ -315,11 +315,11 @@ extension AssetPlayer {
             self?.handleLoadedTimeRangesChange()
         })
 
-        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old, .initial], changeHandler: { [weak self] _, change in
+        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old], changeHandler: { [weak self] _, change in
             self?.handleStatusChange(change: change)
         })
 
-        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old, .initial], changeHandler: { _, _ in
+        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old, .initial], changeHandler: { [weak self]  _, _ in
             // Should be ready to play here
             // @TODO: handle
         })
@@ -343,9 +343,8 @@ extension AssetPlayer {
     @objc private func handleAVPlayerItemDidPlayToEndTimeNotification(notification: Notification) {
         guard !shouldLoop else {
             self.currentTime = startTimeForLoop
-            self.seekToTimeInSeconds(startTimeForLoop) { _ in
-                self.state = .playing
-            }
+            self.perform(action: .seekToTimeInSeconds(time: startTimeForLoop))
+            self.state = .playing
             return
         }
 
@@ -407,7 +406,7 @@ extension AssetPlayer {
             newStatus = .unknown
         }
 
-        if newStatus == .failed, newStatus == .unknown {
+        if newStatus == .failed {
             self.state = .failed(error: player.currentItem?.error)
         }
         updateGeneralMetadata()

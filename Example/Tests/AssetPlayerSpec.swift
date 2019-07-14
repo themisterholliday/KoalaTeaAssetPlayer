@@ -41,39 +41,39 @@ class AssetPlayerSpec: QuickSpec {
                     }
 
                     it("should have SETUP state") {
-                        expect(assetPlayer.assetPlayerProperties.state).to(equal(AssetPlayerPlaybackState.setup(asset: thirtySecondAsset)))
+                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: thirtySecondAsset)))
                     }
 
                     it("should have PLAYED state") {
                         assetPlayer.perform(action: .play)
 
-                        expect(assetPlayer.assetPlayerProperties.state).to(equal(AssetPlayerPlaybackState.playing))
+                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.playing))
                         sleep(2)
-                        expect(assetPlayer.assetPlayerProperties.state).toEventuallyNot(equal(AssetPlayerPlaybackState.failed(error: nil)))
+                        expect(assetPlayer.properties.state).toEventuallyNot(equal(AssetPlayerPlaybackState.failed(error: nil)))
                     }
 
                     it("should have PAUSED state") {
                         assetPlayer.perform(action: .pause)
 
-                        expect(assetPlayer.assetPlayerProperties.state).to(equal(AssetPlayerPlaybackState.paused))
+                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.paused))
                     }
 
                     it("should mute player & un-mute") {
                         assetPlayer.perform(action: .changeIsMuted(to: true))
-                        expect(assetPlayer.assetPlayerProperties.isMuted).to(equal(true))
+                        expect(assetPlayer.properties.isMuted).to(equal(true))
 
                         assetPlayer.perform(action: .changeIsMuted(to: false))
-                        expect(assetPlayer.assetPlayerProperties.isMuted).to(equal(false))
+                        expect(assetPlayer.properties.isMuted).to(equal(false))
                     }
 
                     it("should change start time and end time for looping") {
                         assetPlayer.perform(action: .changeStartTimeForLoop(to: 5.0))
-                        expect(assetPlayer.assetPlayerProperties.startTimeForLoop).to(equal(5.0))
+                        expect(assetPlayer.properties.startTimeForLoop).to(equal(5.0))
 
-                        expect(assetPlayer.assetPlayerProperties.state).toEventually(equal(AssetPlayerPlaybackState.none), timeout: 20)
+                        expect(assetPlayer.properties.state).toEventually(equal(AssetPlayerPlaybackState.idle), timeout: 20)
 
                         assetPlayer.perform(action: .changeEndTimeForLoop(to: 10.0))
-                        expect(assetPlayer.assetPlayerProperties.endTimeForLoop).to(equal(10.0))
+                        expect(assetPlayer.properties.endTimeForLoop).to(equal(10.0))
                     }
                 }
 
@@ -83,16 +83,16 @@ class AssetPlayerSpec: QuickSpec {
                     }
 
                     it("should have FINISHED state") {
-                        expect(assetPlayer.assetPlayerProperties.state).to(equal(AssetPlayerPlaybackState.setup(asset: fiveSecondAsset)))
+                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: fiveSecondAsset)))
                         assetPlayer.perform(action: .play)
-                        expect(assetPlayer.assetPlayerProperties.state).toEventually(equal(AssetPlayerPlaybackState.finished), timeout: 8)
+                        expect(assetPlayer.properties.state).toEventually(equal(AssetPlayerPlaybackState.finished), timeout: 8)
                     }
 
                     it("should continue looping after finishing") {
                         assetPlayer.perform(action: AssetPlayerActions.changeShouldLoop(to: true))
-                        expect(assetPlayer.assetPlayerProperties.state).to(equal(AssetPlayerPlaybackState.setup(asset: fiveSecondAsset)))
+                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: fiveSecondAsset)))
                         assetPlayer.perform(action: .play)
-                        expect(assetPlayer.assetPlayerProperties.state).toEventually(equal(AssetPlayerPlaybackState.playing), timeout: 8)
+                        expect(assetPlayer.properties.state).toEventually(equal(AssetPlayerPlaybackState.playing), timeout: 8)
                     }
                 }
 
@@ -104,8 +104,8 @@ class AssetPlayerSpec: QuickSpec {
 //
 //                    it("should have FAILED state") {
 //                        let error = NSError(domain: "TEST", code: -1, userInfo: nil)
-//                        assetPlayer.assetPlayerProperties.state = .failed(error: error as Error)
-//                        expect(assetPlayer.assetPlayerProperties.state).to(equal(AssetPlayerPlaybackState.failed(error: error)))
+//                        assetPlayer.properties.state = .failed(error: error as Error)
+//                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.failed(error: error)))
 //                    }
 //                }
 
@@ -168,30 +168,30 @@ class AssetPlayerSpec: QuickSpec {
                     }
 
                     it("should have SETUP state") {
-                        expect(assetPlayer.assetPlayerProperties.state).to(equal(AssetPlayerPlaybackState.setup(asset: thirtySecondAsset)))
+                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: thirtySecondAsset)))
                     }
 
                     it("should have PLAYED state") {
                         assetPlayer.perform(action: .play)
 
 
-                        expect(assetPlayer.assetPlayerProperties.state).to(equal(AssetPlayerPlaybackState.playing))
+                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.playing))
                         sleep(2)
-                        expect(assetPlayer.assetPlayerProperties.state).toEventuallyNot(equal(AssetPlayerPlaybackState.failed(error: nil)))
+                        expect(assetPlayer.properties.state).toEventuallyNot(equal(AssetPlayerPlaybackState.failed(error: nil)))
                     }
 
                     it("should have PAUSED state") {
                         assetPlayer.perform(action: .pause)
 
-                        expect(assetPlayer.assetPlayerProperties.state).to(equal(AssetPlayerPlaybackState.paused))
+                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.paused))
                     }
 
                     it("should mute player & un-mute") {
                         assetPlayer.perform(action: .changeIsMuted(to: true))
-                        expect(assetPlayer.assetPlayerProperties.isMuted).to(equal(true))
+                        expect(assetPlayer.properties.isMuted).to(equal(true))
 
                         assetPlayer.perform(action: .changeIsMuted(to: false))
-                        expect(assetPlayer.assetPlayerProperties.isMuted).to(equal(false))
+                        expect(assetPlayer.properties.isMuted).to(equal(false))
                     }
                 }
 
@@ -201,16 +201,16 @@ class AssetPlayerSpec: QuickSpec {
                     }
 
                     it("should have FINISHED state") {
-                        expect(assetPlayer.assetPlayerProperties.state).to(equal(AssetPlayerPlaybackState.setup(asset: fiveSecondAsset)))
+                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: fiveSecondAsset)))
                         assetPlayer.perform(action: .play)
-                        expect(assetPlayer.assetPlayerProperties.state).toEventually(equal(AssetPlayerPlaybackState.finished), timeout: minimumSetupTime + 20)
+                        expect(assetPlayer.properties.state).toEventually(equal(AssetPlayerPlaybackState.finished), timeout: minimumSetupTime + 20)
                     }
 
                     it("should continue looping after finishing") {
                         assetPlayer.perform(action: AssetPlayerActions.changeShouldLoop(to: true))
-                        expect(assetPlayer.assetPlayerProperties.state).to(equal(AssetPlayerPlaybackState.setup(asset: fiveSecondAsset)))
+                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: fiveSecondAsset)))
                         assetPlayer.perform(action: .play)
-                        expect(assetPlayer.assetPlayerProperties.state).toEventually(equal(AssetPlayerPlaybackState.playing), timeout: minimumSetupTime + 8)
+                        expect(assetPlayer.properties.state).toEventually(equal(AssetPlayerPlaybackState.playing), timeout: minimumSetupTime + 8)
                     }
                 }
 
@@ -222,8 +222,8 @@ class AssetPlayerSpec: QuickSpec {
 //
 //                    it("should have FAILED state") {
 //                        let error = NSError(domain: "TEST", code: -1, userInfo: nil)
-//                        assetPlayer.assetPlayerProperties.state = .failed(error: error as Error)
-//                        expect(assetPlayer.assetPlayerProperties.state).to(equal(AssetPlayerPlaybackState.failed(error: error)))
+//                        assetPlayer.properties.state = .failed(error: error as Error)
+//                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.failed(error: error)))
 //                    }
 //                }
 
@@ -279,20 +279,20 @@ class MockAssetPlayerDelegate: AssetPlayerDelegate {
     }
 
     func playerIsSetup(_ player: AssetPlayer) {
-        self.currentAsset = player.assetPlayerProperties.asset
+        self.currentAsset = player.properties.asset
     }
 
     func playerPlaybackStateDidChange(_ player: AssetPlayer) {}
 
     func playerCurrentTimeDidChange(_ player: AssetPlayer) {
-        let properties = player.assetPlayerProperties
+        let properties = player.properties
         self.currentTimeInSeconds = properties.currentTime.rounded()
         self.timeElapsedText = properties.currentTimeText
         self.durationText = properties.durationText
     }
 
     func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer) {
-        let properties = player.assetPlayerProperties
+        let properties = player.properties
         self.currentTimeInMilliSeconds = round(100.0 * properties.currentTime) / 100.0
         self.timeElapsedText = properties.currentTimeText
         self.durationText = properties.durationText
@@ -303,7 +303,7 @@ class MockAssetPlayerDelegate: AssetPlayerDelegate {
     }
 
     func playerBufferedTimeDidChange(_ player: AssetPlayer) {
-        let properties = player.assetPlayerProperties
+        let properties = player.properties
         self.bufferTime = Double(properties.bufferedTime)
     }
 

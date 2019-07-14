@@ -1,5 +1,5 @@
 //
-//  AssetPlayerProperties.swift
+//  properties.swift
 //  KoalaTeaAssetPlayer
 //
 //  Created by Craig Holliday on 7/11/19.
@@ -18,10 +18,11 @@ public struct AssetPlayerProperties {
     public let duration: Double
     public let rate: Float
     public let state: AssetPlayerPlaybackState
+    public let previousState: AssetPlayerPlaybackState
 }
 
 public extension AssetPlayer {
-    var assetPlayerProperties: AssetPlayerProperties {
+    var properties: AssetPlayerProperties {
         return AssetPlayerProperties(
             asset: asset,
             startTimeForLoop: startTimeForLoop,
@@ -34,7 +35,8 @@ public extension AssetPlayer {
             timeLeftText: "-\(createTimeString(time: duration - currentTime))",
             duration: duration,
             rate: rate,
-            state: state)
+            state: state,
+            previousState: previousState)
     }
 
     private func createTimeString(time: Double) -> String {
