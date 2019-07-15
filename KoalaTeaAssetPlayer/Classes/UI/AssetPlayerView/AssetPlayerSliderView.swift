@@ -15,14 +15,15 @@ extension AssetPlayerSliderView {
     )
 }
 
-class AssetPlayerSliderView: UIView {
+internal class AssetPlayerSliderView: UIView {
+    private var bufferSliderColor: UIColor = .darkGray
+    private var bufferBackgroundColor: UIColor = .lightGray
+    private var playbackSliderColor: UIColor = .black
+    private var sliderCircleColor: UIColor = .white
+
+    private var playbackSlider: UISlider = UISlider(frame: .zero)
     private var bufferSlider: UISlider = UISlider(frame: .zero)
     private var bufferBackgroundSlider: UISlider = UISlider(frame: .zero)
-    private var playbackSlider: UISlider = UISlider(frame: .zero)
-    private var bufferSliderColor: UIColor = UIColor(hex: 0xb6b8b9)!
-    private var bufferBackgroundColor: UIColor = UIColor(hex: 0xb6b8b9)!
-    private var playbackSliderColor: UIColor = .red
-    private var sliderCircleColor: UIColor = .black
     private var currentTimeLabel: UILabel = UILabel(frame: .zero)
     private var timeLeftLabel: UILabel = UILabel(frame: .zero)
 
@@ -35,15 +36,33 @@ class AssetPlayerSliderView: UIView {
 
     private let actions: Actions
 
-    required init(actions: Actions) {
+    public var isTracking: Bool {
+        return playbackSlider.isTracking
+    }
+
+    required init(actions: Actions, options: [ControlsViewOption]) {
         self.actions = actions
         super.init(frame: .zero)
+        options.forEach({ handleControlsViewOption($0) })
         addPlaybackSlider()
         addBufferSlider()
     }
 
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    private func handleControlsViewOption(_ option: ControlsViewOption) {
+        switch option {
+        case .bufferSliderColor(let color):
+            self.bufferSliderColor = color
+        case .bufferBackgroundColor(let color):
+            self.bufferBackgroundColor = color
+        case .playbackSliderColor(let color):
+            self.playbackSliderColor = color
+        case .sliderCircleColor(let color):
+            self.sliderCircleColor = color
+        }
     }
 
     private func addBufferSlider() {
@@ -80,11 +99,13 @@ class AssetPlayerSliderView: UIView {
     private func addPlaybackSlider() {
         playbackSlider.minimumValue = 0
         playbackSlider.isContinuous = true
-        playbackSlider.minimumTrackTintColor = .white
+        playbackSlider.minimumTrackTintColor = playbackSliderColor
         playbackSlider.maximumTrackTintColor = .clear
         playbackSlider.layer.cornerRadius = 0
         playbackSlider.addTarget(self, action: #selector(playbackSliderValueChanged(slider:event:)), for: .valueChanged)
         playbackSlider.isUserInteractionEnabled = true
+        playbackSlider.setThumbImage(smallCircle, for: .normal)
+        playbackSlider.setThumbImage(bigCircle, for: .highlighted)
 
         self.addSubview(playbackSlider)
         self.bringSubviewToFront(playbackSlider)
@@ -95,8 +116,6 @@ class AssetPlayerSliderView: UIView {
             $0.leading == self.leadingAnchor
             $0.trailing == self.trailingAnchor
         }
-
-        showSliderThumbImage()
     }
 
     @objc private func playbackSliderValueChanged(slider: UISlider, event: UIEvent) {
@@ -117,8 +136,7 @@ class AssetPlayerSliderView: UIView {
 
 extension AssetPlayerSliderView {
     func updateSlider(maxValue: Float) {
-        // Update max only once
-        guard playbackSlider.maximumValue <= 1.0 else { return }
+        guard playbackSlider.maximumValue != maxValue else { return }
 
         if playbackSlider.isUserInteractionEnabled == false {
             playbackSlider.isUserInteractionEnabled = true
@@ -135,26 +153,5 @@ extension AssetPlayerSliderView {
 
     func updateBufferSlider(bufferValue: Float) {
         bufferSlider.value = bufferValue
-    }
-
-    func showSliders() {
-        self.playbackSlider.alpha = 1
-        self.bufferSlider.alpha = 1
-        self.bufferBackgroundSlider.alpha = 1
-    }
-
-    func hideSliders() {
-        self.playbackSlider.alpha = 0
-        self.bufferSlider.alpha = 0
-        self.bufferBackgroundSlider.alpha = 0
-    }
-
-    func showSliderThumbImage() {
-        playbackSlider.setThumbImage(smallCircle, for: .normal)
-        playbackSlider.setThumbImage(bigCircle, for: .highlighted)
-    }
-
-    func hideSliderThumbImage() {
-        playbackSlider.setThumbImage(UIImage(), for: .normal)
     }
 }

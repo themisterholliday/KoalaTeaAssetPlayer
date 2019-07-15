@@ -17,23 +17,29 @@ public class AssetPlayerView: UIView {
         return ControlsView(actions: (
             playButtonPressed: { [weak self] _ in
                 self?.assetPlayer.perform(action: .play)
-        },
+            },
             pauseButtonPressed: { [weak self] _ in
                 self?.assetPlayer.perform(action: .pause)
-        },
+            },
             didStartDraggingSlider: { [weak self] _ in
                 self?.assetPlayer.perform(action: .pause)
-        },
+            },
             didDragToTime: { [weak self] time in
+                self?.assetPlayer.perform(action: .seekToTimeInSeconds(time: time))
+            },
+            didDragEndAtTime: { [weak self] time in
                 self?.assetPlayer.perform(action: .seekToTimeInSeconds(time: time))
                 if self?.assetPlayer.properties.previousState == .playing {
                     self?.assetPlayer.perform(action: .play)
                 }
-        }
-        ))
+            }
+            ), options: self.controlsViewOptions)
     }()
+
+    private let controlsViewOptions: [ControlsViewOption]
     
-    public required init() {
+    public required init(controlsViewOptions: [ControlsViewOption]) {
+        self.controlsViewOptions = controlsViewOptions
         super.init(frame: .zero)
         self.backgroundColor = .white
         
@@ -83,8 +89,7 @@ extension AssetPlayerView: AssetPlayerDelegate {
         self.handleAssetPlaybackManagerStateChange(to: player.properties.state)
     }
 
-    public func playerCurrentTimeDidChange(_ player: AssetPlayer) {
-    }
+    public func playerCurrentTimeDidChange(_ player: AssetPlayer) {}
 
     public func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer) {
         self.controlsView.configure(with: .updating(viewModel: player.properties.constrolsViewModel))
