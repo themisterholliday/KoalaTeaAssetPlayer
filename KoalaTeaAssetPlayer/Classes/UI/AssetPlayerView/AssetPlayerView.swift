@@ -30,10 +30,13 @@ public class AssetPlayerView: UIView {
                     self?.assetPlayer.perform(action: .play)
                 }
         }
-        ))
+        ), options: self.controlsViewOptions)
     }()
+
+    private let controlsViewOptions: [ControlsViewOption]
     
-    public required init() {
+    public required init(controlsViewOptions: [ControlsViewOption]) {
+        self.controlsViewOptions = controlsViewOptions
         super.init(frame: .zero)
         self.backgroundColor = .white
         

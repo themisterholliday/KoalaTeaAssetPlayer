@@ -9,6 +9,13 @@
 import UIKit
 import SwifterSwift
 
+public enum ControlsViewOption {
+    case bufferSliderColor(UIColor)
+    case bufferBackgroundColor(UIColor)
+    case playbackSliderColor(UIColor)
+    case sliderCircleColor(UIColor)
+}
+
 enum ControlsViewState: Equatable {
     case buffering
     case setup(viewModel: ControlsViewModel)
@@ -51,7 +58,7 @@ public class ControlsView: UIView {
             sliderDragDidEnd: { time in
                 self.actions.didDragToTime(time)
         }
-        ))
+            ), options: self.options)
     }()
 
     private var isWaiting: Bool = false
@@ -59,9 +66,11 @@ public class ControlsView: UIView {
     private var fadingTime = 0.3
 
     private let actions: Actions
+    private let options: [ControlsViewOption]
 
-    required init(actions: Actions) {
+    required init(actions: Actions, options: [ControlsViewOption]) {
         self.actions = actions
+        self.options = options
         super.init(frame: .zero)
         
         self.addSubview(blackView)
@@ -95,7 +104,6 @@ public class ControlsView: UIView {
             pauseButton.isHidden = false
             playButton.isHidden = true
         case .updating(let viewModel):
-            //        self.controlsView.playbackSliderView.updateTimeLabels(currentTimeText: properties.currentTimeText, timeLeftText: properties.timeLeftText)
             playbackSliderView.updateSlider(currentValue: viewModel.currentTime)
             playbackSliderView.updateBufferSlider(bufferValue: viewModel.bufferedTime)
         case .finished:

@@ -16,13 +16,14 @@ extension AssetPlayerSliderView {
 }
 
 class AssetPlayerSliderView: UIView {
+    private var bufferSliderColor: UIColor = .darkGray
+    private var bufferBackgroundColor: UIColor = .lightGray
+    private var playbackSliderColor: UIColor = .black
+    private var sliderCircleColor: UIColor = .white
+
+    private var playbackSlider: UISlider = UISlider(frame: .zero)
     private var bufferSlider: UISlider = UISlider(frame: .zero)
     private var bufferBackgroundSlider: UISlider = UISlider(frame: .zero)
-    private var playbackSlider: UISlider = UISlider(frame: .zero)
-    private var bufferSliderColor: UIColor = UIColor(hex: 0xb6b8b9)!
-    private var bufferBackgroundColor: UIColor = UIColor(hex: 0xb6b8b9)!
-    private var playbackSliderColor: UIColor = .red
-    private var sliderCircleColor: UIColor = .black
     private var currentTimeLabel: UILabel = UILabel(frame: .zero)
     private var timeLeftLabel: UILabel = UILabel(frame: .zero)
 
@@ -35,15 +36,29 @@ class AssetPlayerSliderView: UIView {
 
     private let actions: Actions
 
-    required init(actions: Actions) {
+    required init(actions: Actions, options: [ControlsViewOption]) {
         self.actions = actions
         super.init(frame: .zero)
+        options.forEach({ handleControlsViewOption($0) })
         addPlaybackSlider()
         addBufferSlider()
     }
 
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    private func handleControlsViewOption(_ option: ControlsViewOption) {
+        switch option {
+        case .bufferSliderColor(let color):
+            self.bufferSliderColor = color
+        case .bufferBackgroundColor(let color):
+            self.bufferBackgroundColor = color
+        case .playbackSliderColor(let color):
+            self.playbackSliderColor = color
+        case .sliderCircleColor(let color):
+            self.sliderCircleColor = color
+        }
     }
 
     private func addBufferSlider() {
@@ -80,7 +95,7 @@ class AssetPlayerSliderView: UIView {
     private func addPlaybackSlider() {
         playbackSlider.minimumValue = 0
         playbackSlider.isContinuous = true
-        playbackSlider.minimumTrackTintColor = .white
+        playbackSlider.minimumTrackTintColor = playbackSliderColor
         playbackSlider.maximumTrackTintColor = .clear
         playbackSlider.layer.cornerRadius = 0
         playbackSlider.addTarget(self, action: #selector(playbackSliderValueChanged(slider:event:)), for: .valueChanged)

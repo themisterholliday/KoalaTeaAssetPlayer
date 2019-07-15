@@ -16,7 +16,12 @@ class ViewController: UIViewController {
     lazy var asset: Asset = {
         return Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_5mb", withExtension: "mp4")!)
     }()
-    lazy var assetPlayerView: AssetPlayerView = AssetPlayerView()
+    lazy var assetPlayerView: AssetPlayerView = {
+        return AssetPlayerView(controlsViewOptions: [
+            .sliderCircleColor(.white),
+            .playbackSliderColor(.red),
+            ])
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
