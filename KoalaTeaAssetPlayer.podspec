@@ -24,5 +24,5 @@ Pod::Spec.new do |s|
   s.dependency 'SwifterSwift', '~> 5.0.0'
   s.dependency 'SwiftLint', '~> 0.33.0'
 
-  s.resources = ['Assets/*']
+  s.resources = ['KoalaTeaAssetPlayer/Assets/**/*']
 end
