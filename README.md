@@ -31,7 +31,7 @@ pod 'KoalaTeaAssetPlayer'
 Always have to import first
 
 ```swift
-
+import KoalaTeaAssetPlayer
 ```
 
 First you'll need to create an asset from a url. (File url or remote url)
