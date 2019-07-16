@@ -14,17 +14,6 @@ class ViewController: UIViewController {
     lazy var asset: Asset = {
         return Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_5mb", withExtension: "mp4")!)
     }()
-
-    lazy var assetPlayer = AssetPlayer()
-    lazy var playerView = assetPlayer.playerView
-
-    lazy var assetPlayerView: AssetPlayerView = {
-        return AssetPlayerView(controlsViewOptions: [
-            .sliderCircleColor(.white),
-            .playbackSliderColor(.red),
-            ])
-    }()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -34,6 +23,9 @@ class ViewController: UIViewController {
     }
 
     /// Example of how to use Asset Player by itself
+    lazy var assetPlayer = AssetPlayer()
+    lazy var playerView = assetPlayer.playerView
+
     func assetPlayerExample() {
         // You should definitely use the delegate. Check at the bottom 👇
         assetPlayer.delegate = self
@@ -59,23 +51,38 @@ class ViewController: UIViewController {
         assetPlayer.perform(action: .pause)
         assetPlayer.perform(action: .skip(by: 30))
         assetPlayer.perform(action: .skip(by: -15))
+
+        // And if you're using view, setup the player view
+        playerView.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(playerView)
+        NSLayoutConstraint.activate([
+            playerView.topAnchor.constraint(equalTo: view.topAnchor),
+            playerView.heightAnchor.constraint(equalTo: playerView.widthAnchor, multiplier: 9/16),
+            playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            ])
     }
 
     /// Example player view implementing AssetPlayer
+    lazy var assetPlayerView: AssetPlayerView = {
+        return AssetPlayerView(controlsViewOptions: [
+            .bufferBackgroundColor(.lightGray),
+            .bufferSliderColor(.darkGray),
+            .playbackSliderColor(.red),
+            .sliderCircleColor(.white)
+            ])
+    }()
+
     func assetPlayerViewExample() {
         // Just setup the view
         assetPlayerView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(assetPlayerView)
-        if #available(iOS 11.0, *) {
-            NSLayoutConstraint.activate([
-                assetPlayerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-                assetPlayerView.heightAnchor.constraint(equalTo: assetPlayerView.widthAnchor, multiplier: 9/16),
-                assetPlayerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                assetPlayerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-                ])
-        } else {
-            // Fallback on earlier versions
-        }
+        NSLayoutConstraint.activate([
+            assetPlayerView.topAnchor.constraint(equalTo: view.topAnchor),
+            assetPlayerView.heightAnchor.constraint(equalTo: assetPlayerView.widthAnchor, multiplier: 9/16),
+            assetPlayerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            assetPlayerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            ])
 
         // And setup the playback
         assetPlayerView.setupPlayback(asset: asset, options: [.shouldLoop], remoteCommands: .all(skipInterval: 30))
