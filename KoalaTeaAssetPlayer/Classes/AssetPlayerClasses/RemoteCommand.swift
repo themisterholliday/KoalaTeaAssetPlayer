@@ -7,14 +7,22 @@
 
 import Foundation
 
+/// Remote Commands to match the CommandCenter commands
+///
+/// - playback: Play or pause.
+/// - next: Next asset in queue. !Not implemented yet
+/// - previous: Previous asset in queue. !Not implemented yet
+/// - changePlaybackPosition: Change playback position in media item.
+/// - seekForwardAndBackward: Seek to time in media item.
+/// - skipForward: Skip forward to a time in the media item by an interval
+/// - skipBackward: Skip backward to a time in the media item by an interval
+/// - like: Handle like from command center. !Not implemented yet
+/// - dislike: Handle dislike from command center. !Not implemented yet
+/// - bookmark: Handle bookmark from command center. !Not implemented yet
 public enum RemoteCommand {
-    case playback
-    case next
-    case previous
-    case changePlaybackPosition
+    case playback, next, previous, changePlaybackPosition, seekForwardAndBackward
     case skipForward(interval: Int)
     case skipBackward(interval: Int)
-    case seekForwardAndBackward
     case like(localizedTitle: String?, localizedShortTitle: String?)
     case dislike(localizedTitle: String?, localizedShortTitle: String?)
     case bookmark(localizedTitle: String?, localizedShortTitle: String?)

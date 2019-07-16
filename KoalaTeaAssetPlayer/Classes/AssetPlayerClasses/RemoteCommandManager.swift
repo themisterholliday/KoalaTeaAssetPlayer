@@ -9,7 +9,7 @@
 import Foundation
 import MediaPlayer
 
-public class RemoteCommandManager: NSObject {
+internal class RemoteCommandManager: NSObject {
     
     // MARK: Properties
     
@@ -21,7 +21,7 @@ public class RemoteCommandManager: NSObject {
     
     // MARK: Initialization.
     
-    public init(assetPlaybackManager: AssetPlayer) {
+    internal init(assetPlaybackManager: AssetPlayer) {
         self.assetPlayer = assetPlaybackManager
     }
     
@@ -47,7 +47,7 @@ public class RemoteCommandManager: NSObject {
     // MARK: MPRemoteCommand Activation/Deactivation Methods
     
     #if os(tvOS)
-    public func activateRemoteCommands(_ enable: Bool) {
+    internal func activateRemoteCommands(_ enable: Bool) {
         activatePlaybackCommands(enable)
         
         // To support Siri's "What did they say?" command you have to support the appropriate skip commands.  See the README for more information.
@@ -56,7 +56,7 @@ public class RemoteCommandManager: NSObject {
     }
     #endif
 
-    public func activatePlaybackCommands(_ enable: Bool) {
+    internal func activatePlaybackCommands(_ enable: Bool) {
         if enable {
             remoteCommandCenter.playCommand.addTarget(self, action: #selector(RemoteCommandManager.handlePlayCommandEvent(_:)))
             remoteCommandCenter.pauseCommand.addTarget(self, action: #selector(RemoteCommandManager.handlePauseCommandEvent(_:)))
@@ -74,7 +74,7 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.togglePlayPauseCommand.isEnabled = enable
     }
     
-    public func toggleNextTrackCommand(_ enable: Bool) {
+    internal func toggleNextTrackCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.nextTrackCommand.addTarget(self, action: #selector(RemoteCommandManager.handleNextTrackCommandEvent(_:)))
         } else {
@@ -84,7 +84,7 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.nextTrackCommand.isEnabled = enable
     }
     
-    public func togglePreviousTrackCommand(_ enable: Bool) {
+    internal func togglePreviousTrackCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.previousTrackCommand.addTarget(self, action: #selector(RemoteCommandManager.handlePreviousTrackCommandEvent(event:)))
         } else {
@@ -94,7 +94,7 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.previousTrackCommand.isEnabled = enable
     }
     
-    public func toggleSkipForwardCommand(_ enable: Bool, interval: Int = 0) {
+    internal func toggleSkipForwardCommand(_ enable: Bool, interval: Int = 0) {
         if enable {
             remoteCommandCenter.skipForwardCommand.preferredIntervals = [NSNumber(value: interval)]
             remoteCommandCenter.skipForwardCommand.addTarget(self, action: #selector(RemoteCommandManager.handleSkipForwardCommandEvent(event:)))
@@ -105,7 +105,7 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.skipForwardCommand.isEnabled = enable
     }
     
-    public func toggleSkipBackwardCommand(_ enable: Bool, interval: Int = 0) {
+    internal func toggleSkipBackwardCommand(_ enable: Bool, interval: Int = 0) {
         if enable {
             remoteCommandCenter.skipBackwardCommand.preferredIntervals = [NSNumber(value: interval)]
             remoteCommandCenter.skipBackwardCommand.addTarget(self, action: #selector(RemoteCommandManager.handleSkipBackwardCommandEvent(event:)))
@@ -116,7 +116,7 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.skipBackwardCommand.isEnabled = enable
     }
     
-    public func toggleSeekForwardCommand(_ enable: Bool) {
+    internal func toggleSeekForwardCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.seekForwardCommand.addTarget(self, action: #selector(RemoteCommandManager.handleSeekForwardCommandEvent(event:)))
         } else {
@@ -126,7 +126,7 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.seekForwardCommand.isEnabled = enable
     }
     
-    public func toggleSeekBackwardCommand(_ enable: Bool) {
+    internal func toggleSeekBackwardCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.seekBackwardCommand.addTarget(self, action: #selector(RemoteCommandManager.handleSeekBackwardCommandEvent(event:)))
         } else {
@@ -136,7 +136,7 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.seekBackwardCommand.isEnabled = enable
     }
     
-    public func toggleChangePlaybackPositionCommand(_ enable: Bool) {
+    internal func toggleChangePlaybackPositionCommand(_ enable: Bool) {
         if enable {
             remoteCommandCenter.changePlaybackPositionCommand.addTarget(self, action: #selector(RemoteCommandManager.handleChangePlaybackPositionCommandEvent(event:)))
         } else {
@@ -146,7 +146,7 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.changePlaybackPositionCommand.isEnabled = enable
     }
     
-    public func toggleLikeCommand(_ enable: Bool, localizedTitle: String?, localizedShortTitle: String?) {
+    internal func toggleLikeCommand(_ enable: Bool, localizedTitle: String?, localizedShortTitle: String?) {
         remoteCommandCenter.likeCommand.localizedTitle = localizedTitle ?? ""
         remoteCommandCenter.likeCommand.localizedShortTitle = localizedShortTitle ?? ""
 
@@ -159,7 +159,7 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.likeCommand.isEnabled = enable
     }
     
-    public func toggleDislikeCommand(_ enable: Bool, localizedTitle: String?, localizedShortTitle: String?) {
+    internal func toggleDislikeCommand(_ enable: Bool, localizedTitle: String?, localizedShortTitle: String?) {
         remoteCommandCenter.dislikeCommand.localizedTitle = localizedTitle ?? ""
         remoteCommandCenter.dislikeCommand.localizedShortTitle = localizedShortTitle ?? ""
 
@@ -172,7 +172,7 @@ public class RemoteCommandManager: NSObject {
         remoteCommandCenter.dislikeCommand.isEnabled = enable
     }
     
-    public func toggleBookmarkCommand(_ enable: Bool, localizedTitle: String?, localizedShortTitle: String?) {
+    internal func toggleBookmarkCommand(_ enable: Bool, localizedTitle: String?, localizedShortTitle: String?) {
         remoteCommandCenter.bookmarkCommand.localizedTitle = localizedTitle ?? ""
         remoteCommandCenter.bookmarkCommand.localizedShortTitle = localizedShortTitle ?? ""
 

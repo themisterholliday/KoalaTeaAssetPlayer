@@ -8,12 +8,12 @@
 import Foundation
 import AVKit
 
-public enum AssetPlayerSetupOptions {
+public enum AssetPlayerSetupOption {
     case startMuted, shouldLoop
 }
 
 public enum AssetPlayerActions {
-    case setup(with: Asset, options: [AssetPlayerSetupOptions], remoteCommands: [RemoteCommand])
+    case setup(with: Asset, options: [AssetPlayerSetupOption], remoteCommands: [RemoteCommand])
     case play
     case pause
     case togglePlayPause
@@ -75,7 +75,7 @@ extension AssetPlayer {
     }
     // swiftlint:enable cyclomatic_complexity
 
-    private func handleSetup(with asset: Asset, options: [AssetPlayerSetupOptions], remoteCommands: [RemoteCommand]) {
+    private func handleSetup(with asset: Asset, options: [AssetPlayerSetupOption], remoteCommands: [RemoteCommand]) {
         self.setup(with: asset)
         self.player.isMuted = options.contains(.startMuted)
         self.shouldLoop = options.contains(.shouldLoop)
