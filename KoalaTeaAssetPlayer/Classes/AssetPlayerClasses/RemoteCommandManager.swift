@@ -149,12 +149,12 @@ internal class RemoteCommandManager: NSObject {
     internal func toggleLikeCommand(_ enable: Bool,
                                     localizedTitle: String?,
                                     localizedShortTitle: String?,
-                                    completion: ((Bool) -> ())?) {
+                                    completion: ((Bool) -> Void)?) {
         remoteCommandCenter.likeCommand.localizedTitle = localizedTitle ?? ""
         remoteCommandCenter.likeCommand.localizedShortTitle = localizedShortTitle ?? ""
 
         if enable {
-            remoteCommandCenter.likeCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
+            remoteCommandCenter.likeCommand.addTarget { [weak self] _ -> MPRemoteCommandHandlerStatus in
                 guard let `self` = self else { return .commandFailed }
                 if self.assetPlayer.asset != nil {
                     completion?(true)
@@ -174,12 +174,12 @@ internal class RemoteCommandManager: NSObject {
     internal func toggleDislikeCommand(_ enable: Bool,
                                        localizedTitle: String?,
                                        localizedShortTitle: String?,
-                                       completion: ((Bool) -> ())?) {
+                                       completion: ((Bool) -> Void)?) {
         remoteCommandCenter.dislikeCommand.localizedTitle = localizedTitle ?? ""
         remoteCommandCenter.dislikeCommand.localizedShortTitle = localizedShortTitle ?? ""
 
         if enable {
-            remoteCommandCenter.dislikeCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
+            remoteCommandCenter.dislikeCommand.addTarget { [weak self] _ -> MPRemoteCommandHandlerStatus in
                 guard let `self` = self else { return .commandFailed }
                 if self.assetPlayer.asset != nil {
                     completion?(true)
@@ -199,12 +199,12 @@ internal class RemoteCommandManager: NSObject {
     internal func toggleBookmarkCommand(_ enable: Bool,
                                         localizedTitle: String?,
                                         localizedShortTitle: String?,
-                                        completion: ((Bool) -> ())?) {
+                                        completion: ((Bool) -> Void)?) {
         remoteCommandCenter.bookmarkCommand.localizedTitle = localizedTitle ?? ""
         remoteCommandCenter.bookmarkCommand.localizedShortTitle = localizedShortTitle ?? ""
 
         if enable {
-            remoteCommandCenter.bookmarkCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
+            remoteCommandCenter.bookmarkCommand.addTarget { [weak self] _ -> MPRemoteCommandHandlerStatus in
                 guard let `self` = self else { return .commandFailed }
                 if self.assetPlayer.asset != nil {
                     completion?(true)
