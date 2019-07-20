@@ -39,9 +39,9 @@ internal class RemoteCommandManager: NSObject {
         toggleSeekForwardCommand(false)
         toggleSeekBackwardCommand(false)
         toggleChangePlaybackPositionCommand(false)
-        toggleLikeCommand(false, localizedTitle: nil, localizedShortTitle: nil)
-        toggleDislikeCommand(false, localizedTitle: nil, localizedShortTitle: nil)
-        toggleBookmarkCommand(false, localizedTitle: nil, localizedShortTitle: nil)
+        toggleLikeCommand(false, localizedTitle: nil, localizedShortTitle: nil, completion: nil)
+        toggleDislikeCommand(false, localizedTitle: nil, localizedShortTitle: nil, completion: nil)
+        toggleBookmarkCommand(false, localizedTitle: nil, localizedShortTitle: nil, completion: nil)
     }
     
     // MARK: MPRemoteCommand Activation/Deactivation Methods
@@ -146,40 +146,76 @@ internal class RemoteCommandManager: NSObject {
         remoteCommandCenter.changePlaybackPositionCommand.isEnabled = enable
     }
     
-    internal func toggleLikeCommand(_ enable: Bool, localizedTitle: String?, localizedShortTitle: String?) {
+    internal func toggleLikeCommand(_ enable: Bool,
+                                    localizedTitle: String?,
+                                    localizedShortTitle: String?,
+                                    completion: ((Bool) -> ())?) {
         remoteCommandCenter.likeCommand.localizedTitle = localizedTitle ?? ""
         remoteCommandCenter.likeCommand.localizedShortTitle = localizedShortTitle ?? ""
 
         if enable {
-            remoteCommandCenter.likeCommand.addTarget(self, action: #selector(RemoteCommandManager.handleLikeCommandEvent(event:)))
+            remoteCommandCenter.likeCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
+                guard let `self` = self else { return .commandFailed }
+                if self.assetPlayer.asset != nil {
+                    completion?(true)
+                    return .success
+                } else {
+                    completion?(false)
+                    return .noSuchContent
+                }
+            }
         } else {
-            remoteCommandCenter.likeCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleLikeCommandEvent(event:)))
+            remoteCommandCenter.likeCommand.removeTarget(self)
         }
         
         remoteCommandCenter.likeCommand.isEnabled = enable
     }
     
-    internal func toggleDislikeCommand(_ enable: Bool, localizedTitle: String?, localizedShortTitle: String?) {
+    internal func toggleDislikeCommand(_ enable: Bool,
+                                       localizedTitle: String?,
+                                       localizedShortTitle: String?,
+                                       completion: ((Bool) -> ())?) {
         remoteCommandCenter.dislikeCommand.localizedTitle = localizedTitle ?? ""
         remoteCommandCenter.dislikeCommand.localizedShortTitle = localizedShortTitle ?? ""
 
         if enable {
-            remoteCommandCenter.dislikeCommand.addTarget(self, action: #selector(RemoteCommandManager.handleDislikeCommandEvent(event:)))
+            remoteCommandCenter.dislikeCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
+                guard let `self` = self else { return .commandFailed }
+                if self.assetPlayer.asset != nil {
+                    completion?(true)
+                    return .success
+                } else {
+                    completion?(false)
+                    return .noSuchContent
+                }
+            }
         } else {
-            remoteCommandCenter.dislikeCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleDislikeCommandEvent(event:)))
+            remoteCommandCenter.dislikeCommand.removeTarget(self)
         }
         
         remoteCommandCenter.dislikeCommand.isEnabled = enable
     }
     
-    internal func toggleBookmarkCommand(_ enable: Bool, localizedTitle: String?, localizedShortTitle: String?) {
+    internal func toggleBookmarkCommand(_ enable: Bool,
+                                        localizedTitle: String?,
+                                        localizedShortTitle: String?,
+                                        completion: ((Bool) -> ())?) {
         remoteCommandCenter.bookmarkCommand.localizedTitle = localizedTitle ?? ""
         remoteCommandCenter.bookmarkCommand.localizedShortTitle = localizedShortTitle ?? ""
 
         if enable {
-            remoteCommandCenter.bookmarkCommand.addTarget(self, action: #selector(RemoteCommandManager.handleBookmarkCommandEvent(event:)))
+            remoteCommandCenter.bookmarkCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
+                guard let `self` = self else { return .commandFailed }
+                if self.assetPlayer.asset != nil {
+                    completion?(true)
+                    return .success
+                } else {
+                    completion?(false)
+                    return .noSuchContent
+                }
+            }
         } else {
-            remoteCommandCenter.bookmarkCommand.removeTarget(self, action: #selector(RemoteCommandManager.handleBookmarkCommandEvent(event:)))
+            remoteCommandCenter.bookmarkCommand.removeTarget(self)
         }
         
         remoteCommandCenter.bookmarkCommand.isEnabled = enable
@@ -276,37 +312,6 @@ internal class RemoteCommandManager: NSObject {
         
         return .success
     }
-    
-    // MARK: Feedback Command Handlers
-    @objc func handleLikeCommandEvent(event: MPFeedbackCommandEvent) -> MPRemoteCommandHandlerStatus {
-        
-        if assetPlayer.asset != nil {
-            print("Did recieve likeCommand for \(String(describing: assetPlayer.asset?.assetName))")
-            return .success
-        } else {
-            return .noSuchContent
-        }
-    }
-    
-    @objc func handleDislikeCommandEvent(event: MPFeedbackCommandEvent) -> MPRemoteCommandHandlerStatus {
-        
-        if assetPlayer.asset != nil {
-            print("Did recieve dislikeCommand for \(String(describing: assetPlayer.asset?.assetName))")
-            return .success
-        } else {
-            return .noSuchContent
-        }
-    }
-    
-    @objc func handleBookmarkCommandEvent(event: MPFeedbackCommandEvent) -> MPRemoteCommandHandlerStatus {
-        
-        if assetPlayer.asset != nil {
-            print("Did recieve bookmarkCommand for \(String(describing: assetPlayer.asset?.assetName))")
-            return .success
-        } else {
-            return .noSuchContent
-        }
-    }
 
     internal func enableCommands(from commands: [RemoteCommand]) {
         commands.forEach({ enableRemoteCommand($0) })
@@ -329,12 +334,12 @@ internal class RemoteCommandManager: NSObject {
         case .seekForwardAndBackward:
             toggleSeekForwardCommand(true)
             toggleSeekBackwardCommand(true)
-        case .like(let localizedTitle, let localizedShortTitle):
-            toggleLikeCommand(true, localizedTitle: localizedTitle, localizedShortTitle: localizedShortTitle)
-        case .dislike(let localizedTitle, let localizedShortTitle):
-            toggleDislikeCommand(true, localizedTitle: localizedTitle, localizedShortTitle: localizedShortTitle)
-        case .bookmark(let localizedTitle, let localizedShortTitle):
-            toggleBookmarkCommand(true, localizedTitle: localizedTitle, localizedShortTitle: localizedShortTitle)
+        case .like(let localizedTitle, let localizedShortTitle, let completion):
+            toggleLikeCommand(true, localizedTitle: localizedTitle, localizedShortTitle: localizedShortTitle, completion: completion)
+        case .dislike(let localizedTitle, let localizedShortTitle, let completion):
+            toggleDislikeCommand(true, localizedTitle: localizedTitle, localizedShortTitle: localizedShortTitle, completion: completion)
+        case .bookmark(let localizedTitle, let localizedShortTitle, let completion):
+            toggleBookmarkCommand(true, localizedTitle: localizedTitle, localizedShortTitle: localizedShortTitle, completion: completion)
         }
     }
 }
