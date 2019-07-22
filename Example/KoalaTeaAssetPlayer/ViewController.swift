@@ -12,9 +12,9 @@ import KoalaTeaAssetPlayer
 
 class ViewController: UIViewController {
     lazy var asset: Asset = {
-        return Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_5mb", withExtension: "mp4")!)
+        return Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_1mb", withExtension: "mp4")!)
     }()
-    let asset1: Asset = Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_1mb", withExtension: "mp4")!)
+    let asset1: Asset = Asset(url: Bundle.main.url(forResource: "SampleVideo_2.5", withExtension: "mp4")!)
     let longAsset: Asset = Asset(url: URL(string: "http://clips.vorwaerts-gmbh.de/VfE_html5.mp4")!, assetName: "Long Asset", artworkURL: nil)
 
     override func viewDidLoad() {
@@ -22,7 +22,8 @@ class ViewController: UIViewController {
 
         // ⭐ Try one of these ⭐
 //        assetPlayerExample()
-        assetPlayerViewExample()
+        self.assetPlayerQueueExample()
+//        assetPlayerViewExample()
     }
 
     /// Example of how to use Asset Player by itself
@@ -52,13 +53,41 @@ class ViewController: UIViewController {
                                                bookmarkCommand]
 
         // Easy setup and handling. Everything is just an action.
-        assetPlayer.perform(action: .setup(with: [asset1, asset1], remoteCommands: remoteCommands))
+        assetPlayer.perform(action: .setup(with: [asset], remoteCommands: remoteCommands))
+
         // Example actions you can perform
         assetPlayer.perform(action: .skip(by: 30))
         assetPlayer.perform(action: .skip(by: -15))
         assetPlayer.perform(action: .pause)
         assetPlayer.perform(action: .play)
 
+        // And if you're using view, setup the player view
+        playerView.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(playerView)
+        NSLayoutConstraint.activate([
+            playerView.topAnchor.constraint(equalTo: view.topAnchor),
+            playerView.heightAnchor.constraint(equalTo: playerView.widthAnchor, multiplier: 9/16),
+            playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            ])
+    }
+
+    func assetPlayerQueueExample() {
+        assetPlayer.delegate = self
+
+        // Easy setup and handling. Everything is just an action.
+        assetPlayer.perform(action: .setup(with: [asset, longAsset, asset1], remoteCommands: []))
+
+        assetPlayer.perform(action: .play)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            self.assetPlayer.perform(action: .moveToAssetInQueue(index: self.assetPlayer.properties.currentAssetIndex + 1))
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+//                self.assetPlayer.perform(action: .seekToTimeInSeconds(time: 0))
+//                self.assetPlayer.perform(action: .moveToAssetInQueue(index: self.assetPlayer.properties.currentAssetIndex - 1))
+            }
+        }
 
         // And if you're using view, setup the player view
         playerView.translatesAutoresizingMaskIntoConstraints = false
@@ -93,7 +122,7 @@ class ViewController: UIViewController {
             ])
 
         // And setup the playback
-        assetPlayerView.setupPlayback(assets: [asset1, longAsset], remoteCommands: .all(skipInterval: 30))
+        assetPlayerView.setupPlayback(assets: [asset], remoteCommands: .all(skipInterval: 30))
     }
 }
 

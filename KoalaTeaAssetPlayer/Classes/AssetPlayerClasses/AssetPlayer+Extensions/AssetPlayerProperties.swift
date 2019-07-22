@@ -7,6 +7,7 @@
 
 public struct AssetPlayerProperties {
     public let currentAsset: Asset?
+    public let currentAssetIndex: Int
     public let assets: [Asset]?
     public let isMuted: Bool
     public let currentTime: Double
@@ -24,6 +25,7 @@ public extension AssetPlayer {
     var properties: AssetPlayerProperties {
         return AssetPlayerProperties(
             currentAsset: currentAsset,
+            currentAssetIndex: currentAssetIndex,
             assets: assets,
             isMuted: player.isMuted,
             currentTime: currentTime,

@@ -23,6 +23,7 @@ public enum AssetPlayerActions {
     case changePlayerPlaybackRate(to: Float)
     case changeIsMuted(to: Bool)
     case changeVolume(to: Float)
+    case moveToAssetInQueue(index: Int)
 }
 
 extension AssetPlayer {
@@ -55,6 +56,8 @@ extension AssetPlayer {
             perform(action: .seekToTimeInSeconds(time: currentTime + interval))
         case .changeVolume(let newVolume):
             player.volume = newVolume
+        case .moveToAssetInQueue(let index):
+            self.moveToAssetIndex(index)
         }
     }
     // swiftlint:enable cyclomatic_complexity
@@ -158,5 +161,27 @@ extension AssetPlayer {
     private func changePlayerPlaybackRate(to newRate: Float) {
         guard currentAsset != nil else { return }
         self.rate = newRate
+    }
+
+    private func moveToAssetIndex(_ index: Int) {
+        guard index >= 0 else { return }
+        self.isMovingInQueue = true
+
+        let initialItems = assets?.compactMap({ $0.playerItem }) ?? []
+        player.removeAllItems()
+        let newItems = initialItems.dropFirst(index)
+        for item in newItems {
+            if player.canInsert(item, after: nil) {
+                player.insert(item, after: nil)
+            }
+        }
+
+        self.isMovingInQueue = false
+
+        guard let currentItem = player.currentItem else { return }
+        // Forcing change function to call because the keyPath observation does not work properly when we rebuild the queue above
+        handleChangingCurrentPlayerItem(to: currentItem)
+
+        perform(action: .play)
     }
 }

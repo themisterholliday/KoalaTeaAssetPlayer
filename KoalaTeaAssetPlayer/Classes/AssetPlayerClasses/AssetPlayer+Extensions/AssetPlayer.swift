@@ -92,6 +92,8 @@ open class AssetPlayer: NSObject {
         }
     }
 
+    internal var isMovingInQueue: Bool = false
+
     // MARK: AV Properties
 
     /// The instance of `MPNowPlayingInfoCenter` that is used for updating metadata for the currently playing `Asset`.
@@ -127,7 +129,7 @@ open class AssetPlayer: NSObject {
             guard let newAssets = self.assets else { return }
             self.addPlayerObservers()
 
-            newAssets.forEach({ asynchronouslyLoadURLAsset($0) })
+            newAssets.forEach({ player.insert($0.playerItem, after: nil) })
         }
     }
 
@@ -321,6 +323,7 @@ extension AssetPlayer {
         playbackRateObserver?.invalidate()
     }
 
+    //swiftlint:disable block_based_kvo
     open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
         // Make sure the this KVO callback was intended for this view controller.
         guard context == &AssetPlayerKVOContext else {
@@ -330,28 +333,33 @@ extension AssetPlayer {
 
         switch keyPath {
         case "currentItem":
+            print("did change")
             guard let currentItem = self.player.currentItem else {
+                guard !self.isMovingInQueue else { return }
                 self.currentAsset = nil
                 self.removePlayerObservers()
                 self.removePlayerItemObservers()
                 self.delegate?.playerPlaybackDidEnd(self)
+                self.state = .finished
                 return
             }
-            let asset = assets?.filter({ $0.urlAsset == currentItem.asset }).first
-            currentAsset = asset
-            if let asset = asset {
-                currentAssetIndex = assets?.firstIndex(of: asset) ?? 0
-            }
-            addPlayerItemObservers(playerItem: currentItem)
-            setupTimeObservers()
+            handleChangingCurrentPlayerItem(to: currentItem)
         default:
             break
         }
     }
-    
-    @objc private func handleAVPlayerItemDidPlayToEndTimeNotification(notification: Notification) {
-        self.delegate?.playerPlaybackDidEnd(self)
-        self.state = .finished
+    //swiftlint:enable block_based_kvo
+
+    internal func handleChangingCurrentPlayerItem(to currentItem: AVPlayerItem) {
+        print("handling")
+        let asset = assets?.filter({ $0.urlAsset == currentItem.asset }).first
+        currentAsset = asset
+        if let asset = asset {
+            currentAssetIndex = assets?.firstIndex(of: asset) ?? 0
+            print(currentAssetIndex)
+        }
+        addPlayerItemObservers(playerItem: currentItem)
+        setupTimeObservers()
     }
 
     private func handleBufferEmptyChange(playerItem: AVPlayerItem) {

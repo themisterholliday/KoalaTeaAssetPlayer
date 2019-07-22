@@ -16,17 +16,21 @@ open class Asset: NSObject {
     public var isLocalFile: Bool {
         return urlAsset.url.isFileURL
     }
+    public var playerItem: AVPlayerItem
 
     public init(url: URL, assetName: String? = nil, artworkURL: URL? = nil) {
-        self.urlAsset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
+        let asset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
+        self.urlAsset = asset
         self.assetName = assetName ?? ""
         self.artworkURL = artworkURL
+        self.playerItem = AVPlayerItem(asset: asset)
     }
 
     public init(urlAsset: AVURLAsset, assetName: String? = nil, artworkURL: URL? = nil) {
         self.urlAsset = urlAsset
         self.assetName = assetName ?? ""
         self.artworkURL = artworkURL
+        self.playerItem = AVPlayerItem(asset: urlAsset)
     }
 }
 
