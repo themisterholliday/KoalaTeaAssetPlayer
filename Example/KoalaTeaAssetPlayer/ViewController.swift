@@ -14,12 +14,15 @@ class ViewController: UIViewController {
     lazy var asset: Asset = {
         return Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_5mb", withExtension: "mp4")!)
     }()
+    let asset1: Asset = Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_1mb", withExtension: "mp4")!)
+    let longAsset: Asset = Asset(url: URL(string: "http://clips.vorwaerts-gmbh.de/VfE_html5.mp4")!, assetName: "Long Asset", artworkURL: nil)
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // ⭐ Try one of these ⭐
 //        assetPlayerExample()
-//        assetPlayerViewExample()
+        assetPlayerViewExample()
     }
 
     /// Example of how to use Asset Player by itself
@@ -29,12 +32,6 @@ class ViewController: UIViewController {
     func assetPlayerExample() {
         // You should definitely use the delegate. Check at the bottom 👇
         assetPlayer.delegate = self
-        /*
-            Player options.
-            `shouldLoop` will loop asset indefinitely.
-            `startMuted` will ...... start the asset muted
-         */
-        let options: [AssetPlayerSetupOption] = [.shouldLoop, .startMuted]
 
         // These are some remote commands if you want your media to be accessible on the lock screen
         let likeCommand: RemoteCommand = .like(localizedTitle: "Like", localizedShortTitle: "I really like this") { (success) in
@@ -55,9 +52,7 @@ class ViewController: UIViewController {
                                                bookmarkCommand]
 
         // Easy setup and handling. Everything is just an action.
-        assetPlayer.perform(action: .setup(with: asset,
-                                           options: options,
-                                           remoteCommands: remoteCommands))
+        assetPlayer.perform(action: .setup(with: [asset1, asset1], remoteCommands: remoteCommands))
         // Example actions you can perform
         assetPlayer.perform(action: .skip(by: 30))
         assetPlayer.perform(action: .skip(by: -15))
@@ -98,7 +93,7 @@ class ViewController: UIViewController {
             ])
 
         // And setup the playback
-        assetPlayerView.setupPlayback(asset: asset, options: [.shouldLoop], remoteCommands: .all(skipInterval: 30))
+        assetPlayerView.setupPlayback(assets: [asset1, longAsset], remoteCommands: .all(skipInterval: 30))
     }
 }
 
@@ -138,5 +133,9 @@ extension ViewController: AssetPlayerDelegate {
 
     func playerDidFail(_ error: Error?) {
         // 😱 Something has gone wrong and you should really present a nice error message and log this somewhere. Please don't just print the error.
+    }
+
+    public func playerCurrentAssetDidChange(_ player: AssetPlayer) {
+        // Asset changed in the queue
     }
 }

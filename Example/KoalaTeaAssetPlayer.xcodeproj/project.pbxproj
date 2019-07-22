@@ -10,6 +10,7 @@
 		160738D522D286DF00221BB7 /* AssetPlayerSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160738D422D286DF00221BB7 /* AssetPlayerSpec.swift */; };
 		160738DB22D2877E00221BB7 /* SampleVideo_2.5.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 160738D722D2877E00221BB7 /* SampleVideo_2.5.mp4 */; };
 		160738DD22D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 160738D922D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 */; };
+		165EEEF622E514C4000FE5AC /* QueuePlayerSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 165EEEF422E51347000FE5AC /* QueuePlayerSpec.swift */; };
 		16A9066422D93358009811B9 /* SampleVideo_1280x720_5mb.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 160738D922D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 */; };
 		16A9066622D9364A009811B9 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16A9066522D9364A009811B9 /* Images.xcassets */; };
 		16A9066E22DAF64D009811B9 /* DeinitTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A9066D22DAF64D009811B9 /* DeinitTest.swift */; };
@@ -39,6 +40,7 @@
 		160738D722D2877E00221BB7 /* SampleVideo_2.5.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SampleVideo_2.5.mp4; sourceTree = "<group>"; };
 		160738D822D2877E00221BB7 /* SampleVideo_1280x720_1mb.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SampleVideo_1280x720_1mb.mp4; sourceTree = "<group>"; };
 		160738D922D2877E00221BB7 /* SampleVideo_1280x720_5mb.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SampleVideo_1280x720_5mb.mp4; sourceTree = "<group>"; };
+		165EEEF422E51347000FE5AC /* QueuePlayerSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueuePlayerSpec.swift; sourceTree = "<group>"; };
 		16A9066522D9364A009811B9 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		16A9066D22DAF64D009811B9 /* DeinitTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeinitTest.swift; sourceTree = "<group>"; };
 		1BC77B61B99A2B3BE483FA2B /* Pods-KoalaTeaVideo_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-KoalaTeaVideo_Example.release.xcconfig"; path = "Target Support Files/Pods-KoalaTeaVideo_Example/Pods-KoalaTeaVideo_Example.release.xcconfig"; sourceTree = "<group>"; };
@@ -157,6 +159,7 @@
 				160738D622D2877E00221BB7 /* example_assets */,
 				607FACE91AFB9204008FA782 /* Supporting Files */,
 				16A9066D22DAF64D009811B9 /* DeinitTest.swift */,
+				165EEEF422E51347000FE5AC /* QueuePlayerSpec.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -432,6 +435,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				16A9066F22DAF671009811B9 /* ViewController.swift in Sources */,
+				165EEEF622E514C4000FE5AC /* QueuePlayerSpec.swift in Sources */,
 				16A9066E22DAF64D009811B9 /* DeinitTest.swift in Sources */,
 				160738D522D286DF00221BB7 /* AssetPlayerSpec.swift in Sources */,
 			);
