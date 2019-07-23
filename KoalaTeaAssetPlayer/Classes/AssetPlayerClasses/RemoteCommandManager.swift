@@ -314,10 +314,14 @@ internal class RemoteCommandManager: NSObject {
     }
 
     internal func enableCommands(from commands: [RemoteCommand]) {
-        commands.forEach({ enableRemoteCommand($0) })
+        commands.forEach({ setRemoteCommand($0, to: true) })
     }
 
-    private func enableRemoteCommand(_ remoteCommand: RemoteCommand) {
+    internal func disableCommands(from commands: [RemoteCommand]) {
+        commands.forEach({ setRemoteCommand($0, to: false) })
+    }
+
+    private func setRemoteCommand(_ remoteCommand: RemoteCommand, to enabled: Bool) {
         switch remoteCommand {
         case .playback:
             activatePlaybackCommands(true)

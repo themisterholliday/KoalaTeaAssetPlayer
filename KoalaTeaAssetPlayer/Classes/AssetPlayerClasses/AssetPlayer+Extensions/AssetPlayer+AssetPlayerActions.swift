@@ -8,8 +8,9 @@
 import Foundation
 import AVKit
 
-public enum AssetPlayerActions {
-    case setup(with: Asset, remoteCommands: [RemoteCommand])
+public enum AssetPlayerAction {
+    case setup(with: Asset)
+    case setupRemoteCommands([RemoteCommand])
     case play
     case pause
     case togglePlayPause
@@ -27,10 +28,12 @@ public enum AssetPlayerActions {
 
 extension AssetPlayer {
     // swiftlint:disable cyclomatic_complexity
-    open func perform(action: AssetPlayerActions) {
+    public func perform(action: AssetPlayerAction) {
         switch action {
-        case .setup(let asset, let remoteCommands):
-            handleSetup(with: asset, remoteCommands: remoteCommands)
+        case .setup(let asset):
+            handleSetup(with: asset)
+        case .setupRemoteCommands(let commands):
+            self.remoteCommands = commands
         case .play:
             self.state = .playing
         case .pause:
@@ -59,9 +62,7 @@ extension AssetPlayer {
     }
     // swiftlint:enable cyclomatic_complexity
 
-    private func handleSetup(with asset: Asset, remoteCommands: [RemoteCommand]) {
-        self.enableRemoteCommands(remoteCommands)
-
+    private func handleSetup(with asset: Asset) {
         // Allow background audio and playing audio with silent switch on
         try? AVAudioSession.sharedInstance().setCategory(.playback)
         try? AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)

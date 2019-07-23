@@ -55,7 +55,8 @@ public class AssetPlayerView: UIView {
     }
     
     public func setupPlayback(asset: Asset, remoteCommands: [RemoteCommand]) {
-        assetPlayer.perform(action: .setup(with: asset, remoteCommands: remoteCommands))
+        assetPlayer.remoteCommands = remoteCommands
+        assetPlayer.perform(action: .setup(with: asset))
         assetPlayer.perform(action: .play)
         assetPlayer.delegate = self
     }

@@ -52,7 +52,7 @@ public enum AssetPlayerPlaybackState: Equatable {
     }
 }
 
-open class AssetPlayer: NSObject {
+final public class AssetPlayer: NSObject {
     private struct Constants {
         // Keys required for a playable item
         static let AssetKeysRequiredToPlay = [
@@ -155,11 +155,18 @@ open class AssetPlayer: NSObject {
         return playerView
     }()
 
-    private var remoteCommands: [RemoteCommand] = []
+    internal var remoteCommands: [RemoteCommand] = [] {
+        willSet {
+            self.remoteCommandManager.disableCommands(from: self.remoteCommands)
+        }
+        didSet {
+            self.remoteCommandManager.enableCommands(from: self.remoteCommands)
+        }
+    }
     private lazy var remoteCommandManager: RemoteCommandManager = RemoteCommandManager(assetPlaybackManager: self)
 
     // MARK: - Life Cycle
-    public override init() {
+    public init(remoteCommands: [RemoteCommand] = []) {
         self.state = .idle
         self.previousState = .idle
 
@@ -169,6 +176,8 @@ open class AssetPlayer: NSObject {
         notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(appMovedToForeground), name: UIApplication.didBecomeActiveNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(handleInterruption), name: AVAudioSession.interruptionNotification, object: nil)
+
+        self.remoteCommands = remoteCommands
     }
 
     deinit {
@@ -403,65 +412,3 @@ extension AssetPlayer {
         }
     }
 }
-
-extension AssetPlayer {
-    func enableRemoteCommands(_ commands: [RemoteCommand]) {
-        self.remoteCommandManager.enableCommands(from: commands)
-    }
-}
-
-
-
-////swiftlint:disable block_based_kvo
-//open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
-//    // Make sure the this KVO callback was intended for this view controller.
-//    guard context == &AssetPlayerKVOContext else {
-//        super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
-//        return
-//    }
-//
-//    switch keyPath {
-//    case "currentItem":
-//        print("did change")
-//        guard let currentItem = self.player.currentItem else {
-//            guard !self.isMovingInQueue else { return }
-//            self.currentAsset = nil
-//            self.removePlayerObservers()
-//            self.removePlayerItemObservers()
-//            self.delegate?.playerPlaybackDidEnd(self)
-//            self.state = .finished
-//            return
-//        }
-//        handleChangingCurrentPlayerItem(to: currentItem)
-//    default:
-//        break
-//    }
-//}
-////swiftlint:enable block_based_kvo
-//
-//internal func handleChangingCurrentPlayerItem(to currentItem: AVPlayerItem) {
-//    print("handling")
-//    let asset = assets?.filter({ $0.urlAsset == currentItem.asset }).first
-//    currentAsset = asset
-//    if let asset = asset {
-//        currentAssetIndex = assets?.firstIndex(of: asset) ?? 0
-//        print(currentAssetIndex)
-//    }
-//    addPlayerItemObservers(playerItem: currentItem)
-//    setupTimeObservers()
-//}
-
-//func addPlayerObservers() {
-//    player.addObserver(self, forKeyPath: "currentItem", options: [.old, .new], context: &AssetPlayerKVOContext)
-//}
-//
-//func removePlayerObservers() {
-//    player.removeObserver(self, forKeyPath: "currentItem", context: &AssetPlayerKVOContext)
-//}
-
-
-///*
-// KVO context used to differentiate KVO callbacks for this class versus other
-// classes in its class hierarchy.
-// */
-//private var AssetPlayerKVOContext = 0
