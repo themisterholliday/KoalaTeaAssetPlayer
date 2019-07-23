@@ -82,30 +82,30 @@ public class AssetPlayerView: UIView {
 }
 
 extension AssetPlayerView: AssetPlayerDelegate {
-    public func playerIsSetup(_ player: AssetPlayer) {
-        self.controlsView.configure(with: .setup(viewModel: player.properties.controlsViewModel))
+    public func playerIsSetup(_ properties: AssetPlayerProperties) {
+        self.controlsView.configure(with: .setup(viewModel: properties.controlsViewModel))
     }
 
-    public func playerPlaybackStateDidChange(_ player: AssetPlayer) {
-        self.handleAssetPlaybackManagerStateChange(to: player.properties.state)
+    public func playerPlaybackStateDidChange(_ properties: AssetPlayerProperties) {
+        self.handleAssetPlaybackManagerStateChange(to: properties.state)
     }
 
-    public func playerCurrentTimeDidChange(_ player: AssetPlayer) {}
+    public func playerCurrentTimeDidChange(_ properties: AssetPlayerProperties) {}
 
-    public func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer) {
-        self.controlsView.configure(with: .updating(viewModel: player.properties.controlsViewModel))
+    public func playerCurrentTimeDidChangeInMilliseconds(_ properties: AssetPlayerProperties) {
+        self.controlsView.configure(with: .updating(viewModel: properties.controlsViewModel))
     }
 
-    public func playerPlaybackDidEnd(_ player: AssetPlayer) {
+    public func playerPlaybackDidEnd(_ properties: AssetPlayerProperties) {
         // @TODO: clear view
     }
 
-    public func playerBufferedTimeDidChange(_ player: AssetPlayer) {
-        self.controlsView.configure(with: .updating(viewModel: player.properties.controlsViewModel))
+    public func playerBufferedTimeDidChange(_ properties: AssetPlayerProperties) {
+        self.controlsView.configure(with: .updating(viewModel: properties.controlsViewModel))
     }
 
-    public func playerCurrentAssetDidChange(_ player: AssetPlayer) {
-        self.controlsView.configure(with: .setup(viewModel: player.properties.controlsViewModel))
+    public func playerCurrentAssetDidChange(_ properties: AssetPlayerProperties) {
+        self.controlsView.configure(with: .setup(viewModel: properties.controlsViewModel))
     }
 }
 

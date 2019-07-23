@@ -12,17 +12,17 @@ import SwifterSwift
 
 public protocol AssetPlayerDelegate: class {
     // Setup
-    func playerIsSetup(_ player: AssetPlayer)
+    func playerIsSetup(_ player: AssetPlayerProperties)
 
     // Playback
-    func playerPlaybackStateDidChange(_ player: AssetPlayer)
-    func playerCurrentTimeDidChange(_ player: AssetPlayer)
-    func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer)
-    func playerPlaybackDidEnd(_ player: AssetPlayer)
+    func playerPlaybackStateDidChange(_ player: AssetPlayerProperties)
+    func playerCurrentTimeDidChange(_ player: AssetPlayerProperties)
+    func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayerProperties)
+    func playerPlaybackDidEnd(_ player: AssetPlayerProperties)
     
     // This is the time in seconds that the video has been buffered.
     // If implementing a UIProgressView, user this value / player.maximumDuration to set buffering progress.
-    func playerBufferedTimeDidChange(_ player: AssetPlayer)
+    func playerBufferedTimeDidChange(_ player: AssetPlayerProperties)
 }
 
 public enum AssetPlayerPlaybackState: Equatable {
@@ -113,7 +113,7 @@ final public class AssetPlayer: NSObject {
 
     internal var asset: Asset? {
         willSet {
-            self.removePlayerItemObservers()
+            self.removePlayerItemObservers(playerItem: self.asset?.playerItem)
         }
         didSet {
             guard let newAsset = self.asset else { return }
@@ -121,9 +121,7 @@ final public class AssetPlayer: NSObject {
             asynchronouslyLoadURLAsset(newAsset)
         }
     }
-
-    internal var currentAssetIndex: Int = 0
-
+    
     // MARK: - Periodic Time Observers
     internal var timeObserverToken: Any?
     internal var timeObserverTokenMilliseconds: Any?
@@ -232,14 +230,18 @@ final public class AssetPlayer: NSObject {
                  We can play this asset. Create a new `AVPlayerItem` and make
                  it our player's current item.
                  */
+                self.isPlayingLocalAsset = newAsset.isLocalFile
                 let playerItem = AVPlayerItem(asset: newAsset.urlAsset)
                 self.player.replaceCurrentItem(with: playerItem)
-                self.delegate?.playerIsSetup(self)
+                self.delegate?.playerIsSetup(self.properties)
                 self.addPlayerItemObservers(playerItem: playerItem)
                 self.setupTimeObservers()
                 
                 if self.state != .playing, self.state != .paused, self.state != .buffering {
                     self.state = .idle
+                }
+                if self.state == .playing {
+                    self.handleStateChange(.playing)
                 }
             }
         }
@@ -278,9 +280,10 @@ extension AssetPlayer {
             self.player.pause()
         case .finished:
             self.player.pause()
+            self.delegate?.playerPlaybackDidEnd(self.properties)
         }
 
-        self.delegate?.playerPlaybackStateDidChange(self)
+        self.delegate?.playerPlaybackStateDidChange(self.properties)
     }
 }
 
@@ -308,8 +311,8 @@ extension AssetPlayer {
         })
     }
 
-    internal func removePlayerItemObservers() {
-        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: nil)
+    internal func removePlayerItemObservers(playerItem: AVPlayerItem?) {
+        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
 
         playbackBufferEmptyObserver?.invalidate()
         playbackLikelyToKeepUpObserver?.invalidate()
@@ -320,7 +323,6 @@ extension AssetPlayer {
     }
 
     @objc private func handleAVPlayerItemDidPlayToEndTimeNotification(notification: Notification) {
-        self.delegate?.playerPlaybackDidEnd(self)
         self.state = .finished
     }
 
@@ -359,7 +361,7 @@ extension AssetPlayer {
         if let timeRange = timeRanges.first?.timeRangeValue {
             let bufferedTime = Double(CMTimeGetSeconds(CMTimeAdd(timeRange.start, timeRange.duration)))
             self.bufferedTime = bufferedTime
-            self.delegate?.playerBufferedTimeDidChange(self)
+            self.delegate?.playerBufferedTimeDidChange(self.properties)
         }
     }
 

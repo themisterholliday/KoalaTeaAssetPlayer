@@ -83,33 +83,33 @@ Now that you are setup and can perform actions, you'll need implement the delega
 assetPlayer.delegate = self
 
 extension ViewController: AssetPlayerDelegate {
-    func playerIsSetup(_ player: AssetPlayer) {
+    func playerIsSetup(_ properties: AssetPlayerProperties) {
         // Here the player is setup and you can set the max value for a time slider or anything else you need to show in your UI.
     }
 
-    func playerPlaybackStateDidChange(_ player: AssetPlayer) {
+    func playerPlaybackStateDidChange(_ properties: AssetPlayerProperties) {
         // Can handle state changes here if you need to display the state in a view
     }
 
-    func playerCurrentTimeDidChange(_ player: AssetPlayer) {
+    func playerCurrentTimeDidChange(_ properties: AssetPlayerProperties) {
         // This is fired every second while the player is playing.
     }
 
-    func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer) {
+    func playerCurrentTimeDidChangeInMilliseconds(_ properties: AssetPlayerProperties) {
         /*
             This is fired every millisecond while the player is playing.
             You should probably update your slider here to have a smooth animated slider
          */
     }
 
-    func playerPlaybackDidEnd(_ player: AssetPlayer) {
+    func playerPlaybackDidEnd(_ properties: AssetPlayerProperties) {
         /*
             The playback did end for the player
             Dismiss the player, track some progress, whatever you need to do after the asset is done.
          */
     }
 
-    func playerBufferedTimeDidChange(_ player: AssetPlayer) {
+    func playerBufferedTimeDidChange(_ properties: AssetPlayerProperties) {
         /*
             This is for tracking the buffered time for the player.
             This is that little gray bar you see on YouTube or Vimeo that shows how much track time you have left before you see that buffering spinner

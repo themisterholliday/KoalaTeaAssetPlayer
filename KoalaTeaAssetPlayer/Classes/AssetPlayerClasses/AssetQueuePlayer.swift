@@ -8,8 +8,14 @@
 import Foundation
 import SwifterSwift
 
-protocol AssetQueuePlayerDelegate {
-    
+public protocol AssetQueuePlayerDelegate: class {
+    func playerIsSetup(_ properties: AssetQueuePlayerProperties)
+    func playerPlaybackStateDidChange(_ properties: AssetQueuePlayerProperties)
+    func playerCurrentTimeDidChange(_ properties: AssetQueuePlayerProperties)
+    func playerCurrentTimeDidChangeInMilliseconds(_ properties: AssetQueuePlayerProperties)
+    func playerPlaybackDidEnd(_ properties: AssetQueuePlayerProperties)
+    func playerBufferedTimeDidChange(_ properties: AssetQueuePlayerProperties)
+    func playerDidChangeAsset(_ properties: AssetQueuePlayerProperties)
 }
 
 public enum AssetQueuePlayerAction {
@@ -36,15 +42,14 @@ public enum AssetQueuePlayerAction {
 }
 
 final public class AssetQueuePlayer {
+    public weak var delegate: AssetQueuePlayerDelegate?
+    
     private lazy var assetPlayer = AssetPlayer()
     private lazy var playerView = assetPlayer.playerView
 
     private var assets: [Asset] = []
     private var currentAsset: Asset?
-    private var currentItemIndex: Int? {
-        guard let asset = currentAsset else { return nil }
-        return assets.firstIndex(of: asset)
-    }
+    private var currentAssetIndex: Int = 0
 
     public init(remoteCommands: [RemoteCommand] = []) {
         assetPlayer.delegate = self
@@ -63,11 +68,11 @@ final public class AssetQueuePlayer {
             currentAsset = firstAsset
             assetPlayer.perform(action: .setup(with: firstAsset))
         case .nextAsset:
-            guard let currentIndex = self.currentItemIndex, currentIndex != assets.count else { return }
-            moveToAsset(at: currentIndex + 1)
+            guard currentAssetIndex != assets.count else { return }
+            moveToAsset(at: currentAssetIndex + 1)
         case .previousAsset:
-            guard let currentIndex = self.currentItemIndex, currentIndex != 0 else { return }
-            moveToAsset(at: currentIndex - 1)
+            guard currentAssetIndex != 0 else { return }
+            moveToAsset(at: currentAssetIndex - 1)
         case .moveToAsset(let index):
             moveToAsset(at: index)
         }
@@ -75,34 +80,41 @@ final public class AssetQueuePlayer {
 
     private func moveToAsset(at index: Int) {
         guard let asset = assets[safe: index] else { return }
-        currentAsset = asset
         assetPlayer.perform(action: .setup(with: asset))
+        perform(action: .play)
+        currentAsset = asset
+        currentAssetIndex = index
+        delegate?.playerDidChangeAsset(self.properties)
     }
 }
 
 extension AssetQueuePlayer: AssetPlayerDelegate {
-    public func playerIsSetup(_ player: AssetPlayer) {
-
+    public func playerIsSetup(_ properties: AssetPlayerProperties) {
+        delegate?.playerIsSetup(self.properties)
     }
 
-    public func playerPlaybackStateDidChange(_ player: AssetPlayer) {
-
+    public func playerPlaybackStateDidChange(_ properties: AssetPlayerProperties) {
+        delegate?.playerPlaybackStateDidChange(self.properties)
     }
 
-    public func playerCurrentTimeDidChange(_ player: AssetPlayer) {
-
+    public func playerCurrentTimeDidChange(_ properties: AssetPlayerProperties) {
+        delegate?.playerCurrentTimeDidChange(self.properties)
     }
 
-    public func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer) {
-
+    public func playerCurrentTimeDidChangeInMilliseconds(_ properties: AssetPlayerProperties) {
+        delegate?.playerCurrentTimeDidChangeInMilliseconds(self.properties)
     }
 
-    public func playerPlaybackDidEnd(_ player: AssetPlayer) {
+    public func playerPlaybackDidEnd(_ properties: AssetPlayerProperties) {
+        guard currentAssetIndex != (assets.count - 1) else {
+            delegate?.playerPlaybackDidEnd(self.properties)
+            return
+        }
         perform(action: .nextAsset)
     }
 
-    public func playerBufferedTimeDidChange(_ player: AssetPlayer) {
-
+    public func playerBufferedTimeDidChange(_ properties: AssetPlayerProperties) {
+        delegate?.playerBufferedTimeDidChange(self.properties)
     }
 }
 
@@ -139,7 +151,7 @@ public extension AssetQueuePlayer {
         let playerPropertires = assetPlayer.properties
         return AssetQueuePlayerProperties(assets: assets,
                                           currentAsset: currentAsset,
-                                          currentAssetIndex: currentItemIndex,
+                                          currentAssetIndex: currentAssetIndex,
                                           isMuted: playerPropertires.isMuted,
                                           currentTime: playerPropertires.currentTime,
                                           bufferedTime: playerPropertires.bufferedTime,

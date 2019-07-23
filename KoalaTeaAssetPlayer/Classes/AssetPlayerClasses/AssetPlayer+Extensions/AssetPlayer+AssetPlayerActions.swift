@@ -98,7 +98,7 @@ extension AssetPlayer {
         player.replaceCurrentItem(with: nil)
         playerView.player = nil
 
-        removePlayerItemObservers()
+        removePlayerItemObservers(playerItem: self.asset?.playerItem)
     }
 
     internal func setupTimeObservers() {
@@ -121,7 +121,7 @@ extension AssetPlayer {
     private func handleSecondTimeObserver(with time: CMTime) {
         guard self.state != .finished else { return }
 
-        self.delegate?.playerCurrentTimeDidChange(self)
+        self.delegate?.playerCurrentTimeDidChange(self.properties)
         self.updatePlaybackMetadata()
     }
 
@@ -131,7 +131,7 @@ extension AssetPlayer {
         let timeElapsed = time.seconds
 
         self.currentTime = timeElapsed
-        self.delegate?.playerCurrentTimeDidChangeInMilliseconds(self)
+        self.delegate?.playerCurrentTimeDidChangeInMilliseconds(self.properties)
     }
 
     private func seekTo(_ newPosition: CMTime) {

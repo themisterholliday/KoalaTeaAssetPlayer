@@ -112,32 +112,29 @@ class MockAssetPlayerDelegate: AssetPlayerDelegate {
         assetPlayer.delegate = self
     }
 
-    func playerIsSetup(_ player: AssetPlayer) {
-        self.currentAsset = player.properties.asset
+    func playerIsSetup(_ properties: AssetPlayerProperties) {
+        self.currentAsset = properties.asset
     }
 
-    func playerPlaybackStateDidChange(_ player: AssetPlayer) {}
+    func playerPlaybackStateDidChange(_ properties: AssetPlayerProperties) {}
 
-    func playerCurrentTimeDidChange(_ player: AssetPlayer) {
-        let properties = player.properties
+    func playerCurrentTimeDidChange(_ properties: AssetPlayerProperties) {
         self.currentTimeInSeconds = properties.currentTime.rounded()
         self.timeElapsedText = properties.currentTimeText
         self.durationText = properties.durationText
     }
 
-    func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer) {
-        let properties = player.properties
+    func playerCurrentTimeDidChangeInMilliseconds(_ properties: AssetPlayerProperties) {
         self.currentTimeInMilliSeconds = round(100.0 * properties.currentTime) / 100.0
         self.timeElapsedText = properties.currentTimeText
         self.durationText = properties.durationText
     }
 
-    func playerPlaybackDidEnd(_ player: AssetPlayer) {
+    func playerPlaybackDidEnd(_ properties: AssetPlayerProperties) {
         self.playbackEnded = true
     }
 
-    func playerBufferedTimeDidChange(_ player: AssetPlayer) {
-        let properties = player.properties
+    func playerBufferedTimeDidChange(_ properties: AssetPlayerProperties) {
         self.bufferTime = Double(properties.bufferedTime)
     }
 
