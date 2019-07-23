@@ -54,8 +54,8 @@ public class AssetPlayerView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func setupPlayback(assets: [Asset], remoteCommands: [RemoteCommand]) {
-        assetPlayer.perform(action: .setup(with: assets, remoteCommands: remoteCommands))
+    public func setupPlayback(asset: Asset, remoteCommands: [RemoteCommand]) {
+        assetPlayer.perform(action: .setup(with: asset, remoteCommands: remoteCommands))
         assetPlayer.perform(action: .play)
         assetPlayer.delegate = self
     }

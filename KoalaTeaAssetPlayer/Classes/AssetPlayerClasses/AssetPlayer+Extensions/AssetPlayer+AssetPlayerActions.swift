@@ -9,7 +9,7 @@ import Foundation
 import AVKit
 
 public enum AssetPlayerActions {
-    case setup(with: [Asset], remoteCommands: [RemoteCommand])
+    case setup(with: Asset, remoteCommands: [RemoteCommand])
     case play
     case pause
     case togglePlayPause
@@ -23,15 +23,14 @@ public enum AssetPlayerActions {
     case changePlayerPlaybackRate(to: Float)
     case changeIsMuted(to: Bool)
     case changeVolume(to: Float)
-    case moveToAssetInQueue(index: Int)
 }
 
 extension AssetPlayer {
     // swiftlint:disable cyclomatic_complexity
     open func perform(action: AssetPlayerActions) {
         switch action {
-        case .setup(let assets, let remoteCommands):
-            handleSetup(with: assets, remoteCommands: remoteCommands)
+        case .setup(let asset, let remoteCommands):
+            handleSetup(with: asset, remoteCommands: remoteCommands)
         case .play:
             self.state = .playing
         case .pause:
@@ -56,19 +55,19 @@ extension AssetPlayer {
             perform(action: .seekToTimeInSeconds(time: currentTime + interval))
         case .changeVolume(let newVolume):
             player.volume = newVolume
-        case .moveToAssetInQueue(let index):
-            self.moveToAssetIndex(index)
         }
     }
     // swiftlint:enable cyclomatic_complexity
 
-    private func handleSetup(with assets: [Asset], remoteCommands: [RemoteCommand]) {
-        self.setup(with: assets)
+    private func handleSetup(with asset: Asset, remoteCommands: [RemoteCommand]) {
         self.enableRemoteCommands(remoteCommands)
-        
+
         // Allow background audio and playing audio with silent switch on
         try? AVAudioSession.sharedInstance().setCategory(.playback)
         try? AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
+
+        self.state = .setup(asset: asset)
+        self.updateGeneralMetadata()
     }
 
     private func handleTogglePlayPause() {
@@ -95,17 +94,10 @@ extension AssetPlayer {
         }
 
         player.pause()
-        player.removeAllItems()
+        player.replaceCurrentItem(with: nil)
         playerView.player = nil
 
         removePlayerItemObservers()
-        removePlayerObservers()
-    }
-
-    private func setup(with asset: [Asset]) {
-        self.updateGeneralMetadata()
-
-        self.state = .setup(asset: asset)
     }
 
     internal func setupTimeObservers() {
@@ -142,12 +134,12 @@ extension AssetPlayer {
     }
 
     private func seekTo(_ newPosition: CMTime) {
-        guard currentAsset != nil else { return }
+        guard asset != nil else { return }
         self.player.seek(to: newPosition, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero)
     }
 
     private func seekToTimeInSeconds(_ time: Double, completion: ((Bool) -> Void)?) {
-        guard currentAsset != nil else { return }
+        guard asset != nil else { return }
         let newPosition = CMTimeMakeWithSeconds(time, preferredTimescale: 1000)
         if let completion = completion {
             self.player.seek(to: newPosition, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero, completionHandler: completion)
@@ -159,29 +151,7 @@ extension AssetPlayer {
     }
 
     private func changePlayerPlaybackRate(to newRate: Float) {
-        guard currentAsset != nil else { return }
+        guard asset != nil else { return }
         self.rate = newRate
-    }
-
-    private func moveToAssetIndex(_ index: Int) {
-        guard index >= 0 else { return }
-        self.isMovingInQueue = true
-
-        let initialItems = assets?.compactMap({ $0.playerItem }) ?? []
-        player.removeAllItems()
-        let newItems = initialItems.dropFirst(index)
-        for item in newItems {
-            if player.canInsert(item, after: nil) {
-                player.insert(item, after: nil)
-            }
-        }
-
-        self.isMovingInQueue = false
-
-        guard let currentItem = player.currentItem else { return }
-        // Forcing change function to call because the keyPath observation does not work properly when we rebuild the queue above
-        handleChangingCurrentPlayerItem(to: currentItem)
-
-        perform(action: .play)
     }
 }

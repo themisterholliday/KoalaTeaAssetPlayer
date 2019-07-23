@@ -12,11 +12,11 @@ import KoalaTeaAssetPlayer
 
 class QueuePlayerSpec: QuickSpec {
     override func spec() {
-        let asset1: Asset = Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_1mb", withExtension: "mp4")!)
+        let asset1: Asset = Asset(url: Bundle(for: QueuePlayerSpec.self).url(forResource: "SampleVideo_1280x720_1mb", withExtension: "mp4")!)
 
-        let asset2: Asset = Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_1mb", withExtension: "mp4")!)
+        let asset2: Asset = Asset(url: Bundle(for: QueuePlayerSpec.self).url(forResource: "SampleVideo_1280x720_1mb", withExtension: "mp4")!)
         
-        fdescribe("queue player") {
+        xdescribe("queue player") {
             var assetPlayer: AssetPlayer!
 
             beforeEach {

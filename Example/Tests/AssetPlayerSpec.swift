@@ -13,17 +13,17 @@ import CoreMedia
 import KoalaTeaAssetPlayer
 
 class AssetPlayerSpec: QuickSpec {
+    lazy var thirtySecondAsset: Asset = {
+        return Asset(url: Bundle(for: AssetPlayerSpec.self).url(forResource: "SampleVideo_1280x720_5mb", withExtension: "mp4")!)
+    }()
+
+    lazy var fiveSecondAsset: Asset = {
+        return Asset(url: Bundle(for: AssetPlayerSpec.self).url(forResource: "SampleVideo_1280x720_1mb", withExtension: "mp4")!)
+    }()
+
     override func spec() {
         describe("asset player specs") {
             describe("asset player local asset tests") {
-                var thirtySecondAsset: Asset {
-                    return Asset(url: Bundle(for: AssetPlayerSpec.self).url(forResource: "SampleVideo_1280x720_5mb", withExtension: "mp4")!)
-                }
-
-                var fiveSecondAsset: Asset {
-                    return Asset(url: Bundle(for: AssetPlayerSpec.self).url(forResource: "SampleVideo_1280x720_1mb", withExtension: "mp4")!)
-                }
-
                 var assetPlayer: AssetPlayer!
 
                 beforeEach {
@@ -37,11 +37,11 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("actionable state changes") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, options: [], remoteCommands: []))
+                        assetPlayer.perform(action: .setup(with: self.thirtySecondAsset, remoteCommands: []))
                     }
 
                     it("should have SETUP state") {
-                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: thirtySecondAsset)))
+                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: self.thirtySecondAsset)))
                     }
 
                     it("should have PLAYED state") {
@@ -65,34 +65,17 @@ class AssetPlayerSpec: QuickSpec {
                         assetPlayer.perform(action: .changeIsMuted(to: false))
                         expect(assetPlayer.properties.isMuted).to(equal(false))
                     }
-
-                    it("should change start time and end time for looping") {
-                        assetPlayer.perform(action: .changeStartTimeForLoop(to: 5.0))
-                        expect(assetPlayer.properties.startTimeForLoop).to(equal(5.0))
-
-                        expect(assetPlayer.properties.state).toEventually(equal(AssetPlayerPlaybackState.idle), timeout: 20)
-
-                        assetPlayer.perform(action: .changeEndTimeForLoop(to: 10.0))
-                        expect(assetPlayer.properties.endTimeForLoop).to(equal(10.0))
-                    }
                 }
 
                 describe("finished state test") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: [], remoteCommands: []))
+                        assetPlayer.perform(action: .setup(with: self.fiveSecondAsset, remoteCommands: []))
                     }
 
                     it("should have FINISHED state") {
-                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: fiveSecondAsset)))
+                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: self.fiveSecondAsset)))
                         assetPlayer.perform(action: .play)
                         expect(assetPlayer.properties.state).toEventually(equal(AssetPlayerPlaybackState.finished), timeout: 8)
-                    }
-
-                    it("should continue looping after finishing") {
-                        assetPlayer.perform(action: AssetPlayerActions.changeShouldLoop(to: true))
-                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: fiveSecondAsset)))
-                        assetPlayer.perform(action: .play)
-                        expect(assetPlayer.properties.state).toEventually(equal(AssetPlayerPlaybackState.playing), timeout: 8)
                     }
                 }
 
@@ -113,12 +96,12 @@ class AssetPlayerSpec: QuickSpec {
                     var mockAssetPlayerDelegate: MockAssetPlayerDelegate!
 
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: [], remoteCommands: []))
+                        assetPlayer.perform(action: .setup(with: self.fiveSecondAsset, remoteCommands: []))
                         mockAssetPlayerDelegate = MockAssetPlayerDelegate(assetPlayer: assetPlayer)
                     }
 
                     it("should fire setup delegate") {
-                        expect(mockAssetPlayerDelegate.currentAsset?.urlAsset.url).toEventually(equal(fiveSecondAsset.urlAsset.url))
+                        expect(mockAssetPlayerDelegate.currentAsset?.urlAsset.url).toEventually(equal(self.fiveSecondAsset.urlAsset.url))
                     }
 
                     it("should fire delegate to set current time in seconds") {
@@ -164,7 +147,7 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("actionable state changes") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, options: [], remoteCommands: []))
+                        assetPlayer.perform(action: .setup(with: thirtySecondAsset, remoteCommands: []))
                     }
 
                     it("should have SETUP state") {
@@ -197,20 +180,13 @@ class AssetPlayerSpec: QuickSpec {
 
                 describe("finished state test") {
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: [], remoteCommands: []))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, remoteCommands: []))
                     }
 
                     it("should have FINISHED state") {
                         expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: fiveSecondAsset)))
                         assetPlayer.perform(action: .play)
                         expect(assetPlayer.properties.state).toEventually(equal(AssetPlayerPlaybackState.finished), timeout: minimumSetupTime + 20)
-                    }
-
-                    it("should continue looping after finishing") {
-                        assetPlayer.perform(action: AssetPlayerActions.changeShouldLoop(to: true))
-                        expect(assetPlayer.properties.state).to(equal(AssetPlayerPlaybackState.setup(asset: fiveSecondAsset)))
-                        assetPlayer.perform(action: .play)
-                        expect(assetPlayer.properties.state).toEventually(equal(AssetPlayerPlaybackState.playing), timeout: minimumSetupTime + 8)
                     }
                 }
 
@@ -231,7 +207,7 @@ class AssetPlayerSpec: QuickSpec {
                     var mockAssetPlayerDelegate: MockAssetPlayerDelegate!
 
                     beforeEach {
-                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, options: [], remoteCommands: []))
+                        assetPlayer.perform(action: .setup(with: fiveSecondAsset, remoteCommands: []))
                         mockAssetPlayerDelegate = MockAssetPlayerDelegate(assetPlayer: assetPlayer)
                     }
 

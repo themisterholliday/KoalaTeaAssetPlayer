@@ -22,7 +22,7 @@
          </BuildActionEntry>
          <BuildActionEntry
             buildForTesting = "YES"
-            buildForRunning = "NO"
+            buildForRunning = "YES"
             buildForProfiling = "NO"
             buildForArchiving = "NO"
             buildForAnalyzing = "YES">
@@ -51,6 +51,11 @@
                BlueprintName = "KoalaTeaAssetPlayer_Tests"
                ReferencedContainer = "container:KoalaTeaAssetPlayer.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "DeinitTest/testCleanup()">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
       <MacroExpansion>

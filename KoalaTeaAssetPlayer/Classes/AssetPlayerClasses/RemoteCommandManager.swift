@@ -156,7 +156,7 @@ internal class RemoteCommandManager: NSObject {
         if enable {
             remoteCommandCenter.likeCommand.addTarget { [weak self] _ -> MPRemoteCommandHandlerStatus in
                 guard let `self` = self else { return .commandFailed }
-                if self.assetPlayer.currentAsset != nil {
+                if self.assetPlayer.asset != nil {
                     completion?(true)
                     return .success
                 } else {
@@ -181,7 +181,7 @@ internal class RemoteCommandManager: NSObject {
         if enable {
             remoteCommandCenter.dislikeCommand.addTarget { [weak self] _ -> MPRemoteCommandHandlerStatus in
                 guard let `self` = self else { return .commandFailed }
-                if self.assetPlayer.currentAsset != nil {
+                if self.assetPlayer.asset != nil {
                     completion?(true)
                     return .success
                 } else {
@@ -206,7 +206,7 @@ internal class RemoteCommandManager: NSObject {
         if enable {
             remoteCommandCenter.bookmarkCommand.addTarget { [weak self] _ -> MPRemoteCommandHandlerStatus in
                 guard let `self` = self else { return .commandFailed }
-                if self.assetPlayer.currentAsset != nil {
+                if self.assetPlayer.asset != nil {
                     completion?(true)
                     return .success
                 } else {

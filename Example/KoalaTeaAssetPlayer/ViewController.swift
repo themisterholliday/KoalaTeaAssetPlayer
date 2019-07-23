@@ -22,7 +22,6 @@ class ViewController: UIViewController {
 
         // ⭐ Try one of these ⭐
 //        assetPlayerExample()
-        self.assetPlayerQueueExample()
 //        assetPlayerViewExample()
     }
 
@@ -53,7 +52,7 @@ class ViewController: UIViewController {
                                                bookmarkCommand]
 
         // Easy setup and handling. Everything is just an action.
-        assetPlayer.perform(action: .setup(with: [asset], remoteCommands: remoteCommands))
+        assetPlayer.perform(action: .setup(with: asset, remoteCommands: remoteCommands))
 
         // Example actions you can perform
         assetPlayer.perform(action: .skip(by: 30))
@@ -72,33 +71,33 @@ class ViewController: UIViewController {
             ])
     }
 
-    func assetPlayerQueueExample() {
-        assetPlayer.delegate = self
-
-        // Easy setup and handling. Everything is just an action.
-        assetPlayer.perform(action: .setup(with: [asset, longAsset, asset1], remoteCommands: []))
-
-        assetPlayer.perform(action: .play)
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-            self.assetPlayer.perform(action: .moveToAssetInQueue(index: self.assetPlayer.properties.currentAssetIndex + 1))
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
-//                self.assetPlayer.perform(action: .seekToTimeInSeconds(time: 0))
-//                self.assetPlayer.perform(action: .moveToAssetInQueue(index: self.assetPlayer.properties.currentAssetIndex - 1))
-            }
-        }
-
-        // And if you're using view, setup the player view
-        playerView.translatesAutoresizingMaskIntoConstraints = false
-        self.view.addSubview(playerView)
-        NSLayoutConstraint.activate([
-            playerView.topAnchor.constraint(equalTo: view.topAnchor),
-            playerView.heightAnchor.constraint(equalTo: playerView.widthAnchor, multiplier: 9/16),
-            playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-            ])
-    }
+//    func assetPlayerQueueExample() {
+//        assetPlayer.delegate = self
+//
+//        // Easy setup and handling. Everything is just an action.
+//        assetPlayer.perform(action: .setup(with: [asset, longAsset, asset1], remoteCommands: []))
+//
+//        assetPlayer.perform(action: .play)
+//
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+//            self.assetPlayer.perform(action: .moveToAssetInQueue(index: self.assetPlayer.properties.currentAssetIndex + 1))
+//
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+////                self.assetPlayer.perform(action: .seekToTimeInSeconds(time: 0))
+////                self.assetPlayer.perform(action: .moveToAssetInQueue(index: self.assetPlayer.properties.currentAssetIndex - 1))
+//            }
+//        }
+//
+//        // And if you're using view, setup the player view
+//        playerView.translatesAutoresizingMaskIntoConstraints = false
+//        self.view.addSubview(playerView)
+//        NSLayoutConstraint.activate([
+//            playerView.topAnchor.constraint(equalTo: view.topAnchor),
+//            playerView.heightAnchor.constraint(equalTo: playerView.widthAnchor, multiplier: 9/16),
+//            playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+//            ])
+//    }
 
     /// Example player view implementing AssetPlayer
     lazy var assetPlayerView: AssetPlayerView = {
@@ -122,7 +121,7 @@ class ViewController: UIViewController {
             ])
 
         // And setup the playback
-        assetPlayerView.setupPlayback(assets: [asset], remoteCommands: .all(skipInterval: 30))
+        assetPlayerView.setupPlayback(asset: asset, remoteCommands: .all(skipInterval: 30))
     }
 }
 
