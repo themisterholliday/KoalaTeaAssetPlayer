@@ -9,24 +9,28 @@
 import Foundation
 import AVFoundation
 
-open class Asset: NSObject {
-    public var urlAsset: AVURLAsset
-    public var assetName: String
-    public var artworkURL: URL?
+public struct Asset {
+    public let urlAsset: AVURLAsset
+    public let assetName: String
+    public let artworkURL: URL?
     public var isLocalFile: Bool {
         return urlAsset.url.isFileURL
     }
+    public let playerItem: AVPlayerItem
 
     public init(url: URL, assetName: String? = nil, artworkURL: URL? = nil) {
-        self.urlAsset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
+        let asset = AVURLAsset(url: url, options: [AVURLAssetPreferPreciseDurationAndTimingKey: true])
+        self.urlAsset = asset
         self.assetName = assetName ?? ""
         self.artworkURL = artworkURL
+        self.playerItem = AVPlayerItem(asset: asset)
     }
 
     public init(urlAsset: AVURLAsset, assetName: String? = nil, artworkURL: URL? = nil) {
         self.urlAsset = urlAsset
         self.assetName = assetName ?? ""
         self.artworkURL = artworkURL
+        self.playerItem = AVPlayerItem(asset: urlAsset)
     }
 }
 
@@ -46,5 +50,14 @@ public extension Asset {
 
     var naturalAssetSize: CGSize? {
         return self.urlAsset.getFirstVideoTrack()?.naturalSize
+    }
+}
+
+extension Asset: Equatable {
+    public static func == (lhs: Asset, rhs: Asset) -> Bool {
+        return lhs.urlAsset.url == rhs.urlAsset.url &&
+            lhs.urlAsset.metadata == rhs.urlAsset.metadata &&
+            lhs.assetName == rhs.assetName &&
+            lhs.artworkURL == rhs.artworkURL
     }
 }

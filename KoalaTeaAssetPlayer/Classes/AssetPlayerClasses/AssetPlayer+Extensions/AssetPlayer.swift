@@ -12,17 +12,17 @@ import SwifterSwift
 
 public protocol AssetPlayerDelegate: class {
     // Setup
-    func playerIsSetup(_ player: AssetPlayer)
+    func playerIsSetup(_ player: AssetPlayerProperties)
 
     // Playback
-    func playerPlaybackStateDidChange(_ player: AssetPlayer)
-    func playerCurrentTimeDidChange(_ player: AssetPlayer)
-    func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer)
-    func playerPlaybackDidEnd(_ player: AssetPlayer)
+    func playerPlaybackStateDidChange(_ player: AssetPlayerProperties)
+    func playerCurrentTimeDidChange(_ player: AssetPlayerProperties)
+    func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayerProperties)
+    func playerPlaybackDidEnd(_ player: AssetPlayerProperties)
     
     // This is the time in seconds that the video has been buffered.
     // If implementing a UIProgressView, user this value / player.maximumDuration to set buffering progress.
-    func playerBufferedTimeDidChange(_ player: AssetPlayer)
+    func playerBufferedTimeDidChange(_ player: AssetPlayerProperties)
 }
 
 public enum AssetPlayerPlaybackState: Equatable {
@@ -33,7 +33,7 @@ public enum AssetPlayerPlaybackState: Equatable {
     public static func == (lhs: AssetPlayerPlaybackState, rhs: AssetPlayerPlaybackState) -> Bool {
         switch (lhs, rhs) {
         case (.setup(let lKey), .setup(let rKey)):
-            return lKey.urlAsset.url == rKey.urlAsset.url
+            return lKey == rKey
         case (.playing, .playing):
             return true
         case (.paused, .paused):
@@ -52,7 +52,7 @@ public enum AssetPlayerPlaybackState: Equatable {
     }
 }
 
-open class AssetPlayer: NSObject {
+final public class AssetPlayer: NSObject {
     private struct Constants {
         // Keys required for a playable item
         static let AssetKeysRequiredToPlay = [
@@ -64,10 +64,7 @@ open class AssetPlayer: NSObject {
     public weak var delegate: AssetPlayerDelegate?
 
     // MARK: Properties
-    internal var isPlayingLocalAsset: Bool
-    internal var shouldLoop: Bool
-    internal var startTimeForLoop: Double = 0
-    internal var endTimeForLoop: Double?
+    internal var isPlayingLocalAsset: Bool = false
     internal var currentTime: Double = 0
     internal var bufferedTime: Double = 0
 
@@ -87,6 +84,8 @@ open class AssetPlayer: NSObject {
         }
     }
 
+    internal var isMovingInQueue: Bool = false
+
     // MARK: AV Properties
 
     /// The instance of `MPNowPlayingInfoCenter` that is used for updating metadata for the currently playing `Asset`.
@@ -100,7 +99,7 @@ open class AssetPlayer: NSObject {
             guard newValue != self.currentAVAudioTimePitchAlgorithm else { return }
         }
         didSet {
-            self.avPlayerItem?.audioTimePitchAlgorithm = self.currentAVAudioTimePitchAlgorithm
+            self.player.currentItem?.audioTimePitchAlgorithm = self.currentAVAudioTimePitchAlgorithm
         }
     }
 
@@ -112,32 +111,17 @@ open class AssetPlayer: NSObject {
         self.currentAVAudioTimePitchAlgorithm = .timeDomain
     }
 
-    internal var avPlayerItem: AVPlayerItem? = nil {
-        willSet {
-            if avPlayerItem != nil {
-                self.removePlayerItemObservers()
-            }
-        }
-        didSet {
-            if avPlayerItem != nil {
-                self.addPlayerItemObservers()
-            }
-            /*
-             If needed, configure player item here before associating it with a player.
-             (example: adding outputs, setting text style rules, selecting media options)
-             */
-            player.replaceCurrentItem(with: self.avPlayerItem)
-        }
-    }
-
     internal var asset: Asset? {
+        willSet {
+            self.removePlayerItemObservers(playerItem: self.asset?.playerItem)
+        }
         didSet {
             guard let newAsset = self.asset else { return }
 
             asynchronouslyLoadURLAsset(newAsset)
         }
     }
-
+    
     // MARK: - Periodic Time Observers
     internal var timeObserverToken: Any?
     internal var timeObserverTokenMilliseconds: Any?
@@ -169,15 +153,20 @@ open class AssetPlayer: NSObject {
         return playerView
     }()
 
-    private var remoteCommands: [RemoteCommand] = []
+    internal var remoteCommands: [RemoteCommand] = [] {
+        willSet {
+            self.remoteCommandManager.disableCommands(from: self.remoteCommands)
+        }
+        didSet {
+            self.remoteCommandManager.enableCommands(from: self.remoteCommands)
+        }
+    }
     private lazy var remoteCommandManager: RemoteCommandManager = RemoteCommandManager(assetPlaybackManager: self)
 
     // MARK: - Life Cycle
-    public override init() {
+    public init(remoteCommands: [RemoteCommand] = []) {
         self.state = .idle
         self.previousState = .idle
-        self.isPlayingLocalAsset = false
-        self.shouldLoop = false
 
         super.init()
 
@@ -185,6 +174,8 @@ open class AssetPlayer: NSObject {
         notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(appMovedToForeground), name: UIApplication.didBecomeActiveNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(handleInterruption), name: AVAudioSession.interruptionNotification, object: nil)
+
+        self.remoteCommands = remoteCommands
     }
 
     deinit {
@@ -210,8 +201,7 @@ open class AssetPlayer: NSObject {
                  `self.asset` has already changed! No point continuing because
                  another `newAsset` will come along in a moment.
                  */
-                guard newAsset.urlAsset == self.asset?.urlAsset else { return }
-
+                guard newAsset == self.asset else { return }
                 /*
                  Test whether the values of each of the keys we need have been
                  successfully loaded.
@@ -240,13 +230,19 @@ open class AssetPlayer: NSObject {
                  We can play this asset. Create a new `AVPlayerItem` and make
                  it our player's current item.
                  */
-                self.avPlayerItem = AVPlayerItem(asset: newAsset.urlAsset)
-                self.delegate?.playerIsSetup(self)
+                self.isPlayingLocalAsset = newAsset.isLocalFile
+                let playerItem = AVPlayerItem(asset: newAsset.urlAsset)
+                self.player.replaceCurrentItem(with: playerItem)
+                self.delegate?.playerIsSetup(self.properties)
+                self.addPlayerItemObservers(playerItem: playerItem)
+                self.setupTimeObservers()
                 
                 if self.state != .playing, self.state != .paused, self.state != .buffering {
                     self.state = .idle
                 }
-
+                if self.state == .playing {
+                    self.handleStateChange(.playing)
+                }
             }
         }
     }
@@ -284,52 +280,39 @@ extension AssetPlayer {
             self.player.pause()
         case .finished:
             self.player.pause()
-
-            guard !shouldLoop else {
-                self.currentTime = startTimeForLoop
-                self.perform(action: .seekToTimeInSeconds(time: startTimeForLoop))
-                self.state = .playing
-                return
-            }
+            self.delegate?.playerPlaybackDidEnd(self.properties)
         }
 
-        self.delegate?.playerPlaybackStateDidChange(self)
+        self.delegate?.playerPlaybackStateDidChange(self.properties)
     }
 }
 
 // MARK: Asset Player Observers
 extension AssetPlayer {
-    private func addPlayerItemObservers() {
-        NotificationCenter.default.addObserver(self, selector: #selector(self.handleAVPlayerItemDidPlayToEndTimeNotification(notification:)), name: .AVPlayerItemDidPlayToEndTime, object: avPlayerItem)
+    private func addPlayerItemObservers(playerItem: AVPlayerItem) {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(self.handleAVPlayerItemDidPlayToEndTimeNotification(notification:)),
+                                               name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
 
-        playbackBufferEmptyObserver = avPlayerItem?.observe(\.isPlaybackBufferEmpty, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
-            self?.handleBufferEmptyChange()
+        playbackBufferEmptyObserver = playerItem.observe(\.isPlaybackBufferEmpty, options: [.new, .old, .initial], changeHandler: { [weak self] playerItem, _ in
+            self?.handleBufferEmptyChange(playerItem: playerItem)
         })
 
-        playbackLikelyToKeepUpObserver = avPlayerItem?.observe(\.isPlaybackLikelyToKeepUp, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
-            self?.handleLikelyToKeepUpChange()
+        playbackLikelyToKeepUpObserver = playerItem.observe(\.isPlaybackLikelyToKeepUp, options: [.new, .old, .initial], changeHandler: { [weak self] playerItem, _ in
+            self?.handleLikelyToKeepUpChange(playerItem: playerItem)
         })
 
-        loadedTimeRangesObserver = avPlayerItem?.observe(\.loadedTimeRanges, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
-            self?.handleLoadedTimeRangesChange()
+        loadedTimeRangesObserver = playerItem.observe(\.loadedTimeRanges, options: [.new, .old, .initial], changeHandler: { [weak self] playerItem, _ in
+            self?.handleLoadedTimeRangesChange(playerItem: playerItem)
         })
 
-        playbackStatusObserver = avPlayerItem?.observe(\.status, options: [.new, .old], changeHandler: { [weak self] _, change in
+        playbackStatusObserver = playerItem.observe(\.status, options: [.new, .old], changeHandler: { [weak self] _, change in
             self?.handleStatusChange(change: change)
-        })
-
-        playbackDurationObserver = avPlayerItem?.observe(\.duration, options: [.new, .old, .initial], changeHandler: { [weak self]  _, _ in
-            // Should be ready to play here
-            // @TODO: handle
-        })
-
-        playbackRateObserver = player.observe(\.rate, options: [.new, .old, .initial], changeHandler: { [weak self] _, _ in
-            self?.updatePlaybackMetadata()
         })
     }
 
-    internal func removePlayerItemObservers() {
-        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: avPlayerItem)
+    internal func removePlayerItemObservers(playerItem: AVPlayerItem?) {
+        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
 
         playbackBufferEmptyObserver?.invalidate()
         playbackLikelyToKeepUpObserver?.invalidate()
@@ -340,59 +323,45 @@ extension AssetPlayer {
     }
 
     @objc private func handleAVPlayerItemDidPlayToEndTimeNotification(notification: Notification) {
-        guard !shouldLoop else {
-            self.currentTime = startTimeForLoop
-            self.perform(action: .seekToTimeInSeconds(time: startTimeForLoop))
-            self.state = .playing
-            return
-        }
-
-        self.delegate?.playerPlaybackDidEnd(self)
         self.state = .finished
     }
 
-    private func handleBufferEmptyChange() {
+    private func handleBufferEmptyChange(playerItem: AVPlayerItem) {
         // No need to use this keypath if we are playing local video
         guard !isPlayingLocalAsset else { return }
 
         // PlayerEmptyBufferKey
-        if let item = self.avPlayerItem {
-            if item.isPlaybackBufferEmpty && !item.isPlaybackBufferFull {
+        if playerItem.isPlaybackBufferEmpty && !playerItem.isPlaybackBufferFull {
+            self.state = .buffering
+        }
+    }
+
+    private func handleLikelyToKeepUpChange(playerItem: AVPlayerItem) {
+        // No need to use this keypath if we are playing local video
+        guard !isPlayingLocalAsset else { return }
+
+        // PlayerKeepUpKey
+        if playerItem.isPlaybackLikelyToKeepUp {
+            if self.state == .buffering, previousState == .playing {
+                self.state = previousState
+            }
+        } else {
+            if self.state != .buffering, self.state != .paused {
                 self.state = .buffering
             }
         }
     }
 
-    private func handleLikelyToKeepUpChange() {
-        // No need to use this keypath if we are playing local video
-        guard !isPlayingLocalAsset else { return }
-
-        // PlayerKeepUpKey
-        if let item = self.avPlayerItem {
-            if item.isPlaybackLikelyToKeepUp {
-                if self.state == .buffering, previousState == .playing {
-                    self.state = previousState
-                }
-            } else {
-                if self.state != .buffering, self.state != .paused {
-                    self.state = .buffering
-                }
-            }
-        }
-    }
-
-    private func handleLoadedTimeRangesChange() {
+    private func handleLoadedTimeRangesChange(playerItem: AVPlayerItem) {
         // No need to use this keypath if we are playing local video
         guard !isPlayingLocalAsset else { return }
 
         // PlayerLoadedTimeRangesKey
-        if let item = self.avPlayerItem {
-            let timeRanges = item.loadedTimeRanges
-            if let timeRange = timeRanges.first?.timeRangeValue {
-                let bufferedTime = Double(CMTimeGetSeconds(CMTimeAdd(timeRange.start, timeRange.duration)))
-                self.bufferedTime = bufferedTime
-                self.delegate?.playerBufferedTimeDidChange(self)
-            }
+        let timeRanges = playerItem.loadedTimeRanges
+        if let timeRange = timeRanges.first?.timeRangeValue {
+            let bufferedTime = Double(CMTimeGetSeconds(CMTimeAdd(timeRange.start, timeRange.duration)))
+            self.bufferedTime = bufferedTime
+            self.delegate?.playerBufferedTimeDidChange(self.properties)
         }
     }
 
@@ -443,11 +412,5 @@ extension AssetPlayer {
         UIView.animate(withDuration: 0.5) {
             self.playerView.alpha = 1
         }
-    }
-}
-
-extension AssetPlayer {
-    func enableRemoteCommands(_ commands: [RemoteCommand]) {
-        self.remoteCommandManager.enableCommands(from: commands)
     }
 }

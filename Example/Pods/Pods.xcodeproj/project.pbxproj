@@ -33,6 +33,7 @@
 		11BB30DF8A2490E38059737170227988 /* Functional.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6127DB4E4BD3AA6E3480FF5F101BAA1 /* Functional.swift */; settings = {COMPILER_FLAGS = "-DPRODUCT_NAME=Nimble/Nimble"; }; };
 		123A3221A5BC50497EE0F7A3F0694B2F /* XCTestObservationCenter+Register.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F2BAECC066F47DAFEBA5C7457A679F /* XCTestObservationCenter+Register.m */; settings = {COMPILER_FLAGS = "-DPRODUCT_NAME=Nimble/Nimble"; }; };
 		15332F2171797A6199109B8025073073 /* ArrayExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB4EC1334A8D991BB0F7416793A612D /* ArrayExtensions.swift */; };
+		160DD6ED22E6BBC90095BB56 /* AssetQueuePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160DD6EC22E6BBC90095BB56 /* AssetQueuePlayer.swift */; };
 		1619CC5DF835D29CFE745C443B8728DD /* BeLessThanOrEqual.swift in Sources */ = {isa = PBXBuildFile; fileRef = 468AEC5E5ED4A8FC8285309C4BEA37BC /* BeLessThanOrEqual.swift */; settings = {COMPILER_FLAGS = "-DPRODUCT_NAME=Nimble/Nimble"; }; };
 		16A9066A22D93B62009811B9 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16A9066922D93B62009811B9 /* Media.xcassets */; };
 		16A9066C22DA63E5009811B9 /* Action.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A9066B22DA63E5009811B9 /* Action.swift */; };
@@ -312,6 +313,7 @@
 		15895DF4262B2143F67429D785EBB772 /* World.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = World.swift; path = Sources/Quick/World.swift; sourceTree = "<group>"; };
 		15E777FA068D203846680015D8D14ED5 /* UITableViewExtensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UITableViewExtensions.swift; path = Sources/SwifterSwift/UIKit/UITableViewExtensions.swift; sourceTree = "<group>"; };
 		15FBEC7ACE276D1D50F2C9DF3196D580 /* UIRefreshControlExtensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UIRefreshControlExtensions.swift; path = Sources/SwifterSwift/UIKit/UIRefreshControlExtensions.swift; sourceTree = "<group>"; };
+		160DD6EC22E6BBC90095BB56 /* AssetQueuePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetQueuePlayer.swift; sourceTree = "<group>"; };
 		1626C175DB0130F3FE2B198281FE29E7 /* QuickSpec.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = QuickSpec.m; path = Sources/QuickObjectiveC/QuickSpec.m; sourceTree = "<group>"; };
 		16A9066922D93B62009811B9 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Media.xcassets; path = KoalaTeaAssetPlayer/Assets/Media.xcassets; sourceTree = "<group>"; };
 		16A9066B22DA63E5009811B9 /* Action.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Action.swift; sourceTree = "<group>"; };
@@ -1036,6 +1038,7 @@
 				7F4FF5B46B8A462B7368CACE90BD953E /* VideoExporterOrientationHelper.swift */,
 				EA3D8240ABA879DE7B8769D8D742E272 /* AssetPlayer+Extensions */,
 				16A9067022DB8A93009811B9 /* RemoteCommand.swift */,
+				160DD6EC22E6BBC90095BB56 /* AssetQueuePlayer.swift */,
 			);
 			name = AssetPlayerClasses;
 			path = KoalaTeaAssetPlayer/Classes/AssetPlayerClasses;
@@ -1525,6 +1528,7 @@
 				16A9066C22DA63E5009811B9 /* Action.swift in Sources */,
 				CD7D37180231139E8A909D0E5437207A /* PlayerView.swift in Sources */,
 				A25AC5D857EE9FAE6D14FB4C0A841A08 /* RemoteCommandManager.swift in Sources */,
+				160DD6ED22E6BBC90095BB56 /* AssetQueuePlayer.swift in Sources */,
 				AC90516EF23FFC2EE49FBACA18E3F6B4 /* VideoExporterOrientationHelper.swift in Sources */,
 				D3457230F3D08CAE2E33C1963F4121B4 /* AssetPlayerView.swift in Sources */,
 				2D1B07A07726D9B3E52BCDF21C83A590 /* AssetPlayerSliderView.swift in Sources */,
