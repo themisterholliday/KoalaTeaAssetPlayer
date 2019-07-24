@@ -23,9 +23,9 @@ public enum RemoteCommand {
     case playback, next, previous, changePlaybackPosition, seekForwardAndBackward
     case skipForward(interval: Int)
     case skipBackward(interval: Int)
-    case like(localizedTitle: String?, localizedShortTitle: String?)
-    case dislike(localizedTitle: String?, localizedShortTitle: String?)
-    case bookmark(localizedTitle: String?, localizedShortTitle: String?)
+    case like(localizedTitle: String?, localizedShortTitle: String?, completion: (Bool) -> Void)
+    case dislike(localizedTitle: String?, localizedShortTitle: String?, completion: (Bool) -> Void)
+    case bookmark(localizedTitle: String?, localizedShortTitle: String?, completion: (Bool) -> Void)
 }
 
 public extension Sequence where Iterator.Element == RemoteCommand {
@@ -38,9 +38,6 @@ public extension Sequence where Iterator.Element == RemoteCommand {
             .skipForward(interval: skipInterval),
             .skipBackward(interval: skipInterval),
             .seekForwardAndBackward,
-            .like(localizedTitle: nil, localizedShortTitle: nil),
-            .dislike(localizedTitle: nil, localizedShortTitle: nil),
-            .bookmark(localizedTitle: nil, localizedShortTitle: nil)
         ]
     }
 }

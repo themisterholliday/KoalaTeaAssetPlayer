@@ -37,20 +37,33 @@ class ViewController: UIViewController {
         let options: [AssetPlayerSetupOption] = [.shouldLoop, .startMuted]
 
         // These are some remote commands if you want your media to be accessible on the lock screen
+        let likeCommand: RemoteCommand = .like(localizedTitle: "Like", localizedShortTitle: "I really like this") { (success) in
+            print("Did Like from Command Center")
+        }
+        let dislikeCommand: RemoteCommand = .dislike(localizedTitle: "Dislike", localizedShortTitle: "I really dislike this") { (success) in
+            print("Did Dislike from Command Center")
+        }
+        let bookmarkCommand: RemoteCommand = .bookmark(localizedTitle: "Bookmark", localizedShortTitle: "Bookmark this please") { (success) in
+            print("Did Bookmark from Command Center")
+        }
         let remoteCommands: [RemoteCommand] = [.playback,
                                                .changePlaybackPosition,
                                                .skipForward(interval: 15),
-                                               .skipBackward(interval: 15)]
+                                               .skipBackward(interval: 15),
+                                               likeCommand,
+                                               dislikeCommand,
+                                               bookmarkCommand]
 
         // Easy setup and handling. Everything is just an action.
         assetPlayer.perform(action: .setup(with: asset,
                                            options: options,
                                            remoteCommands: remoteCommands))
         // Example actions you can perform
-        assetPlayer.perform(action: .play)
-        assetPlayer.perform(action: .pause)
         assetPlayer.perform(action: .skip(by: 30))
         assetPlayer.perform(action: .skip(by: -15))
+        assetPlayer.perform(action: .pause)
+        assetPlayer.perform(action: .play)
+
 
         // And if you're using view, setup the player view
         playerView.translatesAutoresizingMaskIntoConstraints = false
