@@ -14,6 +14,9 @@ class ViewController: UIViewController {
     lazy var asset: Asset = {
         return Asset(url: Bundle.main.url(forResource: "SampleVideo_1280x720_5mb", withExtension: "mp4")!)
     }()
+    let asset1: Asset = Asset(url: Bundle.main.url(forResource: "SampleVideo_2.5", withExtension: "mp4")!)
+    let longAsset: Asset = Asset(url: URL(string: "http://clips.vorwaerts-gmbh.de/VfE_html5.mp4")!, assetName: "Long Asset", artworkURL: nil)
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -29,12 +32,6 @@ class ViewController: UIViewController {
     func assetPlayerExample() {
         // You should definitely use the delegate. Check at the bottom 👇
         assetPlayer.delegate = self
-        /*
-            Player options.
-            `shouldLoop` will loop asset indefinitely.
-            `startMuted` will ...... start the asset muted
-         */
-        let options: [AssetPlayerSetupOption] = [.shouldLoop, .startMuted]
 
         // These are some remote commands if you want your media to be accessible on the lock screen
         let likeCommand: RemoteCommand = .like(localizedTitle: "Like", localizedShortTitle: "I really like this") { (success) in
@@ -55,15 +52,16 @@ class ViewController: UIViewController {
                                                bookmarkCommand]
 
         // Easy setup and handling. Everything is just an action.
-        assetPlayer.perform(action: .setup(with: asset,
-                                           options: options,
-                                           remoteCommands: remoteCommands))
+        assetPlayer.perform(action: .setup(with: asset))
+        
+        // Can also setup remote commands like this
+        assetPlayer.perform(action: .setupRemoteCommands(remoteCommands))
+
         // Example actions you can perform
         assetPlayer.perform(action: .skip(by: 30))
         assetPlayer.perform(action: .skip(by: -15))
         assetPlayer.perform(action: .pause)
         assetPlayer.perform(action: .play)
-
 
         // And if you're using view, setup the player view
         playerView.translatesAutoresizingMaskIntoConstraints = false
@@ -75,6 +73,34 @@ class ViewController: UIViewController {
             playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
             ])
     }
+
+//    func assetPlayerQueueExample() {
+//        assetPlayer.delegate = self
+//
+//        // Easy setup and handling. Everything is just an action.
+//        assetPlayer.perform(action: .setup(with: [asset, longAsset, asset1], remoteCommands: []))
+//
+//        assetPlayer.perform(action: .play)
+//
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+//            self.assetPlayer.perform(action: .moveToAssetInQueue(index: self.assetPlayer.properties.currentAssetIndex + 1))
+//
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+////                self.assetPlayer.perform(action: .seekToTimeInSeconds(time: 0))
+////                self.assetPlayer.perform(action: .moveToAssetInQueue(index: self.assetPlayer.properties.currentAssetIndex - 1))
+//            }
+//        }
+//
+//        // And if you're using view, setup the player view
+//        playerView.translatesAutoresizingMaskIntoConstraints = false
+//        self.view.addSubview(playerView)
+//        NSLayoutConstraint.activate([
+//            playerView.topAnchor.constraint(equalTo: view.topAnchor),
+//            playerView.heightAnchor.constraint(equalTo: playerView.widthAnchor, multiplier: 9/16),
+//            playerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//            playerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+//            ])
+//    }
 
     /// Example player view implementing AssetPlayer
     lazy var assetPlayerView: AssetPlayerView = {
@@ -98,38 +124,38 @@ class ViewController: UIViewController {
             ])
 
         // And setup the playback
-        assetPlayerView.setupPlayback(asset: asset, options: [.shouldLoop], remoteCommands: .all(skipInterval: 30))
+        assetPlayerView.setupPlayback(asset: asset, remoteCommands: .defaultCommands(skipInterval: 30))
     }
 }
 
 extension ViewController: AssetPlayerDelegate {
-    func playerIsSetup(_ player: AssetPlayer) {
+    func playerIsSetup(_ properties: AssetPlayerProperties) {
         // Here the player is setup and you can set the max value for a time slider or anything else you need to show in your UI.
     }
 
-    func playerPlaybackStateDidChange(_ player: AssetPlayer) {
+    func playerPlaybackStateDidChange(_ properties: AssetPlayerProperties) {
         // Can handle state changes here if you need to display the state in a view
     }
 
-    func playerCurrentTimeDidChange(_ player: AssetPlayer) {
+    func playerCurrentTimeDidChange(_ properties: AssetPlayerProperties) {
         // This is fired every second while the player is playing.
     }
 
-    func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer) {
+    func playerCurrentTimeDidChangeInMilliseconds(_ properties: AssetPlayerProperties) {
         /*
             This is fired every millisecond while the player is playing.
             You should probably update your slider here to have a smooth animated slider
          */
     }
 
-    func playerPlaybackDidEnd(_ player: AssetPlayer) {
+    func playerPlaybackDidEnd(_ properties: AssetPlayerProperties) {
         /*
             The playback did end for the player
             Dismiss the player, track some progress, whatever you need to do after the asset is done.
          */
     }
 
-    func playerBufferedTimeDidChange(_ player: AssetPlayer) {
+    func playerBufferedTimeDidChange(_ properties: AssetPlayerProperties) {
         /*
             This is for tracking the buffered time for the player.
             This is that little gray bar you see on YouTube or Vimeo that shows how much track time you have left before you see that buffering spinner
@@ -138,5 +164,9 @@ extension ViewController: AssetPlayerDelegate {
 
     func playerDidFail(_ error: Error?) {
         // 😱 Something has gone wrong and you should really present a nice error message and log this somewhere. Please don't just print the error.
+    }
+
+    public func playerCurrentAssetDidChange(_ properties: AssetPlayerProperties) {
+        // Asset changed in the queue
     }
 }

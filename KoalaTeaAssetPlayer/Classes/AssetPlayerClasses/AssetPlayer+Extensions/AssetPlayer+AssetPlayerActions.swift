@@ -8,12 +8,9 @@
 import Foundation
 import AVKit
 
-public enum AssetPlayerSetupOption {
-    case startMuted, shouldLoop
-}
-
-public enum AssetPlayerActions {
-    case setup(with: Asset, options: [AssetPlayerSetupOption], remoteCommands: [RemoteCommand])
+public enum AssetPlayerAction {
+    case setup(with: Asset)
+    case setupRemoteCommands([RemoteCommand])
     case play
     case pause
     case togglePlayPause
@@ -25,20 +22,18 @@ public enum AssetPlayerActions {
     case seekToTimeInSeconds(time: Double)
     case skip(by: Double)
     case changePlayerPlaybackRate(to: Float)
-    case changeIsPlayingLocalAsset(to: Bool)
-    case changeShouldLoop(to: Bool)
-    case changeStartTimeForLoop(to: Double)
-    case changeEndTimeForLoop(to: Double)
     case changeIsMuted(to: Bool)
     case changeVolume(to: Float)
 }
 
 extension AssetPlayer {
     // swiftlint:disable cyclomatic_complexity
-    open func perform(action: AssetPlayerActions) {
+    public func perform(action: AssetPlayerAction) {
         switch action {
-        case .setup(let asset, let options, let remoteCommands):
-            handleSetup(with: asset, options: options, remoteCommands: remoteCommands)
+        case .setup(let asset):
+            handleSetup(with: asset)
+        case .setupRemoteCommands(let commands):
+            self.remoteCommands = commands
         case .play:
             self.state = .playing
         case .pause:
@@ -47,14 +42,6 @@ extension AssetPlayer {
             seekToTimeInSeconds(time) { _ in }
         case .changePlayerPlaybackRate(let rate):
             changePlayerPlaybackRate(to: rate)
-        case .changeIsPlayingLocalAsset(let isPlayingLocalAsset):
-            self.isPlayingLocalAsset = isPlayingLocalAsset
-        case .changeShouldLoop(let shouldLoop):
-            self.shouldLoop = shouldLoop
-        case .changeStartTimeForLoop(let time):
-            handleChangeStartTimeForLoop(to: time)
-        case .changeEndTimeForLoop(let time):
-            handleChangeEndTimeForLoop(to: time)
         case .changeIsMuted(let isMuted):
             player.isMuted = isMuted
         case .stop:
@@ -75,35 +62,13 @@ extension AssetPlayer {
     }
     // swiftlint:enable cyclomatic_complexity
 
-    private func handleSetup(with asset: Asset, options: [AssetPlayerSetupOption], remoteCommands: [RemoteCommand]) {
-        self.setup(with: asset)
-        self.player.isMuted = options.contains(.startMuted)
-        self.shouldLoop = options.contains(.shouldLoop)
-        self.isPlayingLocalAsset = asset.isLocalFile
-        self.enableRemoteCommands(remoteCommands)
-        
+    private func handleSetup(with asset: Asset) {
         // Allow background audio and playing audio with silent switch on
         try? AVAudioSession.sharedInstance().setCategory(.playback)
         try? AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
-    }
 
-    private func handleChangeStartTimeForLoop(to time: Double) {
-        guard time > 0 else {
-            self.startTimeForLoop = 0
-            return
-        }
-        self.startTimeForLoop = time
-    }
-
-    private func handleChangeEndTimeForLoop(to time: Double) {
-        guard self.duration != 0 else {
-            return
-        }
-        guard time < self.duration else {
-            self.endTimeForLoop = self.duration
-            return
-        }
-        self.endTimeForLoop = time
+        self.state = .setup(asset: asset)
+        self.updateGeneralMetadata()
     }
 
     private func handleTogglePlayPause() {
@@ -130,19 +95,15 @@ extension AssetPlayer {
         }
 
         player.pause()
-        avPlayerItem = nil
         player.replaceCurrentItem(with: nil)
         playerView.player = nil
 
-        if avPlayerItem != nil {
-            self.removePlayerItemObservers()
-        }
+        removePlayerItemObservers(playerItem: self.asset?.playerItem)
     }
 
-    private func setup(with asset: Asset) {
-        self.updateGeneralMetadata()
-
-        self.state = .setup(asset: asset)
+    internal func setupTimeObservers() {
+        timeObserverToken = nil
+        timeObserverTokenMilliseconds = nil
 
         // Seconds time observer
         let interval = CMTimeMake(value: 1, timescale: 2)
@@ -160,7 +121,7 @@ extension AssetPlayer {
     private func handleSecondTimeObserver(with time: CMTime) {
         guard self.state != .finished else { return }
 
-        self.delegate?.playerCurrentTimeDidChange(self)
+        self.delegate?.playerCurrentTimeDidChange(self.properties)
         self.updatePlaybackMetadata()
     }
 
@@ -170,12 +131,7 @@ extension AssetPlayer {
         let timeElapsed = time.seconds
 
         self.currentTime = timeElapsed
-        self.delegate?.playerCurrentTimeDidChangeInMilliseconds(self)
-
-        // Set finished state if we are looping and passed our loop end time
-        if let endTime = self.endTimeForLoop, timeElapsed >= endTime, self.shouldLoop {
-            self.state = .finished
-        }
+        self.delegate?.playerCurrentTimeDidChangeInMilliseconds(self.properties)
     }
 
     private func seekTo(_ newPosition: CMTime) {

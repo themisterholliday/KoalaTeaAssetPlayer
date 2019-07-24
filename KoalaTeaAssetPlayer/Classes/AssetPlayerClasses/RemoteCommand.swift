@@ -29,15 +29,13 @@ public enum RemoteCommand {
 }
 
 public extension Sequence where Iterator.Element == RemoteCommand {
-    static func all(skipInterval: Int) -> [RemoteCommand] {
+    static func defaultCommands(skipInterval: Int) -> [RemoteCommand] {
         return [
             .playback,
-            .next,
-            .previous,
             .changePlaybackPosition,
+            .seekForwardAndBackward,
             .skipForward(interval: skipInterval),
             .skipBackward(interval: skipInterval),
-            .seekForwardAndBackward,
         ]
     }
 }

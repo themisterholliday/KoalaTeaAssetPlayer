@@ -7,8 +7,6 @@
 
 public struct AssetPlayerProperties {
     public let asset: Asset?
-    public let startTimeForLoop: Double
-    public let endTimeForLoop: Double?
     public let isMuted: Bool
     public let currentTime: Double
     public let bufferedTime: Double
@@ -25,8 +23,6 @@ public extension AssetPlayer {
     var properties: AssetPlayerProperties {
         return AssetPlayerProperties(
             asset: asset,
-            startTimeForLoop: startTimeForLoop,
-            endTimeForLoop: endTimeForLoop,
             isMuted: player.isMuted,
             currentTime: currentTime,
             bufferedTime: bufferedTime,

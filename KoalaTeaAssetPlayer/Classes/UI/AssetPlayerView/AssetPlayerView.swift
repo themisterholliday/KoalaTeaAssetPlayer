@@ -54,8 +54,9 @@ public class AssetPlayerView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func setupPlayback(asset: Asset, options: [AssetPlayerSetupOption], remoteCommands: [RemoteCommand]) {
-        assetPlayer.perform(action: .setup(with: asset, options: options, remoteCommands: remoteCommands))
+    public func setupPlayback(asset: Asset, remoteCommands: [RemoteCommand]) {
+        assetPlayer.remoteCommands = remoteCommands
+        assetPlayer.perform(action: .setup(with: asset))
         assetPlayer.perform(action: .play)
         assetPlayer.delegate = self
     }
@@ -81,29 +82,35 @@ public class AssetPlayerView: UIView {
 }
 
 extension AssetPlayerView: AssetPlayerDelegate {
-    public func playerIsSetup(_ player: AssetPlayer) {
-        self.controlsView.configure(with: .setup(viewModel: player.properties.constrolsViewModel))
+    public func playerIsSetup(_ properties: AssetPlayerProperties) {
+        self.controlsView.configure(with: .setup(viewModel: properties.controlsViewModel))
     }
 
-    public func playerPlaybackStateDidChange(_ player: AssetPlayer) {
-        self.handleAssetPlaybackManagerStateChange(to: player.properties.state)
+    public func playerPlaybackStateDidChange(_ properties: AssetPlayerProperties) {
+        self.handleAssetPlaybackManagerStateChange(to: properties.state)
     }
 
-    public func playerCurrentTimeDidChange(_ player: AssetPlayer) {}
+    public func playerCurrentTimeDidChange(_ properties: AssetPlayerProperties) {}
 
-    public func playerCurrentTimeDidChangeInMilliseconds(_ player: AssetPlayer) {
-        self.controlsView.configure(with: .updating(viewModel: player.properties.constrolsViewModel))
+    public func playerCurrentTimeDidChangeInMilliseconds(_ properties: AssetPlayerProperties) {
+        self.controlsView.configure(with: .updating(viewModel: properties.controlsViewModel))
     }
 
-    public func playerPlaybackDidEnd(_ player: AssetPlayer) {}
+    public func playerPlaybackDidEnd(_ properties: AssetPlayerProperties) {
+        // @TODO: clear view
+    }
 
-    public func playerBufferedTimeDidChange(_ player: AssetPlayer) {
-        self.controlsView.configure(with: .updating(viewModel: player.properties.constrolsViewModel))
+    public func playerBufferedTimeDidChange(_ properties: AssetPlayerProperties) {
+        self.controlsView.configure(with: .updating(viewModel: properties.controlsViewModel))
+    }
+
+    public func playerCurrentAssetDidChange(_ properties: AssetPlayerProperties) {
+        self.controlsView.configure(with: .setup(viewModel: properties.controlsViewModel))
     }
 }
 
 fileprivate extension AssetPlayerProperties {
-    var constrolsViewModel: ControlsViewModel {
+    var controlsViewModel: ControlsViewModel {
         return ControlsViewModel(currentTime: self.currentTime.float,
                                  bufferedTime: self.bufferedTime.float,
                                  maxValueForSlider: self.duration.float,
