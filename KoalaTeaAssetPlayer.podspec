@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'KoalaTeaAssetPlayer'
-  s.version          = '0.1.0'
+  s.version          = '0.2.0'
   s.summary          = 'KoalaTeaAssetPlayer is a wrapper around AVPlayer for audio and video.'
   s.homepage         = 'https://github.com/themisterholliday/KoalaTeaAssetPlayer'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
