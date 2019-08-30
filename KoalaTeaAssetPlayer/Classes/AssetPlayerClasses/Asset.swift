@@ -9,7 +9,7 @@
 import Foundation
 import AVFoundation
 
-public struct Asset {
+open class Asset {
     public let urlAsset: AVURLAsset
     public let assetName: String
     public let artworkURL: URL?
@@ -36,7 +36,7 @@ public struct Asset {
 
 public extension Asset {
     struct PublicConstants {
-        static let DefaultTimeScale: Int32 = 1000
+        public static let DefaultTimeScale: Int32 = 1000
     }
 
     static func adjustedTimeScaleDuration(for duration: CMTime) -> CMTime {

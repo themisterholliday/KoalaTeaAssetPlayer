@@ -7,7 +7,7 @@
 
 import Foundation
 
-class VideoExporterOrientationHelper {
+public class VideoExporterOrientationHelper {
     static func rotation(from transform: CGAffineTransform) -> CGFloat {
         return atan2(transform.b, transform.a)
     }
@@ -30,8 +30,8 @@ class VideoExporterOrientationHelper {
     }
 }
 
-extension CGAffineTransform {
-    var rotation: CGFloat {
+public extension CGAffineTransform {
+    var currentRotation: CGFloat {
         return atan2(self.b, self.a)
     }
 }
