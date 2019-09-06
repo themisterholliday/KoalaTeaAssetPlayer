@@ -8,11 +8,11 @@
 import Foundation
 
 public class VideoExporterOrientationHelper {
-    static func rotation(from transform: CGAffineTransform) -> CGFloat {
+    public static func rotation(from transform: CGAffineTransform) -> CGFloat {
         return atan2(transform.b, transform.a)
     }
 
-    static func orientationFromTransform(transform: CGAffineTransform) -> (orientation: UIImage.Orientation, isPortrait: Bool) {
+    public static func orientationFromTransform(transform: CGAffineTransform) -> (orientation: UIImage.Orientation, isPortrait: Bool) {
         var assetOrientation = UIImage.Orientation.up
         var isPortrait = false
         if transform.a == 0 && transform.b == 1.0 && transform.c == -1.0 && transform.d == 0 {

@@ -76,7 +76,7 @@ extension AVAsset {
         }
     }
 
-    func getAllFrames(framesPerSecond seconds: Double, withStreaming: @escaping (Int, UIImage) -> Void) {
+    public func getAllFrames(framesPerSecond seconds: Double, withStreaming: @escaping (Int, UIImage) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
             let duration = self.duration.seconds.rounded() * seconds
             let generator = AVAssetImageGenerator(asset: self)
