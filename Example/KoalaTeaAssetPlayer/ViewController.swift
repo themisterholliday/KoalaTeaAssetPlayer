@@ -22,7 +22,7 @@ class ViewController: UIViewController {
 
         // ⭐ Try one of these ⭐
 //        assetPlayerExample()
-//        assetPlayerViewExample()
+        assetPlayerViewExample()
     }
 
     /// Example of how to use Asset Player by itself
@@ -124,7 +124,7 @@ class ViewController: UIViewController {
             ])
 
         // And setup the playback
-        assetPlayerView.setupPlayback(asset: asset, remoteCommands: .defaultCommands(skipInterval: 30))
+        assetPlayerView.setupPlayback(asset: asset, playAfterSetup: false, remoteCommands: .defaultCommands(skipInterval: 30))
     }
 }
 

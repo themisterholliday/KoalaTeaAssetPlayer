@@ -29,7 +29,7 @@ public class AssetPlayerView: UIView {
             },
             didDragEndAtTime: { [weak self] time in
                 self?.assetPlayer.perform(action: .seekToTimeInSeconds(time: time))
-                if self?.assetPlayer.properties.previousState == .playing {
+                if self?.assetPlayer.properties.previousState == .playing || self?.assetPlayer.properties.previousState == .buffering {
                     self?.assetPlayer.perform(action: .play)
                 }
             }
@@ -53,18 +53,25 @@ public class AssetPlayerView: UIView {
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    deinit {
+        assetPlayer.perform(action: .stop)
+    }
     
-    public func setupPlayback(asset: Asset, remoteCommands: [RemoteCommand]) {
+    public func setupPlayback(asset: Asset, playAfterSetup: Bool, remoteCommands: [RemoteCommand]) {
         assetPlayer.remoteCommands = remoteCommands
-        assetPlayer.perform(action: .setup(with: asset))
-        assetPlayer.perform(action: .play)
         assetPlayer.delegate = self
+        assetPlayer.perform(action: .setup(with: asset))
+        
+        if playAfterSetup {
+            assetPlayer.perform(action: .play)
+        }
     }
 
     private func handleAssetPlaybackManagerStateChange(to state: AssetPlayerPlaybackState) {
         switch state {
         case .setup:
-            break
+            controlsView.configure(with: .paused)
         case .playing:
             controlsView.configure(with: .playing)
         case .paused:

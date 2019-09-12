@@ -99,6 +99,8 @@ extension AssetPlayer {
         playerView.player = nil
 
         removePlayerItemObservers(playerItem: self.asset?.playerItem)
+
+        remoteCommandManager = nil
     }
 
     internal func setupTimeObservers() {

@@ -72,15 +72,15 @@ internal class ControlsView: UIView {
 
     private lazy var playbackSliderView: AssetPlayerSliderView = {
         return AssetPlayerSliderView(actions: (
-            sliderDragDidBegin: { _ in
-                self.actions.didStartDraggingSlider(())
-        },
-            sliderDidMove: { time in
-                self.actions.didDragToTime(time)
-        },
-            sliderDragDidEnd: { time in
-                self.actions.didDragEndAtTime(time)
-        }
+            sliderDragDidBegin: { [weak self] _ in
+                self?.actions.didStartDraggingSlider(())
+            },
+            sliderDidMove: { [weak self] time in
+                self?.actions.didDragToTime(time)
+            },
+            sliderDragDidEnd: { [weak self] time in
+                self?.actions.didDragEndAtTime(time)
+            }
             ), options: self.options)
     }()
 
@@ -157,6 +157,9 @@ internal class ControlsView: UIView {
             forceStayOpen = true
 
             fadeSelfIn()
+
+            pauseButton.isHidden = true
+            playButton.isHidden = true
         case .setup(let viewModel):
             playbackSliderView.updateSlider(maxValue: viewModel.maxValueForSlider)
             playbackSliderView.updateSlider(currentValue: viewModel.currentTime)

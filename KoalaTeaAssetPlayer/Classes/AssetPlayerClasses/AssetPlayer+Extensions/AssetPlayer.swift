@@ -155,13 +155,13 @@ final public class AssetPlayer: NSObject {
 
     internal var remoteCommands: [RemoteCommand] = [] {
         willSet {
-            self.remoteCommandManager.disableCommands(from: self.remoteCommands)
+            self.remoteCommandManager?.disableCommands(from: self.remoteCommands)
         }
         didSet {
-            self.remoteCommandManager.enableCommands(from: self.remoteCommands)
+            self.remoteCommandManager?.enableCommands(from: self.remoteCommands)
         }
     }
-    private lazy var remoteCommandManager: RemoteCommandManager = RemoteCommandManager(assetPlaybackManager: self)
+    internal lazy var remoteCommandManager: RemoteCommandManager? = RemoteCommandManager(assetPlaybackManager: self)
 
     // MARK: - Life Cycle
     public init(remoteCommands: [RemoteCommand] = []) {
@@ -294,9 +294,10 @@ extension AssetPlayer {
                                                selector: #selector(self.handleAVPlayerItemDidPlayToEndTimeNotification(notification:)),
                                                name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
 
-        playbackBufferEmptyObserver = playerItem.observe(\.isPlaybackBufferEmpty, options: [.new, .old, .initial], changeHandler: { [weak self] playerItem, _ in
-            self?.handleBufferEmptyChange(playerItem: playerItem)
-        })
+        // @TODO: this is not working as expected
+//        playbackBufferEmptyObserver = playerItem.observe(\.isPlaybackBufferEmpty, options: [.new, .old, .initial], changeHandler: { [weak self] playerItem, _ in
+//            self?.handleBufferEmptyChange(playerItem: playerItem)
+//        })
 
         playbackLikelyToKeepUpObserver = playerItem.observe(\.isPlaybackLikelyToKeepUp, options: [.new, .old, .initial], changeHandler: { [weak self] playerItem, _ in
             self?.handleLikelyToKeepUpChange(playerItem: playerItem)
