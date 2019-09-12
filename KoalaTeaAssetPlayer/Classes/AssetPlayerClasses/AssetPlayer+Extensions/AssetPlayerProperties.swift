@@ -21,15 +21,18 @@ public struct AssetPlayerProperties {
 
 public extension AssetPlayer {
     var properties: AssetPlayerProperties {
+        let finalCurrentTime = currentTime.cleaned
+        let finalBufferedTime = bufferedTime.cleaned
+        let finalDuration = duration.cleaned
         return AssetPlayerProperties(
             asset: asset,
             isMuted: player.isMuted,
-            currentTime: currentTime,
-            bufferedTime: bufferedTime,
+            currentTime: finalCurrentTime,
+            bufferedTime: finalBufferedTime,
             currentTimeText: createTimeString(time: currentTime.rounded()),
             durationText: createTimeString(time: duration),
             timeLeftText: "-\(createTimeString(time: duration.rounded() - currentTime.rounded()))",
-            duration: duration,
+            duration: finalDuration,
             rate: rate,
             state: state,
             previousState: previousState)
@@ -40,5 +43,15 @@ public extension AssetPlayer {
         components.second = Int(max(0.0, time))
 
         return timeRemainingFormatter.string(from: components as DateComponents)!
+    }
+}
+
+private extension Double {
+    var cleaned: Double {
+        if self.isNaN || self.isInfinite {
+            return 0
+        } else {
+            return self
+        }
     }
 }
