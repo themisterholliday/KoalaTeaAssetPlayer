@@ -290,9 +290,7 @@ extension AssetPlayer {
 // MARK: Asset Player Observers
 extension AssetPlayer {
     private func addPlayerItemObservers(playerItem: AVPlayerItem) {
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(self.handleAVPlayerItemDidPlayToEndTimeNotification(notification:)),
-                                               name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleAVPlayerItemDidPlayToEndTimeNotification(notification:)), name: .AVPlayerItemDidPlayToEndTime, object: playerItem)
 
         // @TODO: this is not working as expected
 //        playbackBufferEmptyObserver = playerItem.observe(\.isPlaybackBufferEmpty, options: [.new, .old, .initial], changeHandler: { [weak self] playerItem, _ in

@@ -24,8 +24,6 @@ internal class AssetPlayerSliderView: UIView {
     private var playbackSlider: UISlider = UISlider(frame: .zero)
     private var bufferSlider: UISlider = UISlider(frame: .zero)
     private var bufferBackgroundSlider: UISlider = UISlider(frame: .zero)
-    private var currentTimeLabel: UILabel = UILabel(frame: .zero)
-    private var timeLeftLabel: UILabel = UILabel(frame: .zero)
 
     private lazy var smallCircle: UIImage? = {
         return UIImage(named: "SmallCircle", in: Bundle(for: AssetPlayerSliderView.self), compatibleWith: nil)?.filled(withColor: self.sliderCircleColor)
